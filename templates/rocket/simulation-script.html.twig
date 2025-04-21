@@ -296,20 +296,18 @@
                         RocketApi.configureLoginEndpoint('/api/login', '/api/logout', '/api/me');
                         if (await RocketApi.checkIsAuthenticated("{{ path('app_login') }}")) {
                             extensionManager.setLoggedIn(true);
-                            // initModelBuilderManager(true, storageConfig);
-                            // initScriptMotionManager(true, storageConfig);
                         } else {
                             extensionManager.setLoggedIn(false);
                         }
                     {% else %}
                         extensionManager.setLoggedIn(false);
-                        // initModelBuilderManager(false, storageConfig);
-                        // initScriptMotionManager(false, storageConfig);
                     {% endif %}
                     let modulesAndScriptsInitialized = await extensionManager.init();
                     if (modulesAndScriptsInitialized) {
                         let rocketConfigurationsManager = new RocketConfigurationsManager(this);
-                        rocketConfigurationsManager.getRocketsConfigurations();
+                        await rocketConfigurationsManager.getRocketsConfigurations();
+                        // TODO : Rebuild Rocket Selection selector
+
                     }
                     console.log('------------------------------------------------')
                     console.log('ExtensionManager', extensionManager)

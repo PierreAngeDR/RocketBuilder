@@ -18,17 +18,19 @@ export default class RocketConfigurationsManager {
         this.rocket = rocket;
     }
 
-    getRocketsConfigurations() {
+    async getRocketsConfigurations() {
         this.rocket.clearModelSettings();
         let handledMotionClasses = [];
 
-        ModulesManager.getModules().forEach(module => {
+        let modules = ModulesManager.getModules();
+        for(let module of modules) {
             try {
                 let rocketConfiguration = {name:module.getName(), modules:[], motions:[]};
-                module.getSubModules().forEach(subModule => {
+                let subModules = module.getSubModules();
+                for(let subModule of subModules) {
                     rocketConfiguration.modules.push(subModule.getData());
                     let motionClasses = subModule.getMotionScripts();
-                    motionClasses.forEach(motionClass => {
+                    for(let motionClass of motionClasses) {
                         let motionClassName = motionClass.getName();
                         if (!handledMotionClasses.includes(motionClassName)) {
                             try {
@@ -36,28 +38,44 @@ export default class RocketConfigurationsManager {
                                 console.log('###############################################################')
                                 console.log('Evaluating motion script: ' + motionClassName);
                                 console.log('###############################################################')
-                                eval(motionScript);
-                                
+                                await this.evaluateMotionScript(motionScript, motionClassName);
+                                console.log(`Evaluation done for ${motionClassName} !`)
+                                console.log(window[motionClassName])
+
                             } catch(err) {
                                 throw new Error('Error while evaluating motion script: ' + motionClassName+'. Error was : '+err.message);
                             }
 
                             // Check if motionClassName is an instance of RocketMotionBase
-                            if(window[motionClassName] instanceof RocketMotionBase) {
+                            if(window[motionClassName].prototype instanceof RocketMotionBase) {
                                 handledMotionClasses.push();
                                 rocketConfiguration.motions.push(motionClassName);
+                                console.log('Adding motion script: ' + motionClassName);
                             } else {
                                 throw new Error('Error with motion script: ' + motionClassName+'. Class is not an instance of RocketMotionBase.');
                             }
                         }
-                    })
+                    }
+                    console.log('Adding module: ',rocketConfiguration.name, rocketConfiguration.modules);
                     this.rocket.addModelSettings(rocketConfiguration.name, rocketConfiguration.modules);
-                })
+                }
             } catch(err) {
                 console.log('Dismissed module: ' + module.getName() + '. Error was : '+err.message);
             }
-        })
+        }
+    }
 
+    async evaluateMotionScript(motionScript, motionClassName) {
+        //eval(motionScript);
+        console.log('Evaluating script:', motionScript)
+        const encodedJs = encodeURIComponent(motionScript);
+        const dataUri = 'data:text/javascript;charset=utf-8,'
+            + encodedJs;
+        try {
+            await import(dataUri);
+        } catch(err) {
+            throw new Error('Error while evaluating motion script: ' + motionClassName+'. Error was : '+err.message);
+        }
     }
 
 
