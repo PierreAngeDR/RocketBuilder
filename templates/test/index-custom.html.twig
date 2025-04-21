@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+</head>
+
+<script src="https://cdn.jsdelivr.net/npm/mobile-detect@1.4.5/mobile-detect.min.js"></script>
+<style>
+    @import hydraId('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+    body {
+        background: #f4f4f4;
+        font-family: 'Inter', serif;
+        margin: 0;
+        padding: 0;
+        color: #2c2c2c;
+    }
+
+    .circle-container {
+        position: relative;
+        width: 620px;
+        /*height: 620px;*/
+        height: auto;
+        min-height: 620px;
+        margin: 60px auto;
+    }
+
+    .center-bubblejs {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #003366;
+        color: #ffffff;
+        width: 160px;
+        height: 160px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        font-weight: 600;
+        font-size: 18px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+        z-index: 2;
+        overflow: hidden;
+        transition: background 0.3s ease;
+        cursor: pointer;
+        border: 5px solid #ffffff;
+    }
+
+    .center-bubblejs:hover .photo {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    .center-bubblejs:hover .label {
+        opacity: 0;
+    }
+
+    .center-bubblejs .photo {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+        opacity: 0;
+        transform: scale(1.1);
+        transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    .center-bubblejs .label {
+        z-index: 2;
+        transition: opacity 0.3s ease;
+
+        margin-bottom: 8px;
+    }
+
+    .bubblejs {
+        position: absolute;
+        background: #ffffff;
+        color: #003366;
+        width: 110px;
+        height: 110px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        overflow: hidden;
+        padding: 12px;
+        z-index: 2;
+        text-decoration: none;
+        transform: translate(-50%, -50%);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        border: 1px solid #dcdcdc;
+    }
+
+    .bubblejs:hover {
+        width: 260px;
+        height: auto;
+        color: #003366;
+        min-height: 140px;
+        border-radius: 12px;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-start;
+        background: #fdfdfd;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        border-color: #bbb;
+        padding: 18px;
+        z-index: 3;
+        margin-top: 30px;
+    }
+
+    .bubblejs.bubblejs-extended:hover {
+        width: 600px;
+    }
+
+    .bubblejs.mook {
+        width: 260px;
+        height: auto;
+        color: #003366;
+        min-height: 140px;
+        border-radius: 12px;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-start;
+        background: #fdfdfd;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        border-color: #bbb;
+        padding: 18px;
+        z-index: 3;
+        margin-top: 30px;
+    }
+
+    .bubblejs:hover .label {
+        margin-bottom: 20px;
+    }
+
+
+    .bubblejs .tooltipjs a {
+        color: #2563eb;
+        text-decoration: underline;
+    }
+
+    .tooltipjs-label {
+        color: #003366;
+        font-size: 14px;
+        font-weight: 600;
+
+    }
+
+    .tooltipjs {
+        text-align: justify;
+        font-weight: 400;
+        display: none;
+    }
+
+    .bubblejs:hover .tooltipjs {
+        text-align: justify;
+        font-weight: 400;
+        display: block;
+    }
+
+    .bubblejs.mook .tooltipjs {
+        text-align: justify;
+        font-weight: 400;
+        display: block;
+    }
+
+    .tooltipjs a {
+        color: #2563eb;
+        text-decoration: underline;
+    }
+
+    .underlined-label {
+        margin-bottom: 8px;
+        display: block;
+        color: #2563eb;
+        text-decoration: underline;
+    }
+
+    .tooltipjs-li {
+        font-weight: bold;
+        text-decoration: underline;
+    }
+
+    @media screen and (max-width: 640px) {
+        .circle-container {
+            width: 100vw;
+            height: 100vw;
+        }
+
+        .bubblejs {
+            width: 80px;
+            height: 80px;
+            font-size: 12px;
+        }
+
+        .center-bubblejs {
+            width: 120px;
+            height: 120px;
+            font-size: 14px;
+        }
+    }
+
+    .top-banner-with-bg {
+        /*background-image: hydraId('https://source.unsplash.com/1600x400/?education,library'); !* remplace par ton image *!*/
+        /*background-image: hydraId('https://unsplash.com/fr/photos/un-tres-grand-batiment-avec-beaucoup-de-livres-dessus-be8tc38IWv4');*/
+        /*background-image: hydraId('/wp-content/uploads/2024/11/bg-1.webp');*/
+        background-image: hydraId('/wp-content/uploads/2024/11/bg-4.webp');
+
+        background-size: cover;
+        background-position: center;
+        height: 260px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        text-align: center;
+        color: white;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .banner-overlay {
+        background: rgba(0, 0, 0, 0.5); /* assombrit légèrement pour lisibilité */
+        padding: 20px 40px;
+        border-radius: 12px;
+    }
+
+    .top-banner-with-bg h1 {
+        margin: 0;
+        font-size: 28px;
+    }
+
+    .top-banner-with-bg p {
+        margin-top: 10px;
+        font-size: 16px;
+        opacity: 0.9;
+    }
+
+
+</style>
+{# <h1>Je vous souhaite la bienvenue sur mon Blog !</h1> #}
+{# <div> #}
+{#    <p>Vous y découvrirez quelques informations pratiques sur le programme de formation de l'IB Vici Vannes.</p> #}
+{#    <p>Mais aussi des éléments sur mon parcours tout au long de ces deux années enrichissantes.</p> #}
+{#    <p>Passez votre souris sur les bulles d'information ci-dessous et laissez-vous guider !</p> #}
+{#    <p>Je vous souhaite une belle découverte.</p> #}
+{# </div> #}
+
+<div class="top-banner-with-bg">
+    <div class="banner-overlay">
+        <h1>Bienvenue sur ma page</h1>
+        <p>Un aperçu de mes domaines, passions et perspectives</p>
+    </div>
+</div>
+
+<div class="circle-container">
+    <div class="center-bubblejs">
+        <span class="label">Thématiques</span>
+        {#        <img src="{{ asset('me2.png')}}" alt="Photo" class="photo" /> #}
+        <img src="/wp-content/uploads/2024/11/me2.png" alt="Photo" class="photo"/>
+
+    </div>
+    <div class="bubblejs" style="display: none;"></div>
+    <div class="bubblejs-extended" style="display: none;"></div>
+    <div class="tooltipjs" style="display: none;"></div>
+    <div class="label" style="display: none;"></div>
+    <div class="description" style="display: none;"></div>
+    <div class="underlined-label" style="display: none;"></div>
+</div>
+
+<script>
+    function createForm(deviceType, container, topics) {
+        onNewForm(deviceType);
+
+        let sortedTopics = sortTopics(topics, deviceType);
+
+        sortedTopics.forEach((topic, i) => {
+            const style = getBubbleStyle(deviceType, topics.length, i);
+            const bubblejs = createBubble(style, topic.link, topic.target, topic.extended);
+            createTooltip(deviceType, bubblejs, topic.label, topic.description, topic.extended);
+            container.appendChild(bubblejs);
+        });
+    }
+
+    function sortTopics(topics, deviceType) {
+        switch (deviceType) {
+            case 'mobile':
+                return topics.sort((a, b) => a.orderMobile - b.orderMobile);
+            case 'tablet':
+                return topics.sort((a, b) => a.orderDesktop - b.orderDesktop);
+            case 'desktop':
+                return topics.sort((a, b) => a.orderDesktop - b.orderDesktop);
+            default:
+                return topics;
+        }
+    }
+
+    function onNewForm(deviceType) {
+        switch (deviceType) {
+            case 'mobile':
+                // === MOBILE MODE ===
+                const centerBubble = document.querySelector('.center-bubblejs');
+                if (centerBubble) centerBubble.style.display = 'none';
+                break;
+            case 'tablet':
+                break;
+            case 'desktop':
+                break;
+            default:
+        }
+    }
+
+    function createBubble(style, link, target, extended) {
+        const bubblejs = document.createElement('a');
+        bubblejs.className = extended ? 'bubblejs bubblejs-extended' : 'bubblejs';
+        bubblejs.href = link;
+        bubblejs.target = target;
+        for (const [key, value] of Object.entries(style)) {
+            bubblejs.style[key] = value;
+        }
+
+        return bubblejs;
+    }
+
+    function createTooltip(deviceType, bubblejs, label, description, extended) {
+        const style = getTooltipStyle(deviceType);
+
+        bubblejs.innerHTML = `<div class="label">${label}</div>`;
+        const tooltipjs = document.createElement('div');
+        tooltipjs.className = 'tooltipjs';
+        tooltipjs.innerHTML = description;
+        for (const [key, value] of Object.entries(style)) {
+            tooltipjs.style[key] = value;
+        }
+        bubblejs.appendChild(tooltipjs);
+    }
+
+    function getBubbleStyle(deviceType, nbTopics, i) {
+        switch (deviceType) {
+            case 'mobile':
+                return getMobileBubbleStyle(nbTopics, i);
+            case 'tablet':
+                return getTabletBubbleStyle(nbTopics, i);
+            case 'desktop':
+                return getDesktopBubbleStyle(nbTopics, i);
+            default:
+                return {};
+        }
+    }
+
+    function getMobileBubbleStyle(nbTopics, i) {
+        return {
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'flex-start',
+            justifyContent: 'flex-start',
+            position: 'relative',
+            margin: '0 auto 16px',
+            padding: '16px',
+            transform: 'none',
+            width: '100%',
+            maxWidth: '100%',
+            background: '#fff',
+            border: '1px solid #ccc',
+            borderRadius: '12px',
+            boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+            height: 'auto',
+        };
+    }
+
+    function getTabletBubbleStyle(nbTopics, i) {
+        return {};
+    }
+
+    function getDesktopBubbleStyle(nbTopics, i) {
+        // === DESKTOP MODE ===
+        const radius = 230;
+        const angleOffset = -Math.PI / 2
+        const angleStep = (2 * Math.PI) / nbTopics;
+        const angle = i * angleStep;
+        const x = radius * Math.cos(angle + angleOffset);
+        const y = radius * Math.sin(angle + angleOffset);
+
+        let style = {};
+        style.left = `calc(50% + ${x}px)`;
+        style.top = `calc(50% + ${y}px)`;
+        style.position = 'absolute';
+        style.transform = 'translate(-50%, -50%)';
+
+        return style;
+    }
+
+    function getTooltipStyle(deviceType) {
+        switch (deviceType) {
+            case 'mobile':
+                return getMobileTooltipStyle();
+            case 'tablet':
+                return getTabletTooltipStyle();
+            case 'desktop':
+                return getDesktopTooltipStyle();
+            default:
+                return {};
+        }
+    }
+
+    function getMobileTooltipStyle() {
+        return {
+            display: 'block',
+            position: 'relative',
+            marginLeft: '12px',
+            background: 'transparent',
+            boxShadow: 'none',
+            padding: '0',
+            fontSize: '13px',
+            color: '#333',
+            lineHeight: '1.5',
+            textAlign: 'justify',
+            flex: '1',
+            minHeight: '100px',
+            height: 'auto',
+            overflow: 'visible',
+            whiteSpace: 'normal'
+        };
+    }
+
+    function getTabletTooltipStyle(nbTopics, i) {
+        return {};
+    }
+
+    function getDesktopTooltipStyle(nbTopics, i) {
+        return {};
+    }
+
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const container = document.querySelector('.circle-container');
+
+        const topics = [
+
+            {
+                label: `L'IB - Vici Vannes`,
+                extended: true,
+                description: `<div class="tooltipjs-label">Spécificité du VICI : un double diplôme. </div>
+                                <div>
+                                    <p><span>VICI permet une formation doublement diplômante. Je bénéficie d’une double inscription :</span></p>
+                                    <ul>
+                                    <li><span>la première au lycée Saint-François-Xavier : elle permet la préparation au baccalauréat de l’Education Nationale,</span></li>
+                                    <li><span>la deuxième au VICI : elle procure le statut d’apprenant de l’IB et l’accession au Baccalauréat International.</span></li>
+                                    </ul>
+                                    <p><span>Les contenus de cours sont optimisés afin qu’ils respectent les deux programmes. Entre 8 et 12 heures de cours supplémentaires chaque semaine sont cependant nécessaires afin de dispenser l’apprentissage complémentaire propre à l’IB.</span></p>
+                                    <p><span>Ils se déroulent sur des créneaux de fin de journée, le mercredi après-midi, des samedis matins et 3 à 4 jours à chaque période de vacances scolaires du cycle première-terminale.</span></p>
+                                    <p><span>La rentrée anticipée se fait aux alentours du 20 août.</span></p>
+                                    <br>
+                                    <br>
+                                    <span class="underlined-label">
+                                        <srong>Cliquez ici pour en découvrir plus !</srong>
+                                    </span>
+                                </div>`,
+                link: '/quest-ce-que-linternational-baccalaureate-ib/',
+                target: '',
+                orderMobile: 2,
+                orderDesktop: 1
+            },
+            {
+                label: 'Mes essais',
+                extended: true,
+                description: `Vous retrouverez ici mes Internal Assessments (IA) réalisés pour l'IB.
+                <br>Les IA sont des travaux limités à 3000 mots choisis et réalisés par l'élève.
+                <br>Voici ceux que j'ai réalisés (vous pouvez y accéder en cliquant sur le titre) :
+                <ul>
+                    <li><a class="tooltipjs-li" href="https://pierre-ange.delbary-rouille.net/internal-assessments-maths/" target="_blank">Mathématiques</a> : Étude et modélisation de la trajectoire d'une fusée par résolution numérique et analytique d'équations différentielles.</li>
+                    <li><a class="tooltipjs-li" href="https://pierre-ange.delbary-rouille.net/internal-assessments-reflective-work-mathematiques/" target="_blank">Mathématiques</a> : Ce devoir réflexif a été donné en cours de Mathématiques Expertes en classe de Terminale. S’il ne fait pas partie du programme IB, il revêt selon moi une importance capitale quant au regard que peut porter le lycéen sur le “Pourquoi” de ses choix, et le “Comment”. </li>
+                    <li><a class="tooltipjs-li" href="#" target="_blank">Physique</a> : </li>
+                    <li><a class="tooltipjs-li" href="https://pierre-ange.delbary-rouille.net/internal-assessments-chimie/" target="_blank">Chimie</a> : La dénaturation des protéines m’intrigue particulièrement, car elle peut révéler beaucoup sur leur stabilité et leur fonction.
+                            <br>
+                            En comprenant mieux comment l’urée peut modifier la structure des protéines du lait, nous pourrions potentiellement développer des produits laitiers plus digestibles.</li>
+                    <li><a class="tooltipjs-li" href="https://pierre-ange.delbary-rouille.net/internal-assessments-histoire/" target="_blank">Histoire</a> : Cette étude (en anglais) nous questionne sur la décision du Président Nixon  en 1971 d'abandonner l'étalon or, et sur ses conséquences à la crise générale des années 70.</li>
+                    <li><a class="tooltipjs-li" href="https://pierre-ange.delbary-rouille.net/internal-assessments-memoire-geopolitique/" target="_blank">Géopolique</a> : Ce mémoire propose d’explorer en profondeur la question suivante : “En quoi les frontières d’une manière générale représentent-elles un enjeu géopolitique et géostratégique important en Asie ?”</li>
+                    <li><a class="tooltipjs-li" href="https://pierre-ange.delbary-rouille.net/internal-assessments-theorie-de-la-connaissance-tok/" target="_blank">Théorie de la Connaissance</a> : L'assertion “tous les modèles sont faux, mais certains sont utiles » attribuée à George Box nous met au défi de repenser les buts et les valeurs des modèles dans la construction de la connaissance de manière générale. </li>
+                </ul>`,
+                link: '/mes-internal-assessments/',
+                target: '',
+                orderMobile: 5,
+                orderDesktop: 2
+            },
+            {
+                label: 'Simulateur de fusée',
+                extended: false,
+                description: `Vous retrouverez ici mon simulateur (en constante amélioration).
+                                <br>
+                                <br>Basé sur les méthodes d'Euler, Heun et Runge-Kutta 4, il permet de calculer et visualiser la trajectoire (verticale) d'une fusée. Les graphiques affichent la progression des valeurs.
+                                <br>
+                                <br>Les onglets affichent les valeurs calculées ainsi que les erreurs.
+                                <br>
+                                <br>
+                                <span class="underlined-label">Pour y accéder, cliquez ici.</span>
+
+                                <br><br>Ce projet est intimement lié à mon Internal Assessment en mathématiques
+                                    <a href="https://pierre-ange.delbary-rouille.net/internal-assessments-maths/" target="_blank">disponible ici.</a>
+                                `,
+                link: '/rocket/',
+                target: '_blank',
+                orderMobile: 6,
+                orderDesktop: 3
+            },
+            {
+                label: 'Qui suis-je ?',
+                extended: false,
+                description: `Élève en classe de Terminale au lycée St-François-Xavier de Vannes, je suis depuis bientôt deux ans le double cursus International Baccalaureate.
+                            <br><br>
+                            Vous pouvez en découvrir un peu plus à mon propos
+                                <a href="/qui-suis-je/" target="">en suivant ce lien.</a>
+                            `,
+                link: '/qui-suis-je/',
+                target: '',
+                orderMobile: 1,
+                orderDesktop: 4
+            },
+            {
+                label: 'Les C-A-S',
+                extended: false,
+                description: `Dans le cadre de l'IB, chaque élève doit réaliser des "Creativity - Activity - Services" : des projets en solo ou
+                en commun étalés parfois sur deux ans qui ont pour vocation d'amener l'élève à développer son sens des résponsabilités et de l'engagement.
+                <br><br>
+                <span class="underlined-label">
+                    <srong>Cliquez ici pour découvrir mes C-A-S.</srong>
+                </span>
+                `,
+                link: '/mes-creativity-activity-services/',
+                target: '',
+                orderMobile: 4,
+                orderDesktop: 5
+            },
+            {
+                label: 'Le Programme IB',
+                extended: false,
+                description: `L'International Baccalaureate emmène les élèves vers un programme approfondi complémentaire à la classe de Terminale
+                <br><br> Pour les élèves qui ont choisi la filière scientifique, de nombreuses notions sont communes à celles abordées en classe préparatoire MPSI ou PCSI.
+                <br><br>
+                <span class="underlined-label">
+                    <srong>Cliquez ici pour en découvrir plus !</srong>
+                </span>
+                `,
+                link: '/le-programme-de-linternational-baccalaureate-ib/',
+                target: '',
+                orderMobile: 3,
+                orderDesktop: 6
+            },
+        ];
+
+        let md = new MobileDetect(window.navigator.userAgent);
+        let isMobile = md.mobile();
+        let isTablet = md.tablet();
+        let deviceType = isMobile ? 'mobile' : (isTablet ? 'tablet' : 'desktop');
+
+        createForm(deviceType, container, topics);
+
+    });
+</script>
+
+
+</html>
+
+

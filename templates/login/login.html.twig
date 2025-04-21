@@ -1,0 +1,73 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="min-h-screen flex items-center justify-center bg-gray-100">
+        <div class="bg-white p-8 rounded-xl shadow-xl w-full max-w-md">
+            <h1 class="text-2xl font-bold mb-6 text-center">Connexion</h1>
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                    <input id="email" name="email" type="email" required
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring focus:border-blue-500" />
+                </div>
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700">Mot de passe</label>
+                    <input id="password" name="password" type="password" required
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring focus:border-blue-500" />
+                </div>
+                <div class="flex items-center justify-between">
+                    <button type="submit"
+                            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                        Connexion
+                    </button>
+                    <button type="button" id="logout-btn"
+                            class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition">
+                        Déconnexion
+                    </button>
+                </div>
+            </form>
+
+            <div id="auth-message" class="mt-4 text-sm text-center text-gray-600"></div>
+        </div>
+    </div>
+
+    <script src="/js/Api/RocketApi.js" type="module"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            RocketApi.configureLoginEndpoint('/api/login', '/api/logout', '/api/user')
+
+            const form = document.getElementById('login-form');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const logoutBtn = document.getElementById('logout-btn');
+            const messageBox = document.getElementById('auth-message');
+
+            const showMessage = (text, color = 'text-gray-700') => {
+                messageBox.textContent = text;
+                messageBox.className = `mt-4 text-sm text-center ${color}`;
+            };
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = emailInput.value;
+                const password = passwordInput.value;
+
+                try {
+                    await RocketApi.login(email, password, "{{ path('app_local_full') }}");
+                    //await RocketApi.login(email, password, "{{ path('app_dashboard') }}");
+                    showMessage('✅ Connecté avec succès', 'text-green-600');
+                } catch (err) {
+                    showMessage('❌ Échec de connexion : ' + err.message, 'text-red-600');
+                }
+            });
+
+            logoutBtn.addEventListener('click', () => {
+                RocketApi.logout();
+                showMessage('👋 Déconnecté', 'text-blue-600');
+            });
+        });
+    </script>
+
+
+{% endblock %}

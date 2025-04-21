@@ -1,0 +1,6 @@
+<h1>Bienvenue {{ username }} !</h1>
+<p>Clique sur le lien ci-dessous pour activer ton compte :</p>
+
+<p><a href="{{ signedUrl }}">Confirmer mon email</a></p>
+
+<p>Ce lien expire le {{ expiresAt|date('d/m/Y H:i') }}.</p>

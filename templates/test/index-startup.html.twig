@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head></head>
+
+<style>
+    body {
+        background: radial-gradient(circle at top left, #f0f9ff, #ffffff);
+        font-family: 'Inter', sans-serif;
+        color: #1a202c;
+        margin: 0;
+        padding: 0;
+    }
+
+    .circle-container {
+        position: relative;
+        width: 600px;
+        height: 600px;
+        margin: 60px auto;
+    }
+
+    .center-bubble {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #2563eb;
+        color: #ffffff;
+        width: 140px;
+        height: 140px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        font-weight: 600;
+        font-size: 18px;
+        box-shadow: 0 8px 30px rgba(37, 99, 235, 0.25);
+        z-index: 2;
+        letter-spacing: 0.5px;
+    }
+
+    .bubble {
+        position: absolute;
+        background: white;
+        color: #2563eb;
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.25s ease;
+        cursor: pointer;
+        overflow: hidden;
+        padding: 14px;
+        z-index: 2;
+        text-decoration: none;
+        transform: translate(-50%, -50%);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        border: 2px solid #e2e8f0;
+    }
+
+    .bubble:hover {
+        width: 240px;
+        height: auto;
+        min-height: 120px;
+        border-radius: 16px;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-start;
+        background: #f9fafb;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        border-color: #cbd5e0;
+        padding: 20px;
+    }
+
+    .bubble .tooltip {
+        display: none;
+    }
+
+    .bubble:hover .tooltip {
+        display: block;
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+        position: relative;
+        background: transparent;
+        box-shadow: none;
+        padding: 0;
+        white-space: normal;
+        margin-top: 10px;
+        font-weight: 400;
+        font-size: 13px;
+        color: #4b5563;
+        line-height: 1.5;
+    }
+
+    @media screen and (max-width: 600px) {
+        .circle-container {
+            width: 100vw;
+            height: 100vw;
+        }
+        .bubble {
+            width: 70px;
+            height: 70px;
+            font-size: 12px;
+        }
+        .center-bubble {
+            width: 100px;
+            height: 100px;
+            font-size: 14px;
+        }
+    }
+</style>
+
+<div class="circle-container">
+    <div class="center-bubble">Explore</div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const container = document.querySelector('.circle-container');
+
+        const topics = [
+            {
+                label: 'Innovation',
+                description: 'Découvrez les dernières tendances en innovation et disruption.',
+                link: 'https://example.com/innovation',
+                target: '_blank'
+            },
+            {
+                label: 'Design',
+                description: 'Approches UX/UI modernes centrées utilisateur pour créer de l’impact.',
+                link: 'https://example.com/design',
+                target: '_blank'
+            },
+            {
+                label: 'Growth',
+                description: 'Stratégies de croissance, KPIs, funnel et traction startup.',
+                link: 'https://example.com/growth',
+                target: ''
+            },
+            {
+                label: 'Tech',
+                description: 'Stack modernes, dev agile, no-code, IA et frameworks récents.',
+                link: 'https://example.com/tech',
+                target: '_blank'
+            },
+            {
+                label: 'Funding',
+                description: 'Pitchs, levées de fonds, VCs et business angels.',
+                link: 'https://example.com/funding',
+                target: ''
+            },
+            {
+                label: 'Culture',
+                description: 'Organisation, équipes, mindset startup et culture produit.',
+                link: 'https://example.com/culture',
+                target: '_blank'
+            }
+        ];
+
+        const radius = 230;
+        const angleStep = (2 * Math.PI) / topics.length;
+
+        topics.forEach((topic, i) => {
+            const angle = i * angleStep;
+            const x = radius * Math.cos(angle);
+            const y = radius * Math.sin(angle);
+
+            const bubble = document.createElement('a');
+            bubble.className = 'bubble';
+            bubble.href = topic.link;
+            bubble.target = topic.target;
+            bubble.style.left = `calc(50% + ${x}px)`;
+            bubble.style.top = `calc(50% + ${y}px)`;
+
+            bubble.innerHTML = `
+        <div class="label">${topic.label}</div>
+        <div class="tooltip">${topic.description}</div>
+      `;
+
+            container.appendChild(bubble);
+        });
+    });
+</script>
+
+</html>
+
+

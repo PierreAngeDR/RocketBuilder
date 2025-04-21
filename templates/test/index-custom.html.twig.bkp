@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        </head>
+
+    <script src="https://cdn.jsdelivr.net/npm/mobile-detect@1.4.5/mobile-detect.min.js"></script>
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+body {
+    background: #f4f4f4;
+    font-family: 'Inter', serif;
+    margin: 0;
+    padding: 0;
+    color: #2c2c2c;
+}
+
+.circle-container {
+    position: relative;
+    width: 620px;
+    height: 620px;
+    margin: 60px auto;
+}
+
+.center-bubble {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #003366;
+    color: #ffffff;
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    font-weight: 600;
+    font-size: 18px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+    z-index: 2;
+    overflow: hidden;
+    transition: background 0.3s ease;
+    cursor: pointer;
+    border: 5px solid #ffffff;
+}
+
+.center-bubble:hover .photo {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.center-bubble:hover .label {
+    opacity: 0;
+}
+
+.center-bubble .photo {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    opacity: 0;
+    transform: scale(1.1);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.center-bubble .label {
+    z-index: 2;
+    transition: opacity 0.3s ease;
+
+    margin-bottom: 8px;
+}
+
+.bubble {
+    position: absolute;
+    background: #ffffff;
+    color: #003366;
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    overflow: hidden;
+    padding: 12px;
+    z-index: 2;
+    text-decoration: none;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border: 1px solid #dcdcdc;
+}
+
+.bubble:hover {
+    width: 260px;
+    height: auto;
+    min-height: 140px;
+    border-radius: 12px;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    background: #fdfdfd;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    border-color: #bbb;
+    padding: 18px;
+    z-index: 3;
+}
+
+.bubble:hover .label {
+    margin-bottom: 20px;
+}
+
+
+.bubble .tooltip a {
+    color: #2563eb;
+    text-decoration: underline;
+}
+
+.tooltip {
+    text-align: justify;
+    font-weight: 400;
+    display: none;
+}
+.bubble:hover .tooltip {
+    text-align: justify;
+    font-weight: 400;
+    display: block;
+}
+.tooltip a {
+    color: #2563eb;
+    text-decoration: underline;
+}
+.bubble:hover .tooltip .ulabel {
+    margin-bottom: 8px;
+    display: block;
+    color: #2563eb;
+    text-decoration: underline;
+}
+
+@media screen and (max-width: 640px) {
+.circle-container {
+        width: 100vw;
+        height: 100vw;
+    }
+.bubble {
+        width: 80px;
+        height: 80px;
+        font-size: 12px;
+    }
+.center-bubble {
+        width: 120px;
+        height: 120px;
+        font-size: 14px;
+    }
+}
+</style>
+
+<div class="circle-container">
+<div class="center-bubble">
+<span class="label">Thématiques</span>
+    <img src="{{ asset('me2.png')}}" alt="Photo" class="photo" />
+    </div>
+    <div class="bubble" style="display: none;"></div>
+    <div class="tooltip" style="display: none;"></div>
+    <div class="label" style="display: none;"></div>
+    <div class="description" style="display: none;"></div>
+    <div class="ulabel" style="display: none;"></div>
+    </div>
+
+    <script>
+    function createForm(deviceType, container, topics) {
+        onNewForm(deviceType);
+
+        topics.forEach((topic, i) => {
+            const style = getBubbleStyle(deviceType, topics.length, i);
+            const bubble = createBubble(style, topic.link, topic.target);
+            createTooltip(deviceType, bubble, topic.label, topic.description);
+            container.appendChild(bubble);
+        });
+    }
+
+function onNewForm(deviceType) {
+    switch (deviceType) {
+        case 'mobile':
+            // === MOBILE MODE ===
+            const centerBubble = document.querySelector('.center-bubble');
+            if (centerBubble) centerBubble.style.display = 'none';
+            break;
+        case 'tablet': break;
+        case 'desktop': break;
+        default:
+    }
+}
+
+function createBubble(style, link, target) {
+    const bubble = document.createElement('a');
+    bubble.className = 'bubble';
+    bubble.href = link;
+    bubble.target = target;
+    for(const[key, value] of Object.entries(style)) {
+        bubble.style[key] = value;
+    }
+
+    return bubble;
+}
+
+function createTooltip(deviceType, bubble, label, description) {
+    const style = getTooltipStyle(deviceType);
+
+    bubble.innerHTML = `<div class="label">${label}</div>`;
+    const tooltip = document.createElement('div');
+    tooltip.className = 'tooltip';
+    tooltip.innerHTML = description;
+    for(const[key, value] of Object.entries(style)) {
+        tooltip.style[key] = value;
+    }
+    bubble.appendChild(tooltip);
+}
+
+function getBubbleStyle(deviceType, nbTopics, i) {
+    switch (deviceType) {
+        case 'mobile': return getMobileBubbleStyle(nbTopics, i);
+        case 'tablet': return getTabletBubbleStyle(nbTopics, i);
+        case 'desktop': return getDesktopBubbleStyle(nbTopics, i);
+        default: return {};
+    }
+}
+
+function getMobileBubbleStyle(nbTopics, i) {
+    let style = {};
+    style.position = 'relative';
+    style.margin = '0 auto 16px';
+    style.transform = 'none';
+
+    return style;
+}
+
+function getTabletBubbleStyle(nbTopics, i) {
+    return {};
+}
+
+function getDesktopBubbleStyle(nbTopics, i) {
+    // === DESKTOP MODE ===
+    const radius = 230;
+    const angleStep = (2 * Math.PI) / nbTopics;
+    const angle = i * angleStep;
+    const x = radius * Math.cos(angle);
+    const y = radius * Math.sin(angle);
+
+    let style = {};
+    style.left = `calc(50% + ${x}px)`;
+    style.top = `calc(50% + ${y}px)`;
+    style.position = 'absolute';
+    style.transform = 'translate(-50%, -50%)';
+
+    return style;
+}
+
+function getTooltipStyle(deviceType) {
+    switch (deviceType) {
+        case 'mobile': return getMobileTooltipStyle();
+        case 'tablet': return getTabletTooltipStyle();
+        case 'desktop': return getDesktopTooltipStyle();
+        default: return {};
+    }
+}
+
+function getMobileTooltipStyle(nbTopics, i) {
+    return {};
+}
+
+function getTabletTooltipStyle(nbTopics, i) {
+    return {};
+}
+
+function getDesktopTooltipStyle(nbTopics, i) {
+    return {};
+}
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    const container = document.querySelector('.circle-container');
+
+    const topics = [
+        {
+            label: 'Simulateur de fusée',
+            description: "Vous retrouverez ici mon simulateur (en constante amélioration).<br>Basé sur les méthodes d'Euler, Heun et Runge-Kutta 4, il permet de calculer et visualiser la trajectoire (verticale) d'une fusée. Les graphiques affichent la progression des valeurs. Les onglets affichent les valeurs calculérs ainsi que les erreurs.<br><br><span class='underlined-label'><srong>Cliquez ici</srong></span>",
+            link: 'https://pierre-ange.delbary-rouille.net/rocket/',
+            target: '_blank'
+        },
+        {
+            label: 'Littérature',
+            description: 'Études des grandes œuvres et mouvements littéraires internationaux.',
+            link: 'https://example.com/litterature',
+            target: '_blank'
+        },
+        {
+            label: 'Arts',
+            description: 'Expression esthétique à travers les âges : peinture, musique, théâtre.',
+            link: 'https://example.com/arts',
+            target: ''
+        },
+        {
+            label: 'Société',
+            description: 'Réflexions sur les dynamiques sociales, culturelles et politiques.',
+            link: 'https://example.com/societe',
+            target: '_blank'
+        },
+        {
+            label: 'Tech',
+            description: 'Exploration des technologies modernes et leur impact sur le monde.',
+            link: 'https://example.com/tech',
+            target: ''
+        },
+        {
+            label: 'Philosophie',
+            description: 'Étude des grandes pensées et des fondements conceptuels du savoir.',
+            link: 'https://example.com/philosophie',
+            target: '_blank'
+        }
+    ];
+
+
+    let md = new MobileDetect(window.navigator.userAgent);
+    let isMobile = md.mobile();
+    let isTablet = md.tablet();
+    let deviceType = isMobile ? 'mobile' : (isTablet ? 'tablet' : 'desktop');
+
+    createForm(deviceType, container, topics);
+
+});
+</script>
+
+
+</html>
+
+

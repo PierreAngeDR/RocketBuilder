@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!--
+        Data about rockets properties
+
+            StarShip Rockets    : https://fr.wikipedia.org/wiki/Starship_(fus%C3%A9e)#:~:text=La%20pouss%C3%A9e%20au%20d%C3%A9collage%20de%20la%20fus%C3%A9e%20est%20de%201%20635%20tonnes.
+            Units converter     : https://www.translatorscafe.com/unit-converter/fr-FR/force/25-1/ton-force%20(metric)-newton/
+            Falcon Heavy        : https://fr.wikipedia.org/wiki/Falcon_Heavy#:~:text=Chaque%20propulseur%20d'appoint%20est,%2C6%20tonnes%20de%20k%C3%A9ros%C3%A8ne).
+            Falcon 9            : https://fr.wikipedia.org/wiki/Falcon_9
+            Engines             : https://fr.wikipedia.org/wiki/Merlin_(moteur-fus%C3%A9e)
+
+        Rocket Flight Sources :
+
+            https://www.planete-sciences.org/espace/IMG/pdf/vol-de-la-fusee.pdf
+            https://cnes.fr/evenements/deuxieme-lancement-dariane-6-satellite-cso-3
+
+        Science :
+            Acceleration : https://fr.wikipedia.org/wiki/Acc%C3%A9l%C3%A9ration
+            Gravity calculation based on altitude : http://e.m.c.2.free.fr/poids-et-gravitation.htm
+            Rocket flight : https://www.planete-sciences.org/espace/IMG/pdf/vol-de-la-fusee.pdf
+            Launching a Rocket : https://www.techno-science.net/glossaire-definition/Fusee-astronautique-page-4.html
+            Azimut : https://fr.wikipedia.org/wiki/Azimut
+            Solving Differential Equations :    https://github.com/toshi-ara/SolveOde
+                                                https://scribbler.live/2024/05/11/Differential-Equations-JavaScript.html
+            Maths Library : https://mathjs.org/index.html
+
+        Digital Differential Equations Methods :
+            Runge-Kutta n : https://en.wikipedia.org/wiki/Runge%E2%80%93Kutta_methods
+
+    -->
+
+    <title class="lg-document-title">Simulation Modèle Masse Variable et Traînée</title>
+
+
+    {% include 'rocket/simulation-links.html.twig' %}
+    {% include 'rocket/simulation-css.html.twig' %}
+
+</head>
+<body style="background-color: black; color: white; text-align: center;font-family: Verdana, sans-serif;">
+
+    {% include 'menu/menu-html.html.twig' %}
+    {% include 'rocket-model-builder/builder-button-html.html.twig' %}
+    {% include 'rocket-motion-scripts-editor/scripts-button-html.html.twig' %}
+    {% include 'rocket/simulation-html.html.twig' %}
+    {% include 'rocket/simulation-script.html.twig' %}
+
+</body>
+</html>
+
+

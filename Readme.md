@@ -1,0 +1,10 @@
+# Initialisation
+
+Editer le fichier .env.dev ou .env.prod et configurer la connection base de données
+
+    DATABASE_URL="mysql://root:motdepasse@127.0.0.1:3306/rocket?serverVersion=8.0"
+
+
+# Création de la base de données
+
+    php bin/console doctrine:database:create

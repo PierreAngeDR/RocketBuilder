@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head></head>
+
+<style>
+    body {
+        background: #fff8f0;
+        font-family: 'Merriweather', serif;
+        color: #2d2d2d;
+        margin: 0;
+        padding: 0;
+    }
+
+    .circle-container {
+        position: relative;
+        width: 620px;
+        height: 620px;
+        margin: 60px auto;
+    }
+
+    .center-bubble {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #111111;
+        color: #ffffff;
+        width: 160px;
+        height: 160px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        font-weight: 700;
+        font-size: 20px;
+        letter-spacing: 1px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+        z-index: 2;
+        text-transform: uppercase;
+    }
+
+    .bubble {
+        position: absolute;
+        background: #ffffff;
+        color: #111;
+        width: 110px;
+        height: 110px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        font-size: 15px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        overflow: hidden;
+        padding: 12px;
+        z-index: 2;
+        text-decoration: none;
+        transform: translate(-50%, -50%);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+        border: 2px solid #ddd;
+    }
+
+    .bubble:hover {
+        width: 270px;
+        height: auto;
+        min-height: 140px;
+        border-radius: 8px;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-start;
+        background: #fafafa;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+        border-color: #aaa;
+        padding: 22px;
+    }
+
+    .bubble .tooltip {
+        display: none;
+    }
+
+    .bubble:hover .tooltip {
+        display: block;
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+        position: relative;
+        background: transparent;
+        box-shadow: none;
+        padding: 0;
+        white-space: normal;
+        margin-top: 12px;
+        font-weight: 400;
+        font-size: 14px;
+        color: #333;
+        line-height: 1.6;
+    }
+
+    @media screen and (max-width: 640px) {
+        .circle-container {
+            width: 100vw;
+            height: 100vw;
+        }
+        .bubble {
+            width: 80px;
+            height: 80px;
+            font-size: 13px;
+        }
+        .center-bubble {
+            width: 120px;
+            height: 120px;
+            font-size: 16px;
+        }
+    }
+</style>
+
+<div class="circle-container">
+    <div class="center-bubble">Magazine</div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const container = document.querySelector('.circle-container');
+
+        const topics = [
+            {
+                label: 'Actualité',
+                description: 'Les sujets qui font l’actualité culturelle, scientifique et sociale.',
+                link: 'https://example.com/actu',
+                target: '_blank'
+            },
+            {
+                label: 'Portraits',
+                description: 'Rencontres avec des personnalités qui façonnent notre époque.',
+                link: 'https://example.com/portraits',
+                target: '_blank'
+            },
+            {
+                label: 'Opinions',
+                description: 'Points de vue, tribunes, réflexions critiques et éclairées.',
+                link: 'https://example.com/opinions',
+                target: ''
+            },
+            {
+                label: 'Tendances',
+                description: 'Mode, culture, design, tout ce qui inspire le quotidien.',
+                link: 'https://example.com/tendances',
+                target: '_blank'
+            },
+            {
+                label: 'Explorations',
+                description: 'Voyages, découvertes, récits d’ailleurs et regards sur le monde.',
+                link: 'https://example.com/explorations',
+                target: ''
+            },
+            {
+                label: 'Archives',
+                description: 'Redécouvrez les grandes enquêtes et dossiers passés.',
+                link: 'https://example.com/archives',
+                target: '_blank'
+            }
+        ];
+
+        const radius = 240;
+        const angleStep = (2 * Math.PI) / topics.length;
+
+        topics.forEach((topic, i) => {
+            const angle = i * angleStep;
+            const x = radius * Math.cos(angle);
+            const y = radius * Math.sin(angle);
+
+            const bubble = document.createElement('a');
+            bubble.className = 'bubble';
+            bubble.href = topic.link;
+            bubble.target = topic.target;
+            bubble.style.left = `calc(50% + ${x}px)`;
+            bubble.style.top = `calc(50% + ${y}px)`;
+
+            bubble.innerHTML = `
+        <div class="label">${topic.label}</div>
+        <div class="tooltip">${topic.description}</div>
+      `;
+
+            container.appendChild(bubble);
+        });
+    });
+</script>
+
+
+</html>
+
+

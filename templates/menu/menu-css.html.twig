@@ -1,0 +1,72 @@
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+    }
+
+    .menu-wrapper .navbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #333;
+        color: white;
+        padding: 1rem;
+    }
+
+    .menu-wrapper .menu {
+        display: none;
+        flex-direction: column;
+        background-color: #444;
+        position: absolute;
+        top: 60px;
+        right: 10px;
+        border-radius: 5px;
+        overflow: hidden;
+        z-index: 1000;
+    }
+
+    .menu-wrapper .menu.active {
+        display: flex;
+    }
+
+    .menu-wrapper .menu button {
+        background: none;
+        border: none;
+        color: white;
+        padding: 1rem;
+        text-align: left;
+        width: 100%;
+        font-size: 1rem;
+        cursor: pointer;
+    }
+
+    .menu-wrapper .menu button:hover {
+        background-color: #555;
+    }
+
+    .menu-wrapper .hamburger {
+        font-size: 1.5rem;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    @media (min-width: 600px) {
+        .menu-wrapper .hamburger {
+            display: none;
+        }
+        .menu-wrapper .menu {
+            display: flex;
+            position: static;
+            flex-direction: row;
+            background-color: transparent;
+        }
+        .menu-wrapper .menu.active {
+            display: flex;
+        }
+        .menu-wrapper .menu button {
+            padding: 0 1rem;
+            background: none;
+            border: none;
+        }
+    }
+</style>

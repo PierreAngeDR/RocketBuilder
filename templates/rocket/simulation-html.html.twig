@@ -1,0 +1,207 @@
+<div>
+    <div id="info" style="float: left;width:30%;">
+        <label for="language-select" class="lg-choose-language">Language :</label>
+        <select name="languageSelect" id="language-select">
+            <option value="french">Français</option>
+            <option value="english">English</option>
+        </select>
+        <p><div>
+            <div style="float: left" class="lg-time">Temps : </div>
+            <div style="float: right"><span id="time">0</span> s</div><div style="clear: both;"></div>
+        </div>
+        <p>
+            <div>
+                <div style="float: left" class="lg-gravity">Accélération : </div>
+                <div style="float: right"><span id="gravity">9.81</span> m/s²</div>
+                <div style="clear: both;"></div>
+            </div>
+        <p>
+            <div>
+                <div style="float: left" class="lg-acceleration">Accélération : </div>
+                <div style="float: right"><span id="acceleration">0</span> m/s²</div>
+                <div style="clear: both;"></div>
+            </div>
+        <p>
+            <div>
+                <div style="float: left" class="lg-speed">Vitesse : </div>
+                <div style="float: right"><span id="velocity">0</span> m/s</div>
+                <div style="clear: both;"></div>
+            </div>
+        <p>
+            <div>
+                <div style="float: left" class="lg-drag">Traînée : </div>
+                <div style="float: right"><span id="drag">0</span> N</div>
+                <div style="clear: both;"></div>
+            </div>
+        <p>
+            <div>
+                <div style="float: left" class="lg-height">Altitude : </div>
+                <div style="float: right"><span id="altitude">0</span> m</div>
+                <div style="clear: both;"></div>
+            </div>
+        <p>
+            <div>
+                <div style="float: left" class="lg-total-mass">Masse Totale : </div>
+                <div style="float: right"><span id="mass">0</span> kg</div>
+                <div style="clear: both;"></div>
+            </div>
+        <p>
+            <div>
+                <div style="float: left"><label for="rocketMass" class="lg-rocket-mass">Masse à vide de la fusée (kg) :</label></div>
+{#                <div style="float: right"><input type="number" id="rocketMass" value="100" step="10" min="10" max="500000" onchange="updateValue('rocketMass')"></div>#}
+                <div style="float: right"><input type="text" id="rocketMass"></div>
+                <div style="clear: both;"></div>
+            </div>
+        <p>
+            <div>
+                <div style="float: left"><label for="fuel" class="lg-fuel-mass">Masse initiale de carburant (kg) :</label></div>
+{#                <div style="float: right"><input type="number" id="fuel" value="10" step="10" min="10" max="5000000" onchange="updateValue('fuel')"></div>#}
+                <div style="float: right"><input type="text" id="fuel" ></div>
+                <div style="clear: both;"></div>
+            </div>
+        <p>
+            <div>
+                <div style="float: left"><label for="fuelConsumption" class="lg-fuel-consumption">Consommation de carburant (kg/s) :</label></div>
+{#                <div style="float: right"><input type="number" id="fuelConsumption" value="0.5" step="0.1" min="0.1" max="1000" onchange="updateValue('fuelConsumption')"></div>#}
+                <div style="float: right"><input type="text" id="fuelConsumption" ></div>
+                <div style="clear: both;"></div>
+            </div>
+        <p>
+            <div>
+                <div style="float: left"><label for="frontSection" class="lg-rocket-front-section">Section frontale (m²) :</label></div>
+{#                <div style="float: right"><input type="number" id="frontSection" value="1" step="0.1" min="0.01" max="100" onchange="updateValue('frontSection')"></div>#}
+                <div style="float: right"><input type="text" id="frontSection"></div>
+                <div style="clear: both;"></div>
+            </div>
+        <p>
+            <div>
+                <div style="float: left"><label for="thrust" class="lg-rocket-thrust">Force de Poussée (N) :</label></div>
+{#                <div style="float: right"><input type="number" id="thrust" value="5000" step="100" min="100" max="1000000" onchange="updateValue('thrust')"></div>#}
+                <div style="float: right"><input type="text" id="thrust"></div>
+                <div style="clear: both;"></div>
+            </div>
+        <p>
+            <div>
+                <div style="float: left"><label for="step" class="lg-time-step">Pas d'échantillonnage (s) :</label></div>
+                <div style="float: right"><input type="number" id="step" value="0.5" step="0.1" min="0.1" max="2" onchange="updateValue('step')" /></div>
+                <div style="clear: both;"></div>
+            </div>
+        <p>
+            <div>
+                <div style="float: left"><label for="minSpeed" class="lg-lowest-printable-speed">minimum Speed :</label></div>
+                <div style="float: right"><input type="number" id="minSpeed" value="-100" step="10" min="-5000" max="5000" onchange="updateValue('minSpeed')"/></div>
+                <div style="clear: both;"></div>
+            </div>
+        <p>
+            <div>
+                <div style="float: left"><label for="minAcceleration" class="lg-lowest-printable-acceleration">Accélération minimale affichée (m/s²) :</label></div>
+                <div style="float: right"><input type="number" id="minAcceleration" value="-100" step="10" min="-5000" max="5000" onchange="updateValue('minAcceleration')"/></div>
+                <div style="clear: both;"></div>
+            </div>
+        <p>
+            <div>
+                <div style="float: left"><label for="maxTime" class="lg-maximum-printable-time">Durée maximale affichée (s) :</label></div>
+                <div style="float: right"><input type="number" id="maxTime" value="300" step="10" min="0" max="50000000" onchange="updateValue('maxTime')"/></div>
+                <div style="clear: both;"></div>
+            </div>
+    </div>
+    <div id="motion-viewer" style="float: right;width:70%;">
+        <div class="motion-canvas-wrapper" >
+            <canvas id="background-motion-canvas" class="motion-canvas"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="controls">
+    <div>
+        <div class="autoscale-buttons control-buttons">
+            <label for="autoscale" class="lg-auto-scale">
+                Échelle Auto
+            </label>
+            <input type="checkbox" id="autoscale" name="autoscale"  onChange="autoScale('autoscale', 'scale-wrapper')"/>
+        </div>
+        <div id="scale-wrapper" class="scale-buttons control-buttons">
+            <span  class="lg-scale">Échelle</span> :<span id="scale">2</span>
+            <button onclick="zoomIn()" class="lg-zoom-in">Zoom +</button>
+            <button onclick="zoomOut()" class="lg-zoom-out">Zoom -</button>
+        </div>
+        <div id="run-buttons" class="run-buttons  control-buttons">
+            <button onclick="runAll()" class="lg-run-methods button-primary">Run The 3 methods</button>
+        </div>
+        <div class="rocket-select-wrapper control-buttons">
+            <label for="rocket-select" class="lg-choose-rocket">Choix d'un modèle de fusée :</label>
+            <select name="rocketSelect" id="rocket-select">
+                <option value="basic">Basic</option>
+                <option value="falcon9">Falcon9 (1 étage)</option>
+            </select>
+        </div>
+    </div>
+
+
+
+</div>
+
+<div id="grids">
+    <div class="tabs">
+        <div class="tabs__bar-wrap">
+            <div class="tabs__bar">
+                <div class="tabs__controls">
+                    <span class="lg-graphs">Graphiques</span>
+                    <button class="charts-color-picker"></button>
+                    <div id="reload-charts">
+                            <svg xmlns="http://www.w3.org/2000/svg" id="reload-icon" onclick="reloadCharts()" viewBox="3 3 16 16">
+                            <circle cx="11" cy="-1041.36" r="8" transform="matrix(1 0 0-1 0-1030.36)" opacity=".98" fill="#1d99f3"/>
+                            <path d="m120.6 38.723c-3.312-7.713-7.766-14.367-13.36-19.961-5.595-5.594-12.248-10.05-19.962-13.361-7.713-3.314-15.805-4.97-24.278-4.97-7.984 0-15.71 1.506-23.18 4.521-7.468 3.01-14.11 7.265-19.92 12.751l-10.593-10.511c-1.63-1.684-3.503-2.064-5.622-1.141-2.173.924-3.259 2.527-3.259 4.808v36.5c0 1.412.516 2.634 1.548 3.666 1.033 1.032 2.255 1.548 3.667 1.548h36.5c2.282 0 3.884-1.086 4.807-3.259.923-2.118.543-3.992-1.141-5.622l-11.162-11.243c3.803-3.585 8.148-6.341 13.04-8.27 4.889-1.928 9.994-2.893 15.317-2.893 5.649 0 11.04 1.101 16.17 3.3 5.133 2.2 9.572 5.174 13.32 8.922 3.748 3.747 6.722 8.187 8.922 13.32 2.199 5.133 3.299 10.523 3.299 16.17 0 5.65-1.1 11.04-3.299 16.17-2.2 5.133-5.174 9.573-8.922 13.321-3.748 3.748-8.188 6.722-13.32 8.921-5.133 2.2-10.525 3.3-16.17 3.3-6.464 0-12.574-1.412-18.332-4.236-5.757-2.824-10.618-6.816-14.583-11.977-.38-.543-1-.87-1.874-.979-.815 0-1.494.244-2.037.733l-11.162 11.244c-.434.436-.665.991-.692 1.67-.027.68.15 1.29.53 1.833 5.921 7.17 13.09 12.724 21.509 16.661 8.419 3.937 17.3 5.907 26.642 5.907 8.473 0 16.566-1.657 24.279-4.97 7.713-3.313 14.365-7.768 19.961-13.361 5.594-5.596 10.05-12.248 13.361-19.961 3.313-7.713 4.969-15.807 4.969-24.279 0-8.474-1.657-16.564-4.97-24.277" fill="#fff" transform="matrix(.07192 0 0 .07192 6.674 6.768)"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="tabs__controls lg-chart-height">Tableaux d'altitude</div>
+                <div class="tabs__controls lg-chart-speed">Tableaux de vitesse</div>
+            </div>
+        </div>
+        <div class="tabs__content">
+            <div class="tabs__section">
+                <div class="charts-wrapper">
+                    <div id="charts">
+                        <canvas id="chartHeightCanvas" class="chart-canvas"></canvas><hr>
+                        <canvas id="chartThrustCanvas" class="chart-canvas"></canvas><hr>
+                        <canvas id="chartGravityCanvas" class="chart-canvas"></canvas><hr>
+                        <canvas id="chartMassCanvas" class="chart-canvas"></canvas><hr>
+                        <canvas id="chartSpeedCanvas" class="chart-canvas"></canvas><hr>
+                        <canvas id="chartAccelerationCanvas" class="chart-canvas"></canvas><hr>
+                        <canvas id="chartDragCanvasLinear" class="chart-canvas"></canvas><hr>
+                        <canvas id="chartDragCanvasLog" class="chart-canvas"></canvas><hr>
+                    </div>
+                    <ul id="contextMenu" class="context-menu" style="display:none;">
+                        <li class="menu-item lg-print-pdf" data-action="print-pdf">Print as Pdf</li>
+                        <li class="menu-item lg-copy-to-clipboard" data-action="copy-to-clipboard">Copy to ClipBoard</li>
+                        <li class="menu-item lg-save-as-pdf" data-action="save-as-pdf">Save as Pdf</li>
+                        <li class="menu-item lg-save-as-png" data-action="save-as-png">Save as Png</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="tabs__section">
+                <div id="altitude-table" class="grid-section">
+                    <button id="altitudeButton" style="display:none;" onclick="showGrid('error-grid-altitude', 'Altitude', 'h', ' (m)')">Show Error Grid for Altitude</button>
+                    <button id="altitudeButtonPrint" onclick="printGrid('error-grid-altitude')" class="lg-print-grid">Print Grid</button>
+                    <button id="altitudeButtonDownloadPdf" onclick="downloadPdfGrid('error-grid-altitude')" class="lg-download-pdf">Download Pdf Grid</button>
+                    <button id="altitudeButtonDownloadXlsx" onclick="downloadXlsxGrid('error-grid-altitude')" class="lg-download-xlsx">Download Excel Grid</button>
+                    <button id="altitudeButtonDownloadCsv" onclick="downloadCsvGrid('error-grid-altitude')" class="lg-download-csv">Download Csv Grid</button>
+                    <button id="altitudeButtonDownloadJson" onclick="downloadJsonGrid('error-grid-altitude')" class="lg-download-json">Download Json Grid</button>
+                    <div id="error-grid-altitude"></div>x
+                </div>
+            </div>
+            <div class="tabs__section">
+                <div id="speed-table" class="grid-section">
+                    <button id="speedButton" style="display:none;" onclick="showGrid('error-grid-speed', 'Speed', 'v', ' (m/s)')">Show Error Grid for Speed</button>
+                    <button id="speedButtonPrint" onclick="printGrid('error-grid-speed')" class="lg-print-grid">Print Grid</button>
+                    <button id="speedButtonDownloadPdf" onclick="downloadPdfGrid('error-grid-speed')" class="lg-download-pdf">Download Pdf Grid</button>
+                    <button id="speedButtonDownloadXlsx" onclick="downloadXlsxGrid('error-grid-speed')" class="lg-download-xlsx">Download Excel Grid</button>
+                    <button id="speedButtonDownloadCsv" onclick="downloadCsvGrid('error-grid-speed')" class="lg-download-csv">Download Csv Grid</button>
+                    <button id="speedButtonDownloadJson" onclick="downloadJsonGrid('error-grid-speed')" class="lg-download-json">Download Json Grid</button>
+                    <div id="error-grid-speed"></div>x
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,67 @@
+{% block stylesheets %}
+{#    {% include 'menu/menu-css.html.twig' %}#}
+    <link rel="stylesheet" href="{{ asset('styles/app.css') }}">
+{% endblock %}
+
+
+<div class="menu-wrapper">
+    <div class="navbar">
+        <div class="logo">Rocket Simulator</div>
+        <div class="hamburger" onclick="toggleMenu()">&#9776;</div>
+{#        <div class="menu" id="menu">#}
+{#            {% if is_logged is defined  and  (is_logged==true ) %}#}
+{#                <button id="menu-logout" onclick="onMenuClick('application-logout')">Déconnexion</button>#}
+{#            {% else %}#}
+{#                <button id="menu-login" onclick="onMenuClick('application-login')">Connexion</button>#}
+{#            {% endif %}#}
+{#            <button id="menu-info" onclick="onMenuClick('application-info')">Infos</button>#}
+{#            <button id="menu-create" onclick="onMenuClick('model-builder')">Créer</button>#}
+{#        </div>#}
+
+        <div class="menu" id="menu">
+            <nav class="nav-menu">
+                <ul>
+                    <li>
+                        {% if is_logged is defined  and  (is_logged==true ) %}
+                            <button id="menu-logout" onclick="onMenuClick('application-logout')">Déconnexion</button>
+                        {% else %}
+                            <button id="menu-login" onclick="onMenuClick('application-login')">Connexion</button>
+                        {% endif %}
+                    </li>
+                    <li>
+                        <button id="menu-info" onclick="onMenuClick('application-info')">Infos</button>
+                    </li>
+                    <li class="has-submenu">
+                        <button>Créer</button>
+                        <ul class="submenu">
+                            <li>
+                                <button id="menu-create" onclick="onMenuClick('model-builder')">... des modèles de fusées</button>
+                            </li>
+                            <li><button id="menu-create" onclick="onMenuClick('motion-scripts')">... des modèles de trajectoires</button></li>
+{#                            <li><a href="#consulting">Consulting</a></li>#}
+                        </ul>
+                    </li>
+{#                    <li><a href="#contact">Contact</a></li>#}
+{#                    <li><a href="#login">Login</a></li>#}
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    function toggleMenu() {
+        const menu = document.getElementById('menu');
+        menu.classList.toggle('active');
+    }
+
+    function onMenuClick(action) {
+        const event = new CustomEvent("menuAction", {detail: action});
+        document.dispatchEvent(event);
+
+        console.log('onMenuClick', action);
+        toggleMenu();
+
+    }
+</script>

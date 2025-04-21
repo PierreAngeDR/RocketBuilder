@@ -1,0 +1,224 @@
+
+
+/* Script Editor Modal - Scoped styles to prevent interference with other plugins */
+.js-motions-editor {
+    @apply fixed inset-0 bg-black/50 flex items-center justify-center z-50;
+}
+
+/* New script modal */
+.js-motions-editor .new-script-modal {
+    /*@apply fixed inset-0 bg-black/30 flex items-center justify-center z-50;*/
+    @apply fixed inset-0 bg-black/30 flex items-center justify-center;
+    z-index: 100;
+    /*display: none; !* Default state is hidden *!*/
+    border-width: medium;
+    height: 300px;
+    width: 300px;
+    background: white;
+    margin: auto;
+    color: black;
+    border: solid;
+    border-radius: 20px;
+    padding: 10px;
+    position: absolute;
+
+}
+
+/* Container */
+.js-motions-editor .modal-container {
+    @apply bg-white w-11/12 h-5/6 rounded-lg shadow-xl flex flex-col;
+}
+
+/* Header */
+.js-motions-editor .modal-header {
+    @apply px-6 py-4 border-b flex justify-between items-center;
+}
+
+.js-motions-editor .modal-title {
+    @apply text-xl font-semibold text-gray-700;
+}
+
+.js-motions-editor .close-btn {
+    /*@apply text-gray-400 hover:text-gray-600;*/
+    width:30px;
+    @apply text-gray-400 hover:text-gray-600 cursor-pointer p-1 rounded-full hover:bg-gray-100;
+}
+
+/* Content area */
+.js-motions-editor .modal-content {
+    @apply flex-grow flex overflow-hidden;
+}
+
+/* Sidebar */
+.js-motions-editor .scripts-sidebar {
+    @apply w-1/4 border-r flex flex-col;
+}
+
+.js-motions-editor .sidebar-header {
+    @apply p-4 border-b flex justify-between items-center;
+}
+
+.js-motions-editor .sidebar-title {
+    @apply font-medium text-gray-700;
+}
+
+.js-motions-editor .new-script-btn {
+    width:30px;
+    @apply p-1 rounded text-gray-500 hover:bg-gray-100;
+}
+
+.js-motions-editor .scripts-list {
+    @apply flex-grow overflow-y-auto;
+}
+
+/* Editor area */
+.js-motions-editor .editor-area {
+    @apply w-3/4 flex flex-col;
+}
+
+.js-motions-editor .editor-tabs {
+    @apply border-b flex overflow-x-auto;
+}
+
+
+.js-motions-editor .tab {
+    @apply flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100;
+}
+
+.editor-tabs > div:not(.tab-active) span {
+    color: black; /* Ou #000000 si tu veux être précis */
+}
+
+.js-motions-editor .tab-active {
+    @apply border-b-2 border-blue-500 text-blue-500;
+}
+
+.js-motions-editor .tab-close {
+    @apply ml-2 rounded-full p-1 hover:bg-gray-200;
+    color:blue;
+    width:20px;
+}
+
+.js-motions-editor .editors-container {
+    @apply flex-grow overflow-hidden;
+}
+
+/* Controls */
+.js-motions-editor .editor-controls {
+    @apply p-4 border-t flex justify-between;
+}
+
+.js-motions-editor .danger-btn {
+    @apply px-3 py-2 bg-red-500 text-white rounded hover:bg-red-600 mr-2 inline-flex items-center;
+}
+
+.js-motions-editor .primary-btn {
+    @apply px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 mr-2 inline-flex items-center;
+}
+
+.js-motions-editor .success-btn {
+    @apply px-3 py-2 bg-green-500 text-white rounded hover:bg-green-600 inline-flex items-center;
+}
+
+.js-motions-editor .button-icon {
+    @apply w-4 h-4 mr-1;
+}
+
+/* Script items */
+.js-motions-editor .script-item {
+    @apply p-3 border-b cursor-pointer;
+}
+
+.js-motions-editor .script-item:hover {
+    @apply bg-gray-100;
+}
+
+.js-motions-editor .script-item.active {
+    @apply bg-blue-100 border-l-4 border-blue-500 text-blue-500;
+}
+
+.scripts-list > .script-item:not(.active) {
+    @apply text-black;
+}
+
+.js-motions-editor .script-title {
+    @apply font-medium;
+}
+
+.js-motions-editor .script-submodules {
+    @apply text-xs text-gray-500;
+}
+
+/* Toast notifications */
+.js-motions-editor .toast {
+    @apply fixed bottom-4 right-4 bg-gray-800 text-white px-6 py-3 rounded shadow-lg;
+}
+
+.js-motions-editor .fade-out {
+    @apply opacity-0 transition-opacity;
+}
+
+/*Set Editor to max Size*/
+
+.js-motions-editor .h-full {
+    height: 100%;
+}
+
+.js-motions-editor .ce-block__content {
+    max-width: 100%;
+}
+
+
+/*.codeflask-wrapper {*/
+/*    height: 300px;*/
+/*    border: 1px solid #ddd;*/
+/*    border-radius: 5px;*/
+/*    overflow: hidden;*/
+/*    font-family: monospace;*/
+/*    font-size: 14px;*/
+/*    position: relative;*/
+/*}*/
+
+/*.codeflask-wrapper .codeflask {*/
+/*    height: 100%;*/
+/*}*/
+
+/*!* CodeFlask attaches shadow-root for the editor display *!*/
+/*.codeflask code {*/
+/*    outline: none;*/
+/*}*/
+
+
+.codex-editor {
+    height: 100%;
+    padding-right: 10px !important;
+}
+.codex-editor__redactor {
+    padding-bottom: 0 !important;
+    height: 100%;
+}
+
+.ce-block {
+    height: 100%;
+}
+
+.ce-block__content {
+    height: 100%;
+}
+
+.ace-editor-wrapper {
+    height: 100% !important;
+}
+
+.ace-editor-wrapper {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    z-index:3000;
+    height: 300px;
+    pointer-events: auto;
+    background-color: white; /* ou un thème foncé si tu préfères */
+}
+
+.ce-toolbar.ce-toolbar--opened {
+    display: none !important;
+}

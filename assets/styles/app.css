@@ -1,0 +1,92 @@
+
+@import url("./builder-button.css");
+@import url("./js-motion-editor.css");
+@import url("./menu.css");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+:root {
+    --space-black: #121212;
+    --space-dark: #1e1e1e;
+    --space-blue: #0077cc;
+    --space-light-blue: #4dabf7;
+    --space-gray: #343a40;
+    --space-light-gray: #e9ecef;
+    --space-white: #f8f9fa;
+    --space-red: #e03131;
+    --space-green: #2b8a3e;
+    --space-yellow: #f08c00;
+    --space-orange: #e8590c;
+    --border-radius: 8px;
+    --transition-speed: 0.3s;
+}
+
+/* Base styles */
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--space-black);
+    color: var(--space-white);
+}
+
+button {
+    cursor: pointer;
+    padding: 10px 16px;
+    border-radius: var(--border-radius);
+    font-weight: 500;
+    transition: all var(--transition-speed);
+    border: none;
+    outline: none;
+}
+
+.button-primary {
+    background-color: var(--space-blue);
+    color: var(--space-white);
+}
+
+.button-primary:hover {
+    background-color: var(--space-light-blue);
+}
+
+.button-secondary {
+    background-color: var(--space-gray);
+    color: var(--space-white);
+}
+
+.button-secondary:hover {
+    background-color: #495057;
+}
+
+.button-danger {
+    background-color: var(--space-red);
+    color: var(--space-white);
+}
+
+.button-danger:hover {
+    background-color: #fa5252;
+}
+
+input, select, textarea {
+    padding: 8px 12px;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--space-gray);
+    background-color: var(--space-dark);
+    color: var(--space-white);
+    font-size: 14px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head></head>
+
+<style>
+    body {
+        background: linear-gradient(to bottom right, #f0f4f8, #ffffff);
+        font-family: 'Segoe UI', sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+
+    .circle-container {
+        position: relative;
+        width: 600px;
+        height: 600px;
+        margin: 60px auto;
+        border-radius: 50%;
+    }
+
+    .center-bubble {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #003366;
+        color: white;
+        width: 140px;
+        height: 140px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: 600;
+        font-size: 18px;
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        z-index: 2;
+        text-align: center;
+    }
+
+    .bubble {
+        position: absolute;
+        background: white;
+        color: #003366;
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        overflow: hidden;
+        padding: 12px;
+        z-index: 2;
+        text-decoration: none;
+        transform: translate(-50%, -50%);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+        border: 1px solid #dce3ea;
+    }
+
+    .bubble:hover {
+        width: 240px;
+        height: auto;
+        min-height: 120px;
+        border-radius: 16px;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-start;
+        background: #f8fbfd;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        border-color: #cbd5e0;
+        padding: 16px;
+    }
+
+    .bubble .tooltip {
+        display: none;
+    }
+
+    .bubble:hover .tooltip {
+        display: block;
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+        position: relative;
+        background: transparent;
+        box-shadow: none;
+        padding: 0;
+        white-space: normal;
+        margin-top: 10px;
+        font-weight: 400;
+        font-size: 13px;
+        color: #4a5568;
+    }
+
+    @media screen and (max-width: 600px) {
+        .circle-container {
+            width: 100vw;
+            height: 100vw;
+        }
+        .bubble {
+            width: 70px;
+            height: 70px;
+            font-size: 12px;
+        }
+        .center-bubble {
+            width: 100px;
+            height: 100px;
+            font-size: 14px;
+        }
+    }
+</style>
+
+<div class="circle-container">
+    <div class="center-bubble">Thématiques</div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const container = document.querySelector('.circle-container');
+
+        const topics = [
+            {
+                label: 'Sciences',
+                description: 'Découvre les sciences physiques, naturelles et bien plus.',
+                link: 'https://example.com/sciences',
+                target: '_blank'
+            },
+            {
+                label: 'Littérature',
+                description: 'Explore la littérature mondiale et ses chefs-d\'œuvre.',
+                link: 'https://example.com/litterature',
+                target: '_blank'
+            },
+            {
+                label: 'Arts',
+                description: 'Peinture, musique, théâtre et expression créative.',
+                link: 'https://example.com/arts',
+                target: ''
+            },
+            {
+                label: 'Société',
+                description: 'Comprendre les enjeux du monde contemporain.',
+                link: 'https://example.com/societe',
+                target: '_blank'
+            },
+            {
+                label: 'Tech',
+                description: 'Nouveautés numériques, IA et innovations tech.',
+                link: 'https://example.com/tech',
+                target: ''
+            },
+            {
+                label: 'Philosophie',
+                description: 'Réflexions, pensée critique et grands penseurs.',
+                link: 'https://example.com/philosophie',
+                target: '_blank'
+            }
+        ];
+
+        const radius = 220;
+        const angleStep = (2 * Math.PI) / topics.length;
+
+        topics.forEach((topic, i) => {
+            const angle = i * angleStep;
+            const x = radius * Math.cos(angle);
+            const y = radius * Math.sin(angle);
+
+            const bubble = document.createElement('a');
+            bubble.className = 'bubble';
+            bubble.href = topic.link;
+            bubble.target = topic.target;
+            bubble.style.left = `calc(50% + ${x}px)`;
+            bubble.style.top = `calc(50% + ${y}px)`;
+
+            bubble.innerHTML = `
+        <div class="label">${topic.label}</div>
+        <div class="tooltip">${topic.description}</div>
+      `;
+
+            container.appendChild(bubble);
+        });
+    });
+</script>
+
+</html>
+
+

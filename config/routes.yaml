@@ -1,0 +1,14 @@
+controllers:
+    resource:
+        path: ../src/Controller/
+        namespace: App\Controller
+    type: attribute
+
+
+    # For Reverse Proxy. Parameter route_prefix is defined in services.yaml
+    prefix: '%route_prefix%'
+
+
+# Added Define route for api login
+api_login_check:
+    path: /api/login

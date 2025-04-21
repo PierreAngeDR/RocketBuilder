@@ -1,0 +1,5369 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!--
+        Data about rockets properties
+
+            StarShip Rockets    : https://fr.wikipedia.org/wiki/Starship_(fus%C3%A9e)#:~:text=La%20pouss%C3%A9e%20au%20d%C3%A9collage%20de%20la%20fus%C3%A9e%20est%20de%201%20635%20tonnes.
+            Units converter     : https://www.translatorscafe.com/unit-converter/fr-FR/force/25-1/ton-force%20(metric)-newton/
+            Falcon Heavy        : https://fr.wikipedia.org/wiki/Falcon_Heavy#:~:text=Chaque%20propulseur%20d'appoint%20est,%2C6%20tonnes%20de%20k%C3%A9ros%C3%A8ne).
+            Falcon 9            : https://fr.wikipedia.org/wiki/Falcon_9
+            Engines             : https://fr.wikipedia.org/wiki/Merlin_(moteur-fus%C3%A9e)
+
+        Rocket Flight Sources :
+
+            https://www.planete-sciences.org/espace/IMG/pdf/vol-de-la-fusee.pdf
+            https://cnes.fr/evenements/deuxieme-lancement-dariane-6-satellite-cso-3
+
+        Science :
+            Acceleration : https://fr.wikipedia.org/wiki/Acc%C3%A9l%C3%A9ration
+            Gravity calculation based on altitude : http://e.m.c.2.free.fr/poids-et-gravitation.htm
+            Rocket flight : https://www.planete-sciences.org/espace/IMG/pdf/vol-de-la-fusee.pdf
+            Launching a Rocket : https://www.techno-science.net/glossaire-definition/Fusee-astronautique-page-4.html
+            Azimut : https://fr.wikipedia.org/wiki/Azimut
+            Solving Differential Equations :    https://github.com/toshi-ara/SolveOde
+                                                https://scribbler.live/2024/05/11/Differential-Equations-JavaScript.html
+            Maths Library : https://mathjs.org/index.html
+
+        Digital Differential Equations Methods :
+            Runge-Kutta n : https://en.wikipedia.org/wiki/Runge%E2%80%93Kutta_methods
+
+    -->
+
+    <title class="lg-document-title">Simulation Modèle Masse Variable et Traînée</title>
+
+    
+<!--
+    Using https://tabulator.info/examples/6.3 for tables
+-->
+<link href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator.min.css" rel="stylesheet">
+<script type="text/javascript" src="https://unpkg.com/tabulator-tables@6.3.1/dist/js/tabulator.min.js"></script>
+<script type="text/javascript" src="https://oss.sheetjs.com/sheetjs/xlsx.full.min.js"></script> <!-- for exporting tables to xlsx format -->
+<script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script><!-- for exporting tables to pdf format -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.20/jspdf.plugin.autotable.min.js"></script> <!-- for exporting tables to pdf format -->
+
+<!--
+    Using https://www.chartjs.org/ for charts
+    Using html2canvas for exports
+    Using jsPdf for pdf canvas exports. Already used for Tabulator
+
+    Source for chart Context Menu : https://codepen.io/elizzk/pen/xxZjQvJ
+    Source for chart Download/Copy : https://stackblitz.com/edit/js-charts-pdf-export?file=index.js
+-->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script> <!-- html2canvas -->
+
+
+
+<!--
+    Using https://www.jsdelivr.com/package/npm/tabs-slider for tabs
+-->
+<script src="https://cdn.jsdelivr.net/npm/tabs-slider@3.1.1/dist/js/tabsSlider.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/tabs-slider@3.1.1/dist/css/tabs.min.css" rel="stylesheet">
+
+<!--
+    Using jscolor.js for color picker (https://jscolor.com/)
+-->
+<script src="https://cdn.jsdelivr.net/npm/@eastdesire/jscolor@2.5.2/jscolor.min.js"></script>
+
+<!--
+    Using https://github.com/localForage/localForage for cookies via localStorage
+-->
+<script src="https://cdn.jsdelivr.net/npm/localforage@1.10.0/dist/localforage.min.js"></script>
+
+<!--
+    Using https://sheetjs.com/ for Excel exports
+-->
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
+<!--
+    Using toastify-js for toasts
+-->
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    
+<style>
+.hidden {
+    display: none !important;
+}
+
+*:disabled {
+    opacity : 1 !important;
+    background-color: white !important;
+    color: black !important;
+}
+
+input {
+    width:100px;
+}
+
+#info {
+    text-align: center;
+    font-size: 12px;
+    color: white;
+    margin-top: 10px;
+}
+
+input {
+    font-size: 12px;
+    padding: 2px 2px;
+    /* margin: 5px; */
+
+}
+.controls {
+    /*margin-top: 10px;*/
+    padding: 30px;
+    display : inline-block;
+}
+
+.control-buttons {
+    display: inline-block;
+    vertical-align: middle;
+
+}
+
+button, select {
+    font-size: 12px;
+    padding: 5px 10px;
+    margin: 5px;
+}
+
+.chart-canvas {
+    width:90%;
+    /* aspect-ratio: 9/6 auto; */
+    aspect-ratio: 9/6 ;
+}
+
+.grid-section {
+    width: 100%;
+}
+
+.tabs {
+    max-width: 100% !important;
+}
+.tabs__content {
+    width: calc(100% * 3) !important;
+}
+.tabs__section {
+    padding: 30px;
+    width: 100% !important;
+}
+.tabs__controls {
+    color:black;
+}
+
+.charts-wrapper{
+    display:block;
+    overflow:hidden;
+    margin:0 auto;
+    padding: 20px;
+    background:#fff;
+    border-radius:4px;
+}
+
+.context-menu{
+    position: fixed;
+    border:1px solid #dedede;
+    background:white;
+    list-style:none;
+    border-radius: 0 6px 6px;
+    padding: 0 2px;
+}
+.menu-item {
+    font-size: 14px;
+    line-height: 24px;
+    width: 200px;
+    color:black;
+    font-family: sans-serif;
+    padding: 4px 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.menu-item:hover {
+    background: #dddddd;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+#reload-charts {
+    display: inline-block;
+    vertical-align: middle;
+}
+#reload-icon {
+    width: 25px;
+    height: 25px;
+}
+
+canvas {
+    /* background-color: black; */
+    display: block;
+    margin: auto;
+}
+
+.motion-canvas-wrapper {
+    position:relative;
+    width:100%;
+    aspect-ratio: 9/6 ;
+}
+
+.motion-canvas {
+    position:absolute;
+    width:100%;
+    padding: 20px;
+    aspect-ratio: 9/6;
+}
+
+#grids {
+    display: inline-block;
+    width: 100%;
+}
+
+
+</style>
+</head>
+<body style="background-color: black; color: white; text-align: center;font-family: Verdana, sans-serif;">
+
+    <div>
+    <div id="info" style="float: left;width:30%;">
+        <label for="language-select" class="lg-choose-language">Language :</label>
+        <select name="languageSelect" id="language-select">
+            <option value="french">Français</option>
+            <option value="english">English</option>
+        </select>
+        <p><div>
+            <div style="float: left" class="lg-time">Temps : </div>
+            <div style="float: right"><span id="time">0</span> s</div><div style="clear: both;"></div>
+        </div>
+        <p>
+            <div>
+                <div style="float: left" class="lg-gravity">Accélération : </div>
+                <div style="float: right"><span id="gravity">9.81</span> m/s²</div>
+                <div style="clear: both;"></div>
+            </div>
+        <p>
+            <div>
+                <div style="float: left" class="lg-acceleration">Accélération : </div>
+                <div style="float: right"><span id="acceleration">0</span> m/s²</div>
+                <div style="clear: both;"></div>
+            </div>
+        <p>
+            <div>
+                <div style="float: left" class="lg-speed">Vitesse : </div>
+                <div style="float: right"><span id="velocity">0</span> m/s</div>
+                <div style="clear: both;"></div>
+            </div>
+        <p>
+            <div>
+                <div style="float: left" class="lg-drag">Traînée : </div>
+                <div style="float: right"><span id="drag">0</span> N</div>
+                <div style="clear: both;"></div>
+            </div>
+        <p>
+            <div>
+                <div style="float: left" class="lg-height">Altitude : </div>
+                <div style="float: right"><span id="altitude">0</span> m</div>
+                <div style="clear: both;"></div>
+            </div>
+        <p>
+            <div>
+                <div style="float: left" class="lg-total-mass">Masse Totale : </div>
+                <div style="float: right"><span id="mass">0</span> kg</div>
+                <div style="clear: both;"></div>
+            </div>
+        <p>
+            <div>
+                <div style="float: left"><label for="rocketMass" class="lg-rocket-mass">Masse à vide de la fusée (kg) :</label></div>
+                <div style="float: right"><input type="text" id="rocketMass"></div>
+                <div style="clear: both;"></div>
+            </div>
+        <p>
+            <div>
+                <div style="float: left"><label for="fuel" class="lg-fuel-mass">Masse initiale de carburant (kg) :</label></div>
+                <div style="float: right"><input type="text" id="fuel" ></div>
+                <div style="clear: both;"></div>
+            </div>
+        <p>
+            <div>
+                <div style="float: left"><label for="fuelConsumption" class="lg-fuel-consumption">Consommation de carburant (kg/s) :</label></div>
+                <div style="float: right"><input type="text" id="fuelConsumption" ></div>
+                <div style="clear: both;"></div>
+            </div>
+        <p>
+            <div>
+                <div style="float: left"><label for="frontSection" class="lg-rocket-front-section">Section frontale (m²) :</label></div>
+                <div style="float: right"><input type="text" id="frontSection"></div>
+                <div style="clear: both;"></div>
+            </div>
+        <p>
+            <div>
+                <div style="float: left"><label for="thrust" class="lg-rocket-thrust">Force de Poussée (N) :</label></div>
+                <div style="float: right"><input type="text" id="thrust"></div>
+                <div style="clear: both;"></div>
+            </div>
+        <p>
+            <div>
+                <div style="float: left"><label for="step" class="lg-time-step">Pas d'échantillonnage (s) :</label></div>
+                <div style="float: right"><input type="number" id="step" value="0.5" step="0.1" min="0.1" max="2" onchange="updateValue('step')" /></div>
+                <div style="clear: both;"></div>
+            </div>
+        <p>
+            <div>
+                <div style="float: left"><label for="minSpeed" class="lg-lowest-printable-speed">minimum Speed :</label></div>
+                <div style="float: right"><input type="number" id="minSpeed" value="-100" step="10" min="-5000" max="5000" onchange="updateValue('minSpeed')"/></div>
+                <div style="clear: both;"></div>
+            </div>
+        <p>
+            <div>
+                <div style="float: left"><label for="minAcceleration" class="lg-lowest-printable-acceleration">Accélération minimale affichée (m/s²) :</label></div>
+                <div style="float: right"><input type="number" id="minAcceleration" value="-100" step="10" min="-5000" max="5000" onchange="updateValue('minAcceleration')"/></div>
+                <div style="clear: both;"></div>
+            </div>
+        <p>
+            <div>
+                <div style="float: left"><label for="maxTime" class="lg-maximum-printable-time">Durée maximale affichée (s) :</label></div>
+                <div style="float: right"><input type="number" id="maxTime" value="300" step="10" min="0" max="50000000" onchange="updateValue('maxTime')"/></div>
+                <div style="clear: both;"></div>
+            </div>
+    </div>
+    <div id="motion-viewer" style="float: right;width:70%;">
+        <div class="motion-canvas-wrapper" >
+            <canvas id="background-motion-canvas" class="motion-canvas"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="controls">
+    <div>
+        <div class="autoscale-buttons control-buttons">
+            <label for="autoscale" class="lg-auto-scale">
+                Échelle Auto
+            </label>
+            <input type="checkbox" id="autoscale" name="autoscale"  onChange="autoScale('autoscale', 'scale-wrapper')"/>
+        </div>
+        <div id="scale-wrapper" class="scale-buttons control-buttons">
+            <span  class="lg-scale">Échelle</span> :<span id="scale">2</span>
+            <button onclick="zoomIn()" class="lg-zoom-in">Zoom +</button>
+            <button onclick="zoomOut()" class="lg-zoom-out">Zoom -</button>
+        </div>
+        <div id="run-buttons" class="run-buttons control-buttons">
+            <button onclick="runAll()" class="lg-run-methods">Run The 3 methods</button>
+        </div>
+        <div class="rocket-select-wrapper control-buttons">
+            <label for="rocket-select" class="lg-choose-rocket">Choix d'un modèle de fusée :</label>
+            <select name="rocketSelect" id="rocket-select">
+                <option value="basic">Basic</option>
+                <option value="falcon9">Falcon9 (1 étage)</option>
+            </select>
+        </div>
+    </div>
+
+
+
+</div>
+
+<div id="grids">
+    <div class="tabs">
+        <div class="tabs__bar-wrap">
+            <div class="tabs__bar">
+                <div class="tabs__controls">
+                    <span class="lg-graphs">Graphiques</span>
+                    <button class="charts-color-picker"></button>
+                    <div id="reload-charts">
+                            <svg xmlns="http://www.w3.org/2000/svg" id="reload-icon" onclick="reloadCharts()" viewBox="3 3 16 16">
+                            <circle cx="11" cy="-1041.36" r="8" transform="matrix(1 0 0-1 0-1030.36)" opacity=".98" fill="#1d99f3"/>
+                            <path d="m120.6 38.723c-3.312-7.713-7.766-14.367-13.36-19.961-5.595-5.594-12.248-10.05-19.962-13.361-7.713-3.314-15.805-4.97-24.278-4.97-7.984 0-15.71 1.506-23.18 4.521-7.468 3.01-14.11 7.265-19.92 12.751l-10.593-10.511c-1.63-1.684-3.503-2.064-5.622-1.141-2.173.924-3.259 2.527-3.259 4.808v36.5c0 1.412.516 2.634 1.548 3.666 1.033 1.032 2.255 1.548 3.667 1.548h36.5c2.282 0 3.884-1.086 4.807-3.259.923-2.118.543-3.992-1.141-5.622l-11.162-11.243c3.803-3.585 8.148-6.341 13.04-8.27 4.889-1.928 9.994-2.893 15.317-2.893 5.649 0 11.04 1.101 16.17 3.3 5.133 2.2 9.572 5.174 13.32 8.922 3.748 3.747 6.722 8.187 8.922 13.32 2.199 5.133 3.299 10.523 3.299 16.17 0 5.65-1.1 11.04-3.299 16.17-2.2 5.133-5.174 9.573-8.922 13.321-3.748 3.748-8.188 6.722-13.32 8.921-5.133 2.2-10.525 3.3-16.17 3.3-6.464 0-12.574-1.412-18.332-4.236-5.757-2.824-10.618-6.816-14.583-11.977-.38-.543-1-.87-1.874-.979-.815 0-1.494.244-2.037.733l-11.162 11.244c-.434.436-.665.991-.692 1.67-.027.68.15 1.29.53 1.833 5.921 7.17 13.09 12.724 21.509 16.661 8.419 3.937 17.3 5.907 26.642 5.907 8.473 0 16.566-1.657 24.279-4.97 7.713-3.313 14.365-7.768 19.961-13.361 5.594-5.596 10.05-12.248 13.361-19.961 3.313-7.713 4.969-15.807 4.969-24.279 0-8.474-1.657-16.564-4.97-24.277" fill="#fff" transform="matrix(.07192 0 0 .07192 6.674 6.768)"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="tabs__controls lg-chart-height">Tableaux d'altitude</div>
+                <div class="tabs__controls lg-chart-speed">Tableaux de vitesse</div>
+            </div>
+        </div>
+        <div class="tabs__content">
+            <div class="tabs__section">
+                <div class="charts-wrapper">
+                    <div id="charts">
+                        <canvas id="chartHeightCanvas" class="chart-canvas"></canvas><hr>
+                        <canvas id="chartThrustCanvas" class="chart-canvas"></canvas><hr>
+                        <canvas id="chartGravityCanvas" class="chart-canvas"></canvas><hr>
+                        <canvas id="chartMassCanvas" class="chart-canvas"></canvas><hr>
+                        <canvas id="chartSpeedCanvas" class="chart-canvas"></canvas><hr>
+                        <canvas id="chartAccelerationCanvas" class="chart-canvas"></canvas><hr>
+                        <canvas id="chartDragCanvasLinear" class="chart-canvas"></canvas><hr>
+                        <canvas id="chartDragCanvasLog" class="chart-canvas"></canvas><hr>
+                    </div>
+                    <ul id="contextMenu" class="context-menu" style="display:none;">
+                        <li class="menu-item lg-print-pdf" data-action="print-pdf">Print as Pdf</li>
+                        <li class="menu-item lg-copy-to-clipboard" data-action="copy-to-clipboard">Copy to ClipBoard</li>
+                        <li class="menu-item lg-save-as-pdf" data-action="save-as-pdf">Save as Pdf</li>
+                        <li class="menu-item lg-save-as-png" data-action="save-as-png">Save as Png</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="tabs__section">
+                <div id="altitude-table" class="grid-section">
+                    <button id="altitudeButton" style="display:none;" onclick="showGrid('error-grid-altitude', 'Altitude', 'h', ' (m)')">Show Error Grid for Altitude</button>
+                    <button id="altitudeButtonPrint" onclick="printGrid('error-grid-altitude')" class="lg-print-grid">Print Grid</button>
+                    <button id="altitudeButtonDownloadPdf" onclick="downloadPdfGrid('error-grid-altitude')" class="lg-download-pdf">Download Pdf Grid</button>
+                    <button id="altitudeButtonDownloadXlsx" onclick="downloadXlsxGrid('error-grid-altitude')" class="lg-download-xlsx">Download Excel Grid</button>
+                    <button id="altitudeButtonDownloadCsv" onclick="downloadCsvGrid('error-grid-altitude')" class="lg-download-csv">Download Csv Grid</button>
+                    <button id="altitudeButtonDownloadJson" onclick="downloadJsonGrid('error-grid-altitude')" class="lg-download-json">Download Json Grid</button>
+                    <div id="error-grid-altitude"></div>x
+                </div>
+            </div>
+            <div class="tabs__section">
+                <div id="speed-table" class="grid-section">
+                    <button id="speedButton" style="display:none;" onclick="showGrid('error-grid-speed', 'Speed', 'v', ' (m/s)')">Show Error Grid for Speed</button>
+                    <button id="speedButtonPrint" onclick="printGrid('error-grid-speed')" class="lg-print-grid">Print Grid</button>
+                    <button id="speedButtonDownloadPdf" onclick="downloadPdfGrid('error-grid-speed')" class="lg-download-pdf">Download Pdf Grid</button>
+                    <button id="speedButtonDownloadXlsx" onclick="downloadXlsxGrid('error-grid-speed')" class="lg-download-xlsx">Download Excel Grid</button>
+                    <button id="speedButtonDownloadCsv" onclick="downloadCsvGrid('error-grid-speed')" class="lg-download-csv">Download Csv Grid</button>
+                    <button id="speedButtonDownloadJson" onclick="downloadJsonGrid('error-grid-speed')" class="lg-download-json">Download Json Grid</button>
+                    <div id="error-grid-speed"></div>x
+                </div>
+            </div>
+        </div>
+    </div>
+</div>    
+
+
+
+
+
+
+
+
+
+<script>
+    const allIntegrationMethods = [{name:'Euler', color:'red'}, {name:'Heun', color:'blue'}, {name:'RK4', color:'green'}];
+    let integrationMethods = [...allIntegrationMethods];
+    let integrationMethod;
+    let rocket;
+
+    // Don't remove this next line. This is used by the server to loadFromDb the scripts.
+    
+
+
+ const formatNumbers = function(value) {
+    //return new Intl.NumberFormat("de-DE", { minimumSignificantDigits: 2, maximumSignificantDigits: 2, minimumFractionDigits : 2, maximumFractionDigits:2 }).format(value)
+    return new Intl.NumberFormat("de-DE", { minimumFractionDigits : 2, maximumFractionDigits:2 }).format(value)
+}
+window['formatNumbers'] = formatNumbers;
+/**
+ *
+ * @returns {{totalMem: number, totalJs: number, availableMem: number, availablePercent: string}}
+ */
+ const getMemoryUsage = function() {
+    /**
+     *
+     * @property {Object} window.performance.memory
+     * @property {number} window.performance.memory.jsHeapSizeLimit
+     * @property {number} window.performance.memory.totalJSHeapSize
+     * @property {number} window.performance.memory.usedJSHeapSize
+     */
+    let memoryInfo = window.performance.memory;
+    let totalMem = memoryInfo.jsHeapSizeLimit;
+    let totalJs = memoryInfo.totalJSHeapSize;
+
+    let availableMem = totalMem-totalJs;
+    let availablePercent = ((availableMem/totalMem)*100).toFixed(2);
+
+    return {
+        totalMem,
+        totalJs,
+        availableMem,
+        availablePercent,
+    }
+}
+
+window['getMemoryUsage'] = getMemoryUsage;
+
+ const logMemoryUsage = function() {
+    let {totalMem, totalJs, availableMem, availablePercent} = window.getMemoryUsage();
+
+    console.log('Using '+formatNumbers(totalJs)+' out of '+formatNumbers(totalMem)+' . Still '+formatNumbers(availableMem)+' available ('+availablePercent+'%)');
+}
+window['logMemoryUsage'] = logMemoryUsage;
+
+console.log('Show Memory usage by calling showMemoryUsage() in browser console.');
+logMemoryUsage();
+
+
+
+/**
+ * Language Settings
+ */
+
+let languages = {};
+languages['lg-choose-language'] = {french: "Langage" , english: "Language"};
+languages['lg-document-title'] = {french: "Simulation Modèle Masse Variable et Traînée" , english: "Rocket Model Simulation with Variable Mass & Drag"};
+languages['lg-time'] = {french: "Temps" , english: "Time"};
+languages['lg-speed'] = {french: "Vitesse" , english: "Speed"};
+languages['lg-gravity'] = {french: "Gravité" , english: "Gravity"};
+languages['lg-height'] = {french: "Altitude" , english: "Height"};
+languages['lg-total-mass'] = {french: "Masse Totale" , english: "Total Mass"};
+languages['lg-rocket-mass'] = {french: "Masse à Vide de la fusée (kg)" , english: "Empty Rocket Mass (kg)"};
+languages['lg-fuel-mass'] = {french: "Masse de Carburant (kg)" , english: "Fuel Mass (kg)"};
+languages['lg-fuel-consumption'] = {french: "Consommation de carburant (kg/s)" , english: "Fuel Consumption (kg/s)"};
+languages['lg-rocket-front-section'] = {french: "Section frontale de la fusée (m²)" , english: "Rocket Front surface (m²)"};
+languages['lg-rocket-thrust'] = {french: "Poussée Moteur (N)" , english: "Engine Thrust (N)"};
+languages['lg-time-step'] = {french: "Pas d'échantillonnage (s)" , english: "Time Step (s)"};
+languages['lg-time-step-simple'] = {french: "Pas (s)" , english: "Step (s)"};
+languages['lg-lowest-printable-speed'] = {french: "Vitesse minimale affichée (m/s)" , english: "Minimal printed Speed (m/s)"};
+languages['lg-lowest-printable-acceleration'] = {french: "Accélération minimale affichée (m/s²)" , english: "Minimal printed Acceleration (m/s²)"};
+languages['lg-maximum-printable-time'] = {french: "Durée maximale affichée (s)" , english: "Maximum printed Duration (s)"};
+languages['lg-scale'] = {french: "Échelle" , english: "Scale"};
+languages['lg-zoom-in'] = {french: "Zoomer" , english: "Zoom In"};
+languages['lg-zoom-out'] = {french: "DéZoomer" , english: "Zoom Out"};
+languages['lg-run-methods'] = {french: "Lancer les 3 méthodes" , english: "Run the 3 methods"};
+languages['lg-choose-rocket'] = {french: "Choix du modèle de fusée" , english: "Choose a rocket model"};
+languages['lg-graphs'] = {french: "Graphiques" , english: "Graphs"};
+languages['lg-chart-height'] = {french: "Tableaux d'altitude" , english: "Height Grid"};
+languages['lg-chart-speed'] = {french: "Tableaux de vitesse" , english: "Speed Grid"};
+languages['lg-print-grid'] = {french: "Imprimer la grille" , english: "Print Grid"};
+languages['lg-download-pdf'] = {french: "Télécharger la grille au format pdf" , english: "Download Pdf file"};
+languages['lg-download-xlsx'] = {french: "Télécharger la grille au format excel" , english: "Download Excel file"};
+languages['lg-download-csv'] = {french: "Télécharger la grille au format csv" , english: "Download Csv file"};
+languages['lg-download-json'] = {french: "Télécharger la grille au format json" , english: "Download Json file"};
+languages['lg-index'] = {french: "Index" , english: "Index"};
+languages['lg-time'] = {french: "Temps (s)" , english: "Time (s)"};
+languages['lg-acceleration'] = {french: "Acceleration (m/s²)" , english: "Acceleration (m/s²)"};
+languages['lg-drag'] = {french: "Traînée (N)" , english: "Drag (N)"};
+languages['lg-mass'] = {french: "Masse (kg)" , english: "Mass (kg)"};
+languages['lg-euler'] = {french: "Euler" , english: "Euler"};
+languages['lg-heun'] = {french: "Heun" , english: "Heun"};
+languages['lg-rk4'] = {french: "Runge-Kutta 4" , english: "Runge-Kutta 4"};
+languages['lg-errorEulerRK4'] = {french: "Erreur Euler/RK4" , english: "Error Euler/RK4"};
+languages['lg-errorHeunRK4'] = {french: "Erreur Heun/RK4" , english: "Error Heun/RK4"};
+languages['lg-chart-title-altitude'] = {french: "Altitude / Temps" , english: "Height / Time"};
+languages['lg-chart-title-thrust'] = {french: "Propulsion / Temps" , english: "Thrust / Time"};
+languages['lg-chart-title-gravity'] = {french: "Gravité / Temps" , english: "Gravity / Time"};
+languages['lg-chart-title-speed'] = {french: "Vitesse / Temps" , english: "Speed / Time"};
+languages['lg-chart-title-acceleration'] = {french: "Acceleration / Temps" , english: "Acceleration / Time"};
+languages['lg-chart-title-drag-linear'] = {french: "Traînée (linéaire) / Temps" , english: "Drag (linear) / Time"};
+languages['lg-chart-title-drag-log'] = {french: "Traînée (logarithmique) / Temps" , english: "Drag (logarithmic)/ Time"};
+languages['lg-chart-title-mass'] = {french: "Masse du module / Temps" , english: "Module Mass / Time"};
+languages['lg-error-copy-clipboard'] = {french: "Erreur pendant la copie vers le presse-papier" , english: "Error while copying image to Clipboard"};
+languages['lg-error-copy-clipboard-not-supported'] = {french: "Le copie d'image png vers le press-papier n'est pas supportée par votre navigateur" , english: "Copying png image to Clipboard is not supported by your browser"};
+languages['lg-print-pdf'] = {french: "Imprimer le Pdf" , english: "Print as Pdf"};
+languages['lg-copy-to-clipboard'] = {french: "Copier vers le presse-papier" , english: "Copy to ClipBoard"};
+languages['lg-save-as-pdf'] = {french: "Télécharger le Pdf" , english: "Save as Pdf"};
+languages['lg-save-as-png'] = {french: "Télécharger l'image Png" , english: "Save as Png"};
+languages['lg-auto-scale'] = {french: "Échelle Auto" , english: "Auto Scale"};
+
+languages['lg-params-h'] = {french: "Altitude" , english: "Altitude"};
+languages['lg-params-v'] = {french: "Vitesse" , english: "Speed"};
+
+languages['lg-alert-no-grid-available'] = {french: "La grille n'existe pas encore." , english: "Grid doesnt exist yet."};
+languages['lg-no-print-local'] = {french: "Il n'est pas possible d'imprimer car vous utilisez la version locale du simulateur, et la quantité de données est trop grande." , english: "Printing not enabled because you are using the local version of the Rocket Simulator and your dataset is too large."};
+languages['lg-no-print-remote'] = {french: "Il n'est pas possible d'imprimer car vous  la quantité de données est trop grande. Vous pouvez tout de même télécharger un Pdf ou un fichier Excel" , english: "Printing not enabled because your dataset is too large. You can still download the data as a PDF or XLSX file."};
+languages['lg-no-full-dataset'] = {french: "Il n'est pas possible d'afficher toutes les données: la quantité trop grande. Nous divisons le pas par 10." , english: "Not Showing all data. Restricting step to 0.1. You won't be able to Print the grid."};
+
+
+
+
+
+window.RocketLanguages = languages;
+
+// TODO : use Languages.get everywhere, and set currentLanguage via setLanguage()
+
+ class Languages {
+    static currentLanguage = 'french';
+
+    static setLanguage(language) {
+        self.currentLanguage = language;
+    }
+    static get(key) {
+        console.log('GET Language', key, Languages.currentLanguage)
+        console.log(RocketLanguages);
+        if (typeof RocketLanguages[key] === 'undefined') {
+            if (typeof RocketLanguages['lg-'+key] === 'undefined') {
+                return key;
+            } else {
+                return RocketLanguages['lg-'+key][Languages.currentLanguage];
+            }
+        }
+        return RocketLanguages[key][Languages.currentLanguage];
+    }
+}
+
+
+window.Languages = Languages;
+
+
+
+/**
+ *  Interactive methods
+ */
+
+
+window.updateValue = function(id) {
+    rocket.getParameters().updateFromScreenId(id);
+}
+
+window.initAutoScale = function() {
+    let autoScaleValue = rocket.getAutoScale();
+    let autoScaleElement = document.getElementById('autoscale');
+    let isChecked = autoScaleElement.getAttribute('checked') === 'checked';
+    if (isChecked !== autoScaleValue) {
+        autoScaleElement.click();
+    }
+}
+
+window.autoScale = function(id, scaleWrapperId) {
+    let element = document.getElementById(id);
+    let scaleWrapper = document.getElementById(scaleWrapperId);
+    if (element.getAttribute('checked') === 'checked' ) {
+        scaleWrapper.classList.remove('hidden');
+        element.setAttribute('checked', '')
+        rocket.setAutoScale(false);
+    } else {
+        scaleWrapper.classList.add('hidden');
+        element.setAttribute('checked', 'checked')
+        rocket.setAutoScale(true);
+    }
+
+}
+
+window.zoomIn = function() {
+    rocket.zoomIn();
+}
+
+window.zoomOut = function() {
+    rocket.zoomOut();
+}
+
+window.reloadCharts = function() {
+    rocket.drawCharts()
+}
+
+window.showGrid = function(gridId, gridTitle, paramName, titleAddOn='') {
+    let stepElement = document.getElementById('step');
+    let stepValue = stepElement.value;
+    rocket.showGrid(gridId, gridTitle, paramName, stepValue, titleAddOn);
+}
+
+window.printGrid = function(gridId) {
+    rocket.printGrid(gridId);
+}
+
+window.downloadPdfGrid = function(gridId) {
+    rocket.downloadGrid(gridId, 'pdf');
+}
+
+window.downloadXlsxGrid = function(gridId) {
+    rocket.downloadGrid(gridId, 'xlsx');
+}
+
+window.downloadCsvGrid = function(gridId) {
+    rocket.downloadGrid(gridId, 'csv');
+}
+
+window.downloadJsonGrid = function(gridId) {
+    rocket.downloadGrid(gridId, 'json');
+}
+
+window.runAll = async function() {
+    //await rocket.runMethods([{name:'Euler', color:'red'}, {name:'Heun', color:'blue'}, {name:'RK4', color:'green'}])
+    disableControls(true);
+    await rocket.runMethods(()=>window.disableControls(false))
+
+
+}
+
+window.disableControls = function(off = true) {
+    let controlIds = ['language-select', 'rocketMass', 'fuel', 'fuelConsumption', 'frontSection', 'thrust', 'step', 'rocket-select', 'run-buttons']
+    controlIds.forEach(id => {
+        document.getElementById(id).disabled = off;
+    })
+}
+
+window.updateLanguage = function(newLanguage, updateRocketLanguage = true) {
+    for(const [key, value] of Object.entries(window.RocketLanguages)) {
+        let elements = document.querySelectorAll('.'+key);
+        for(let i=0;i<elements.length;i++) {
+            if ((typeof elements[i] !== 'undefined')&&(null !== elements[i])) {
+                elements[i].innerText = value[newLanguage];
+            }
+        }
+    }
+    updateRocketLanguage && rocket.updateLanguage(newLanguage);
+}
+
+let rocketSelect = document.getElementById('rocket-select');
+rocketSelect.addEventListener("change", (event)=>{
+    rocket.useModel(event.target.value);
+    updateValue('rocket-select')
+});
+
+let languageSelect = document.getElementById('language-select');
+languageSelect.addEventListener("change", (event)=>{
+    updateLanguage(event.target.value);
+});
+document.addEventListener("init-languages", (event)=>{
+    updateLanguage(languageSelect.value, false);
+});
+addEventListener("resize", (event) => {
+    rocket&&rocket.onResize(window.innerWidth, window.innerHeight)
+});
+
+
+/**
+ *  End Interactive methods
+ */
+
+
+
+
+/**
+ * color picker
+ */
+async function _initColorPicker() {
+    let colorPickerId = document.querySelector('.charts-color-picker');
+    let chartsColorPicker = new JSColor(colorPickerId, {
+        onChange: () => {
+            rocket.updateChartBackgroundColor(chartsColorPicker.toRGBAString())
+        },
+
+    });
+    let color = await rocket.getParameters().getChartBackgroundColor();
+    chartsColorPicker.fromString(color);
+
+}
+
+window.initColorPicker = async function() {
+    await _initColorPicker();
+}
+
+
+ class Base {
+
+    /**
+     * Enable logging.
+     * @type {boolean}
+     */
+    debugLog = true;
+
+
+    /**
+     * Enable warnings.
+     * @type {boolean}
+     */
+    debugWarn = true;
+
+    /**
+     *
+     * @param args
+     * @returns {Base}
+     */
+    log(...args) {
+        if (this.debugLog !== true) {
+            return this;
+        }
+        console.log.apply(console, [...args]);
+
+        return this;
+    }
+
+    /**
+     *
+     * @param args
+     * @returns {Base}
+     */
+    warn(...args) {
+        if (this.debugWarn !== true) {
+            return this;
+        }
+        console.warn.apply(console, [...args]);
+
+        return this;
+    }
+
+}
+
+window.Base = Base;
+
+
+
+ class ParameteredBase extends Base {
+
+    /**
+     *
+     * @returns {*}
+     */
+    getParameters() {
+        return this[this._internalParameterName];
+    }
+
+}
+
+window.ParameteredBase = ParameteredBase;
+
+
+
+/**
+ * @class
+ */
+ class RocketBase extends ParameteredBase {
+    commonParameters;
+
+    /**
+     * @var RocketParameters parameters
+     */
+    constructor(parameters = null) {
+        super()
+        this.commonParameters = parameters;
+        this._internalParameterName = 'commonParameters';
+    }
+
+    isLocalFileLocation() {
+        return window.location.href.indexOf('file:') === 0;
+    }
+
+    showToastMessage(message) {
+        Toastify({
+
+            text: message,
+
+            duration: 3000
+
+        }).showToast();
+    }
+}
+
+window.RocketBase = RocketBase;
+
+
+
+
+ class RocketParameters extends Base {
+
+    /**
+     * Enable logging.
+     * @type {boolean}
+     */
+    debugLog = false;
+
+
+    _variables = {};
+    _ids = {};
+    _attachedObjects = [];
+    _attachedVariables = {};
+    _loadCount = 0;
+
+    /**
+     *
+     * @returns {boolean}
+     */
+    isLoaded() {
+        this._loadCount++;
+        let isLoaded = true;
+        for(const[key, value] of Object.entries(this._variables)) {
+            isLoaded &&= value.initialized;
+            if (!value.initialized && (this._loadCount>10)) {
+                console.log('Not initialized', key)
+            }
+        }
+        return isLoaded;
+    }
+
+    /**
+     *
+     * @param word
+     * @returns {string}
+     */
+    ucFirst(word) {
+        return word.charAt(0).toUpperCase() + word.slice(1);
+    }
+
+    /**
+     *
+     * @param cname
+     * @param cvalue
+     * @param exdays
+     * @returns {Promise<void>}
+     */
+    async storeValue(cname, cvalue) {
+        await localforage.setItem(cname, cvalue);
+    }
+
+    /**
+     *
+     * @param cname
+     * @returns {Promise<undefined|*>}
+     */
+    async getStoredValue(cname) {
+        const result = await localforage.getItem(cname);
+        if (null === result) {
+            console.log('Returning undefined')
+            return undefined;
+        }
+        return result;
+    }
+
+    /**
+     *
+     * @param value
+     * @returns {number|string|boolean}
+     */
+    toRawType(value) {
+        if (typeof value === 'string') {
+            let val = parseFloat(value);
+            if (!isNaN(val)) {
+                return val;
+            }
+            if (value === 'true') {
+                return true;
+            }
+            if (value === 'false') {
+                return false;
+            }
+        }
+
+        return value;
+    }
+
+    /**
+     *
+     * @param object
+     * @param initObject
+     * @returns {this}
+     */
+    attachTo(object, initObject = false) {
+        this._attachedObjects.push(object);
+        initObject && this.initAttachedObject(object);
+        return this;
+    }
+
+    /**
+     *
+     * @param {string} variableName
+     * @param {string} getter
+     * @param {string} setter
+     */
+    addVariableGetterSetter(variableName, getter, setter = null) {
+        let getterSetter = {getter};
+        if (typeof setter !== null) {
+            //console.log('Setting setter for ', variableName, setter)
+            getterSetter.setter = setter;
+        }
+
+        if (typeof this._attachedVariables[variableName] == 'undefined') {
+            //console.log('Adding getterSetter for ', variableName, getterSetter)
+            this._attachedVariables[variableName] = getterSetter;
+        }
+    }
+
+    /**
+     *
+     * @param object
+     * @param {string} variableName
+     * @param {string} getter
+     * @param {string} setter
+     */
+    addObjectGetterSetter(object, variableName, getter, setter = null) {
+        object[variableName] = (value = undefined) => {
+            if (typeof value === 'undefined') {
+                // Getter mode
+                //console.log('object', object, object._internalParameterName, getter)
+                return object[object._internalParameterName][getter](value);
+            } else {
+                // Setter mode
+                //console.log('object', object, object._internalParameterName, setter, value)
+                if (null !== setter) {
+                    return object[object._internalParameterName][setter](value);
+                }
+                throw new Error(`Trying to set value for ${variableName} on ${typeof object} but no setter is defined as it is certainly a Shared Variable. Please check your code.`)
+            }
+        }
+    }
+
+    /**
+     *
+     * @param {string} variableName
+     * @param {string} prefix
+     * @param {string} getter
+     * @param {string} setter
+     */
+    attachGetterSetter(variableName, prefix = '', getter, setter = null) {
+        this.addVariableGetterSetter(variableName, getter, setter);
+        this._attachedObjects.forEach((object)=>{
+            this.addObjectGetterSetter(object, variableName, getter, setter);
+        });
+    }
+
+    /**
+     *
+     * @param {object} object
+     * @returns {this}
+     */
+    initAttachedObject(object) {
+        for(const[variableName, getterSetter] of Object.entries(this._attachedVariables)) {
+            this.addObjectGetterSetter(object, variableName, getterSetter.getter, getterSetter.setter);
+        }
+
+        return this;
+    }
+
+    /**
+     *
+     * @returns {this}
+     */
+    initAttachedObjects() {
+        this._attachedObjects.forEach((object)=>{
+            this.initAttachedObject(object);
+        });
+
+        return this;
+    }
+
+    /**
+     *
+     * @param variableName
+     * @param id
+     */
+    createVariable(variableName, id=false) {
+        this._variables[variableName] = {};
+        this._variables[variableName].initialized = false;
+        if (false !== id) {
+            this._variables[variableName].id = id;
+        }
+    }
+
+    /**
+     *
+     * @param variableName
+     * @returns {this}
+     */
+    setInitialized(variableName) {
+        this._variables[variableName].initialized = true;
+
+        return this;
+    }
+
+    /**
+     *
+     * @param {string} variableName
+     * @param {string} prefix
+     * @returns {{getter: string, setter: string, _getter: string}}
+     */
+    getGetterSetter(variableName, prefix = '') {
+        let ucFirst = this.ucFirst(variableName);
+        let getter = 'get'+prefix+ucFirst;
+        let setter = 'set'+prefix+ucFirst;
+        let _getter = '_get'+prefix+ucFirst;
+
+        return {getter, setter, _getter};
+    }
+
+    /**
+     *
+     * @param variableName
+     * @param value
+     * @returns {this}
+     */
+    addConstant(variableName, value = undefined) {
+        let prefix = '';
+        let {getter, setter} = this.getGetterSetter(variableName, prefix);
+        this.createVariable(variableName);
+
+        this[setter] = (value) => {
+            this._variables[variableName].value = value;
+        };
+
+        this[getter] = () => {
+            return this.toRawType(this._variables[variableName].value);
+        };
+
+        this.attachGetterSetter(variableName, prefix, getter, setter);
+
+        this[setter](value);
+        this.setInitialized(variableName);
+
+        return this;
+    }
+
+    /**
+     *
+     * @param variableName
+     * @param value
+     * @param onChange
+     * @returns {this}
+     */
+    addVariable(variableName, value = undefined, onChange = null) {
+        let prefix = '';
+        let {getter, setter} = this.getGetterSetter(variableName, prefix);
+        this.createVariable(variableName);
+
+        this[setter] = (value) => {
+            //console.log('Setter for ', this)
+            this._variables[variableName].value = value;
+            if (typeof onChange === 'function') {
+                onChange();
+            }
+        };
+
+        this[getter] = () => {
+            //console.log('Getter for ',getter,  this)
+            return this.toRawType(this._variables[variableName].value);
+        };
+
+        this.attachGetterSetter(variableName, prefix, getter, setter);
+
+        this[setter](value);
+        this.setInitialized(variableName);
+
+        return this;
+    }
+
+    /**
+     *
+     * @param variableName
+     * @param {object} owner
+     * @param {Function} func
+     * @returns {this}
+     */
+    addFuncVariable(owner, variableName, func) {
+        this.log('addFuncVariable', owner, variableName, func)
+        if (typeof func !== 'function') {
+            throw new Error(`Error while adding Func Variable "${variableName}". "func" argument must be a function. Got ${typeof func} instead.`);
+        }
+
+        let prefix = '';
+        let {getter, setter} = this.getGetterSetter(variableName, prefix);
+        this.createVariable(variableName);
+
+        this[setter] = () => {
+        };
+
+        this[getter] = () => {
+            //console.log('Getter for ',getter,  owner, owner.t())
+            return this.toRawType(func.apply(owner));
+        };
+
+        this.attachGetterSetter(variableName, prefix, getter, setter);
+
+        this.setInitialized(variableName);
+
+        return this;
+    }
+
+    /**
+     *
+     * @param variableName
+     * @param {Function} sharedFunction
+     * @param value
+     * @param onChange
+     * @returns {this}
+     */
+    addSharedVariable(variableName, sharedFunction, value = undefined, onChange = null) {
+        if (typeof sharedFunction !== 'function') {
+            throw new Error(`Error while adding Shared Variable "${variableName}". "sharedFunction" argument must be a function. Got ${typeof owner} instead.`);
+        }
+
+        let prefix = 'SharedVariable';
+        let {getter, _getter, setter} = this.getGetterSetter(variableName, prefix);
+        this.createVariable(variableName);
+
+        this[setter] = (value) => {
+            //console.log('Setter for ', this)
+            this._variables[variableName].value = value;
+            if (typeof onChange === 'function') {
+                onChange();
+            }
+        };
+
+        this[getter] = () => {
+            //console.log('Getter for ',getter,  this)
+            return this.toRawType(sharedFunction());
+        };
+
+        /**
+         * allows to get the own value. This can be used by the getter function.
+         * @returns {number|string|boolean}
+         */
+        this[_getter] = () => {
+            //console.log('Getter for ',_getter,  this)
+            return this.toRawType(this._variables[variableName].value);
+        };
+
+        this.attachGetterSetter(variableName, prefix, getter, setter);
+        // Add an extra variable preceded by underscore that accesses the own value.
+        this.attachGetterSetter('_'+variableName, prefix, _getter);
+
+        this[setter](value);
+        this.setInitialized(variableName);
+
+        return this;
+    }
+
+    /**
+     *
+     * @param variableName
+     * @param id
+     * @param value
+     * @returns {this}
+     */
+    addScreenVariable(variableName, id = null, value = undefined) {
+        id = (null === id) ? variableName : id;
+        let prefix = '';
+        let {getter, setter} = this.getGetterSetter(variableName, prefix);;
+        this.createVariable(variableName, id);
+
+        this[setter] = (value) => {
+            this._variables[variableName].value = value;
+            let id = this._variables[variableName].id;
+            document.getElementById(id).setAttribute('value', value);
+        };
+
+        this[getter] = () => {
+            let id = this._variables[variableName].id;
+            return this.toRawType(this._variables[variableName].value??document.getElementById(id).value);
+        };
+
+        this.attachGetterSetter(variableName, prefix, getter, setter);
+
+        this[setter](value);
+        this.setInitialized(variableName);
+
+        return this;
+    }
+
+    /**
+     *
+     * @param variableName
+     * @param defaultValue
+     * @param afterInitialization
+     * @param onUpdate
+     * @returns {Promise<RocketParameters>}
+     */
+    async addStoredVariable(variableName, defaultValue, afterInitialization, onUpdate) {
+        // _getter is only used when variable is loaded at init. Once loaded, variable is updated without async
+        let prefix = '';
+        let {getter, _getter, setter} = this.getGetterSetter(variableName, prefix);
+
+        this.createVariable(variableName);
+
+        this[setter] = async (value) => {
+            this._variables[variableName].value = value;
+            onUpdate&&onUpdate();
+            await this.storeValue(variableName, value);
+        };
+        this[getter] = () => {
+            let value = this._variables[variableName].value;
+            return this.toRawType(value);
+        };
+        this[_getter] = async() => {
+            let value = this._variables[variableName].value;
+            if (typeof value !== 'undefined') {
+                return this.toRawType(value);
+            }
+
+            value = await  this.getStoredValue(variableName);
+            if (typeof value !== 'undefined') {
+                return this.toRawType(value);
+            }
+
+            value = this.toRawType(defaultValue)
+
+            return value;
+        };
+
+        this.attachGetterSetter(variableName, prefix, getter, setter);
+
+        const initialValue = await this[_getter](false);
+        await this[setter](initialValue);
+        this.setInitialized(variableName);
+        afterInitialization&&afterInitialization();
+
+        return this;
+    }
+
+    /**
+     *
+     * @param variableName
+     * @param id
+     * @param onChange
+     * @returns {this}
+     */
+    async addStoredScreenVariable(variableName, id = null, onChange = null) {
+        id = (null === id) ? variableName : id;
+
+        // _getter is only used when variable is loaded at init. Once loaded, variable is updated without async
+        let prefix = '';
+        let {getter, _getter, setter} = this.getGetterSetter(variableName, prefix);
+
+        this._ids[id] = {
+            variable : variableName,
+            getter,
+            setter
+        };
+        this.createVariable(variableName, id);
+
+        this[setter] = async (value) => {
+            this._variables[variableName].value = value;
+            let id = this._variables[variableName].id;
+            let element = document.getElementById(id);
+            if (element.tagName === 'INPUT') {
+                element.setAttribute('value', value);
+            } else {
+                if (element.tagName === 'SELECT') {
+                    let options = element.querySelectorAll('option');
+                    for(let i=0;i<options.length;i++) {
+                        if (options[i].value === value) {
+                            options[i].setAttribute('selected', 'selected');
+                        }
+                    }
+                } else {
+                    throw new Error('Non handled HTML Element for setting value', value);
+                }
+
+            }
+            await this.storeValue(id, value);
+            if (typeof onChange === 'function') {
+                onChange();
+            }
+        };
+        this[getter] = () => {
+            let value = this._variables[variableName].value;
+            return this.toRawType(value);
+        };
+        this[_getter] = async() => {
+            let id = this._variables[variableName].id;
+            //console.log('Getting Value for '+id);
+            let value = this._variables[variableName].value;
+            //console.log('Value for '+id, value)
+            if (typeof value !== 'undefined') {
+                return this.toRawType(value);
+            }
+
+            value = await  this.getStoredValue(id);
+            //console.log('Stored Value for '+id, value)
+            if (typeof value !== 'undefined') {
+                return this.toRawType(value);
+            }
+
+            //console.log('Getting value for ', id)
+            value = this.toRawType(document.getElementById(id).value)
+
+            //console.log('Value from html for '+id, value)
+
+            return value;
+        };
+
+        this.attachGetterSetter(variableName, prefix, getter, setter);
+
+        const initialValue = await this[_getter]();
+        await this[setter](initialValue);
+        this.setInitialized(variableName);
+
+        return this;
+    }
+
+    /**
+     *
+     * @param id
+     * @returns {this}
+     */
+    updateFromScreenId(id) {
+        let relatedVariable = this._ids[id] || null;
+        if (null === relatedVariable) {
+            throw new Error('Unknown variable associated to id "'+id+'"');
+        }
+
+        let updatedValue = this.toRawType(document.getElementById(id).value)
+        this[relatedVariable.setter](updatedValue);
+        return this;
+    }
+
+    /**
+     *
+     * @param variableName
+     * @returns {*}
+     */
+    getValue(variableName) {
+        return this._variables[variableName];
+    }
+}
+
+window.RocketParameters = RocketParameters;
+
+
+
+
+
+/**
+ * @class
+ * @extends {RocketBase}
+ */
+ class ParameteredRocket extends RocketBase {
+
+    /**
+     * Enable logging.
+     * @type {boolean}
+     */
+    debugLog = false;
+    
+    constructor(parameters = null, internalParameterName = 'commonParameters') {
+        super(parameters);
+        this._internalParameterName = internalParameterName;
+        this.log('Creating ', internalParameterName)
+        if (internalParameterName !== 'commonParameters') {
+            this[internalParameterName] = new RocketParameters()
+                // TODO : rollback to .attachTo(this, true); and test
+                                                .attachTo(this, true);
+                                                //.attachTo(this);
+        }
+    }
+
+    /**
+     *
+     * @param args
+     * @returns {this}
+     */
+    addVariable(...args) {
+        let onChange = (args.length>2) ? args.pop() : null;
+        if (null !== onChange) {
+            onChange = onChange.bind(this);
+            args.push(onChange);
+        }
+        this.getParameters().addVariable.apply(this.getParameters(), args);
+        return this;
+    }
+
+    /**
+     *
+     * @param args
+     * @returns {this}
+     */
+    addFuncVariable(...args) {
+        args.unshift(this);
+        this.getParameters().addFuncVariable.apply(this.getParameters(), args);
+        return this;
+    }
+}
+
+window.ParameteredRocket = ParameteredRocket;
+
+
+
+
+ class RocketPhysics extends Base {
+
+    /**
+     * Enable logging.
+     * @type {boolean}
+     */
+    debugLog = true;
+
+    /**
+     * Used calculation model. Can be 'standard' or 'realistic'
+     * 'standard' will use a simplified version for calculations
+     * 'realistic' will use real calculations based on height, speed, etc.
+     * @type {string}
+     */
+    model = 'standard';
+
+    defaultModel = 'standard';
+
+    /**
+     * Gravitational Constant
+     * @type {number}
+     */
+    gravitationalConstant= 6.67408e-11;
+
+    /**
+     * Earth Mass (Kg)
+     * @type {number}
+     */
+    earthMass = 5.972e24;
+    /**
+     * Earth Radius (m)
+     * @type {number}
+     */
+    earthRadius = 6.371e6;
+
+    /**
+     * @type {number}
+     */
+    GM = this.gravitationalConstant * this.earthMass;
+
+    /**
+     * simplified version of g, Gravitation (N/kg)
+     * @type {number}
+     */
+    simplifiedG = 9.81;
+
+    /**
+     * simplified version of rho (Air density) kg/m^3
+     * @type {number}
+     */
+    rho0 = 1.225;
+
+    constructor(model = 'standard') {
+        super();
+        this.changeModel(model);
+    }
+
+    /**
+     * Changes the current physics model to the specified model if it is supported.
+     * If the specified model is not supported, it defaults to the predefined model.
+     *
+     * @param {string} model The desired physics model to be applied. Accepted values are 'standard' and 'realistic'.
+     * @return {this} The current instance with the updated physics model.
+     */
+    changeModel(model) {
+        if (model !== 'standard' && model !== 'realistic') {
+            model = this.defaultModel;
+            this.log('New Physiscs model is not supported. Using default :')
+        }
+        this.model = model;
+
+        return this;
+    }
+
+    /**
+     * Calculates the gravitational value based on the selected model and the given height.
+     *
+     * @param {number} height The height above the Earth's surface in meters.
+     * @return {number} The gravitational value computed based on the model.
+     */
+    gValue(height) {
+        switch (this.model) {
+            case 'standard': return this.simplifiedG;
+            case 'realistic': return this.GM/((this.earthRadius + height) ** 2);
+        }
+    }
+
+    /**
+     *
+     * @param height
+     * @returns {number}
+     *
+     * TODO : explore more on Rho calculation : https://www.deleze.name/marcel/sec2/applmaths/pression-altitude/masse_volumique.pdf
+     */
+    rhoValue(height) {
+        switch (this.model) {
+            case 'standard': return this.rho0;
+            case 'realistic':
+                let H = 8500; // Scale Height (m)
+                return this.rho0 * Math.exp(-height / H);
+        }
+    }
+
+}
+
+window.RocketPhysics = RocketPhysics;
+
+
+
+
+
+
+ class RocketMotionBase extends ParameteredRocket {
+    static defaultAltitude = 0;
+    static defaultOffset = 0;
+    static defaultHeight = 40;
+    static defaultDiameter = 2;
+    static defaultPosition = 'central';
+
+    /**
+     *
+     * @type {boolean}
+     */
+    debugLog = false;
+
+    /**
+     *
+     * @type {string}
+     */
+    uuid = '';
+
+    /**
+     *
+     * @type {RocketMotionMethods}
+     */
+    methods = null;
+
+    /**
+     * @type {RocketModule}
+     */
+    module;
+
+    /**
+     *
+     * @type {boolean}
+     */
+    areSharedVariablesLoaded = false;
+
+    /**
+     * @type {RocketPhysics}
+     */
+    physics;
+
+    /**
+     *
+     * @param {RocketModule} module
+     * @param parameters
+     */
+    constructor(module, parameters = null) {
+        super(parameters, '_internals');
+
+        this.uuid = self.crypto.randomUUID();
+
+        this._shares = {};
+
+        this.initPhysics()
+            .setModule(module)
+            .addInternalVariables()
+            .initMethods()
+            .addInternalMethods();
+
+        //this.loadSharedVariables();
+    }
+
+    /**
+     *
+     * @returns {RocketMotionBase}
+     */
+    initPhysics() {
+        this.physics = new RocketPhysics('standard');
+
+        return this;
+    }
+
+    /**
+     *
+     * @returns {RocketMotionBase}
+     */
+    addInternalVariables() {
+        // Create variables not present in settings
+        /**
+         * @var {RocketParameters} self._internals
+         */
+        this._internals
+            .addVariable('v',0)           // Vitesse
+            .addVariable('h',0)           // Altitude
+            .addVariable('t',0)           // Temps
+            .addVariable('m',0)           // Masse Totale
+            .addVariable('specifications')
+            .addVariable('running')
+            .addVariable('representation')
+            .addVariable('enginePropellingStartTime', 0)
+            .addVariable('enginePropellingDuration', Infinity)
+            .addVariable('isLastElementOfModule', false)
+            .addVariable('moduleGetters', [])
+        ;
+
+        return this;
+    }
+
+    /**
+     *
+     * @returns {RocketMotionBase}
+     */
+    addInternalMethods() {
+        // Create Values Storing Method's values arrays
+
+        this.getMethods().forEach(method => {
+            /**
+             * @var {RocketMotionMethod} method
+             */
+            this._internals.addVariable(method.name(), []);
+        });
+
+        return this;
+    }
+
+    loadSharedVariables() {
+        if (this.areSharedVariablesLoaded === true) {
+            return;
+        }
+
+        this.areSharedVariablesLoaded = true;
+
+        this.doLoadSharedVariables();
+        return this;
+    }
+
+    doLoadSharedVariables() {
+        return this;
+    }
+    sharedFunction(func) {
+        return func.bind(this);
+    }
+
+    addSharedFunction(name, func) {
+        this._shares[name] = func.bind(this);
+    }
+
+    /**
+     *
+     * @returns {RocketMotionBase}
+     */
+    initMethods() {
+        return this;
+    }
+
+    /**
+     *
+     * @param {string} name
+     * @param {Function} sharedGetFunction
+     * @param {any} initialValue
+     * @returns {this}
+     */
+    addSharedVariable(name, sharedGetFunction, initialValue) {
+        this._internals.addSharedVariable(name, sharedGetFunction.bind(this), 0);
+
+        if (typeof initialValue === 'function') {
+            this[name](this[name]() + initialValue.apply(this));
+        } else {
+            this[name](this[name]() + initialValue);
+        }
+
+        return this;
+    }
+    addSharedVariable2(name, sharedGetFunction) {
+        this._internals.addSharedVariable(name, sharedGetFunction.bind(this));
+
+        return this;
+    }
+
+    all() {
+        return this.getModule().subModules.map(subModule => subModule.motion);
+    }
+
+    others() {
+        return this.getModule().subModules
+                    .filter(subModule =>subModule.motion.uuid !== this.uuid)
+                    .map(subModule => subModule.motion);
+    }
+
+    /**
+     *
+     * @returns {RocketMotionMethods}
+     */
+    getMethods() {
+        if (null === this.methods) {
+            throw new Error('Methods not defined for RocketMotion object');
+        }
+        return this.methods;
+    }
+
+    /**
+     * get stored array with name method
+     * @param method
+     * @returns {*}
+     */
+    data(method) {
+        //console.log('data', method, this)
+        if (!this.hasOwnProperty(method)) {
+            throw new Error('Method ' + method + ' not found');
+        }
+        return this[method]();
+    }
+
+    saveLastData(method, data) {
+        this.data(method).push(data);
+        this.lastData = data;
+        return this;
+    }
+
+    getLastData() {
+        return this.lastData;
+    }
+
+    isEnginePropelling() {
+        return (this.enginePropellingStartTime() <= this.t())
+            && (this.enginePropellingStartTime() + this.enginePropellingDuration() >= this.t())
+            && (this.mc()>0);
+    }
+
+    hasExposedFrontSection() {
+        let position = this.getDimensions().position;
+        let altitude = this.getDimensions().altitude;
+        return this.all().every(motion => {
+            let dimensions = motion.getDimensions();
+            return  (dimensions.position !== position) ? true : (dimensions.altitude <= altitude);
+        })
+    }
+
+
+    /**
+     *
+     * @returns {RocketModule}
+     */
+    getModule() {
+        //console.log(this)
+        return this.module;
+    }
+
+    /**
+     *
+     * @param {RocketModule} module
+     * @returns {this}
+     */
+    setModule(module) {
+        this.module = module;
+
+        return this;
+    }
+
+    /**
+     *
+     * @param {RocketModule} module
+     * @param {RocketMotionBase} motionClass
+     * @param parameters
+     * @returns {RocketMotionBase}
+     */
+    static getNewMotion(module, motionClass, parameters = null) {
+        return new motionClass(module, parameters);
+    }
+
+    /**
+     *
+     * @returns {this}
+     */
+    initSettings() {
+        this.log('initSettings for '+this.name(), this)
+        // this.v(0);
+        // this.h(0);
+        // this.t(0);
+        this.m(this.m0() + this.mc());
+        if (!(this.specifications() instanceof RocketModuleSpecifications)) {
+            this.specifications(new RocketModuleSpecifications(this.getDimensions()));
+        }
+        this.running(false);
+
+        this.loadSharedVariables();
+
+        return this;
+    }
+
+    /**
+     * @returns {this}
+     */
+    initialize() {
+        this.initSettings();
+
+        return this;
+    }
+
+
+
+
+
+
+    /**
+     *
+     * @returns {*|{altitude: number, offset: number, height: number, diameter: number, position: string}}
+     */
+    getDimensions() {
+        return this.hasOwnProperty('dimensions') && (typeof this.dimensions === 'function') ?
+                    this.dimensions()
+                :
+                    this.dimensions = {
+                                        altitude: RocketMotionBase.defaultAltitude,     // altitude du module quand la fusée est au sol
+                                        offset: RocketMotionBase.defaultOffset,         // offset par rapport au module central. Valide quand position = left, right, front ou rear
+                                        height: RocketMotionBase.defaultHeight,         // hauteur du module
+                                        diameter: RocketMotionBase.defaultDiameter,     // diamètre du module
+                                        position: RocketMotionBase.defaultPosition      // 5 choix possibles: central, left, right, front, rear
+                                    }
+    }
+
+    /**
+     * Here, you define in your motion class the variation of your variables (example, mass depending on time)
+     *
+     * @returns {RocketMotionBase}
+     */
+    updateVariants() {
+        return this;
+    }
+
+    /**
+     *
+     * @returns {boolean}
+     */
+    updateCalculations(isLastElementOfModule = false) {
+        this.isLastElementOfModule(isLastElementOfModule);
+        return this.processCalculations();
+    }
+
+    /**
+     * This method should be overridden by each new RocketMotionXxxx Class
+     * @returns {boolean}
+     */
+    processCalculations() {
+         return false;
+    }
+
+    calculateGravitationForce() {
+        return this.calculateGravity()*this.m();
+    }
+
+    calculateGravity() {
+        return this.physics.gValue(this.h());
+    }
+
+    calculateRho() {
+        return this.physics.rhoValue(this.h());
+    }
+
+}
+
+window.RocketMotionBase = RocketMotionBase;
+
+
+
+
+ class RocketModuleSpecifications {
+    dimensions;
+    constructor(dimensions) {
+        this.dimensions = dimensions;
+    }
+
+    testAndWarnUnknownValue(key, defaultValue) {
+        if (this.dimensions[key] === undefined) {
+            console.warn(`Unknown value for ${key} : ${this.dimensions[key]}. Using default value : ${defaultValue}`);
+            return defaultValue;
+        }
+
+        return this.dimensions[key];
+    }
+
+    getAltitude() {
+        return this.testAndWarnUnknownValue('altitude', RocketMotionBase.defaultAltitude);
+    }
+
+    getDiameter() {
+        return this.testAndWarnUnknownValue('diameter', RocketMotionBase.defaultDiameter);
+    }
+
+    /**
+     * Get front section of rocket. We assume this is half a sphere.
+     *
+     * TODO : update the way it works because here. This doesn't take account of a top level module front section.
+     * @returns {number}
+     */
+    getFrontSection() {
+        return this.getDiameter()*Math.PI;
+    }
+
+    getHeight() {
+        return this.testAndWarnUnknownValue('height', RocketMotionBase.defaultHeight);
+        return this.dimensions.height;
+    }
+
+    getOffset() {
+        return Math.abs(this.dimensions.offset??RocketMotionBase.defaultOffset);
+    }
+
+    /**
+     * TODO = implement solution for position front & rear
+     * @returns {number}
+     */
+    getPosition() {
+        switch (this.testAndWarnUnknownValue('position', RocketMotionBase.defaultHeight)) {
+            case 'central': return 0;
+            case 'left': return -this.getOffset()*2;
+            case 'right': return this.getOffset()*2;
+            default: return 0;
+        }
+    }
+}
+
+window.RocketModuleSpecifications = RocketModuleSpecifications;
+
+
+ class RocketMotionMethod {
+    /**
+     *
+     * @type {string}
+     * @private
+     */
+    _name = '';
+    /**
+     *
+     * @type {string}
+     * @private
+     */
+    _color = '';
+    /**
+     *
+     * @type {boolean}
+     * @private
+     */
+    _isMainSource = false;
+    /**
+     *
+     * @type {function}
+     * @private
+     */
+    _getter = null;
+
+    /**
+     *
+     * @param {string} name
+     * @param {string} color
+     * @param {boolean }isMainSource
+     * @param {function} getter
+     */
+    constructor(name, color, isMainSource, getter) {
+        this._name = name;
+        this._color = color;
+        this._isMainSource = isMainSource;
+        this._getter = getter;
+    }
+
+    name() {
+         return this._name;
+    }
+
+    color() {
+        return this._color;
+    }
+
+    isMainSource() {
+        return this._isMainSource;
+    }
+
+    getter() {
+        return this._getter;
+    }
+}
+
+window.RocketMotionMethod = RocketMotionMethod;
+
+
+
+
+ class RocketMotionMethods {
+    /**
+     *
+     * @type {RocketMotionBase}
+     * @private
+     */
+    _boundTo = null;
+    /**
+     *
+     * @type {RocketMotionMethod[]}
+     * @private
+     */
+    _methods = [];
+
+    /**
+     *
+     * @param {RocketMotionBase} binder
+     */
+    constructor(binder) {
+        this.binder = binder;
+    }
+
+    /**
+     *
+     * //@param {RocketMotionMethod|[{string}]} method
+     * @param {string} methodName
+     * @param {string} color
+     * @param {boolean} isMainSource
+     */
+    //add(method) {
+    add(methodName, color, isMainSource = false) {
+
+        let getter = ()=>{
+                            return this._boundTo[name].bind(this._boundTo);
+                        };
+
+        let method = new RocketMotionMethod(
+                                                                methodName,   // method name
+                                                                color,  // color
+                                                                isMainSource,
+                                                                getter  // getter assigned Variable in RocketMotionBase
+                                                            )
+        this._methods.push(method);
+
+        return this;
+    }
+
+    /**
+     *
+     * @returns {RocketMotionMethod[]}
+     */
+    methods() {
+        return this._methods;
+    }
+
+    methodObjects() {
+        return this._methods.map(method => {
+            return {
+                name: method.name(),
+                color: method.color(),
+                isMainSource: method.isMainSource(),
+            }
+        });
+    }
+
+    /**
+     *
+     * @param callback
+     */
+    forEach(callback) {
+        this._methods.forEach(method => callback(method));
+    }
+}
+
+window.RocketMotionMethods = RocketMotionMethods;
+
+
+
+ class RocketMotionSharedVariable extends Base {
+    /**
+     *
+     * @type {boolean}
+     */
+    debugLog = false;
+    
+    /**
+     * @type {Function|any}
+     */
+    localValue;
+
+    /**
+     * @type {Function}
+     */
+    localValueFunction;
+
+    /**
+     * @type {RocketMotionBase}
+     */
+    owner;
+
+    constructor(owner, name, value, sharedFunction) {
+        super();
+        this.owner = owner;
+        if (typeof value === 'function') {
+            this.localValueFunction = value.bind(owner);
+            this.localValue = this.localValueFunction()
+        } else {
+            this.localValueFunction = (val)=>val;
+            this.localValue = value;
+        }
+
+        this.log('Setting localValue of '+name+' to : ', this.localValue);
+        let ucFirst = function(word) {
+            return word.charAt(0).toUpperCase() + word.slice(1);
+        }
+
+        let localName = 'local' + ucFirst(name);
+        owner._shares = owner._shares || {};
+        owner._shares[name] = {
+            func : value.bind(owner),
+            sharedFunction: sharedFunction.bind(owner),
+        };
+        owner[name] = function(value) {
+            if (value !== undefined) {
+                return owner[localName](value);
+            } else {
+                return owner._shares[name].sharedFunction();
+            }
+        };
+        owner[localName] = function(value) {
+            if (value !== undefined) {
+                //this.log('Setting localValue of '+name+' to : ', value);
+                this.localValue = this.localValueFunction.apply(this.owner, [value]);
+                return owner;
+            } else {
+                //this.log(this.localValue)
+                this.localValue = this.localValueFunction.apply(this.owner);
+                return this.localValue;
+            }
+        }.bind(this);
+
+        owner[name].bind(owner);
+    }
+
+    static add(owner, name, value, sharedFunction) {
+        return new RocketMotionSharedVariable(owner, name, value, sharedFunction);
+    }
+}
+
+window.RocketMotionSharedVariable = RocketMotionSharedVariable;
+
+
+ class Constraints {
+    static alwaysPositive(value) {
+        return (value > 0) ? value : 0;
+    }
+}
+
+window.Constraints = Constraints;
+
+
+
+
+
+
+
+
+ class RocketMotionStageExtended extends RocketMotionBase {
+    debugLog = false;
+
+    initPhysics() {
+        super.initPhysics();
+        this.physics = new RocketPhysics('realistic');
+
+        return this;
+    }
+
+    /**
+     * Define your methods here. They will be used to configure arrays to store their values
+     * @returns {this}
+     */
+    initMethods() {
+        super.initMethods();
+
+        this.methods = new RocketMotionMethods(this)
+                            .add('Euler', 'red')
+                            .add('Heun', 'blue')
+                            .add('RK4', 'green', true);
+
+        return this;
+    }
+
+    // TODO : redo the explanation
+
+    /**
+     * Create new Shared Variables for the current module motion belongs to.
+     * For instance :
+     *      this.addSharedVariable('F', this.sharedF())
+     *
+     * Where sharedF() returns the shared function that will give Cumulated F for all submodules of the module
+     *      sharedF = () => this.sharedFunction(
+     *                         ()=>{
+     *                             return this.all().reduce((acc, motion)=> {
+     *                                 return acc + (motion.isEnginePropelling() ? motion._F() : 0)
+     *                             }, 0);
+     *                         });
+     *
+     * You can now call :
+     *      this.F() => will get the cumulated F for all submodules of the module
+     *      this._F() => will get the F for the current submodule
+     *      this.F(<some value>) will set the value for the current submodule
+     *
+     * There is no setter for all submodules of the module at the same time (each submodule has to set its own _F value
+     *
+     * @returns {RocketMotionStage2}
+     */
+    doLoadSharedVariables() {
+        super.doLoadSharedVariables();
+        RocketMotionSharedVariable.add(this, 'F', this.F, this.sharedF);                                    // Poussée moteur Totale du module
+        RocketMotionSharedVariable.add(this, 'A', this.A, this.sharedA);                                    // Surface Frontale Totale du module
+        RocketMotionSharedVariable.add(this, 'm0', this.m0, this.sharedM0);                                 // Masse Totale à vide du module
+        RocketMotionSharedVariable.add(this, 'mc', this.mc, this.sharedMc);                                 // Masse Totale de carburant
+        RocketMotionSharedVariable.add(this, 'm', ()=>this.localM0()+this.localMc(), this.sharedM);   // Masse Totale du module
+        RocketMotionSharedVariable.add(this, 'dm', this.dm, this.sharedDm);                                 // Masse Totale à vide du module
+
+        return this;
+    }
+
+    /**
+     * Calculates the total Thrust force for all submodules of the module this submodule belongs to
+     */
+    sharedF() {
+        return this.all().reduce((acc, motion)=> {
+            return acc + (motion.isEnginePropelling() ? motion.localF() : 0)
+        }, 0);
+    }
+
+    /**
+     * Calculates the total Front Section for all submodules of the module this submodule belongs to
+     */
+    sharedA() {
+        return this.all().reduce((acc, motion)=> {
+            return acc + (motion.hasExposedFrontSection() ? motion.localA() : 0)
+        }, 0);
+    }
+
+    /**
+     * Calculates the total Mass for all submodules of the module this submodule belongs to
+     */
+    sharedM() {
+        return this.all().reduce((acc, motion)=> {
+            return acc + motion.localM();
+        }, 0);
+    }
+
+    /**
+     * Calculates the total Mass for all submodules of the module this submodule belongs to when empty
+     */
+    sharedM0() {
+        return this.all().reduce((acc, motion)=> {
+            return acc + motion.localM0();
+        }, 0);
+    }
+
+    /**
+     * Calculates the total Mass for all submodules of the module this submodule belongs to when empty
+     */
+    sharedDm() {
+        return this.all().reduce((acc, motion)=> {
+            return acc + (motion.isEnginePropelling() ?  motion.localDm() : 0);
+        }, 0);
+    }
+
+    sharedMc() {
+        return this.all().reduce((acc, motion)=> {
+            return acc + motion.localMc();
+        }, 0);
+    }
+
+    /**
+     * Calculates the Drag Force
+     *  This is given by the following formula : Fdrag = 0.5 * rho * v^2 * Cd
+     *      Where :
+     *              rho is the air density depending on the altitude
+     *              v is the speed
+     *              Cd is the rocket drag coefficient. It depends on each Rocket
+     *
+     *
+     * @param {number} speed
+     * @returns {number}
+     */
+    calculateDrag(speed) {
+        this.log('Calculate drag for speed', speed, 'and A', this.A())
+        // TODO : shouldn't it depend on the speed sign ?
+        return 0.5 * this.Cd() * this.calculateRho() * this.A() * speed * speed * Math.sign(speed);
+    }
+
+    /**
+     *
+     * @param {number} speed
+     * @param {number} drag
+     * @returns {number}
+     */
+    calculateAcceleration(speed, drag) {
+        return (this.F() - this.calculateGravitationForce() - drag) / this.m();
+    }
+
+    shareData(methodName, acceleration, drag) {
+        let data = {
+            t: this.t(),
+            h: this.h(),
+            v: this.v(),
+            a:acceleration,
+            d:drag,
+            m : this.m(),
+            mc : this.mc(),
+            m0 : this.m0(),
+            th : this.F(),
+            A : this.A(),
+            dm : this.dm(),
+            g: this.calculateGravity()
+        };
+        this.saveLastData(methodName, data);
+
+
+        // Set all submodules infos
+        this.others().map(motion => {
+            motion.v(this.v());
+            motion.h(this.h());
+            motion.saveLastData(methodName, data);
+        })
+
+        return this;
+    }
+
+    /**
+     *
+     * @param {string} methodName
+     * @param {number} acceleration
+     * @param {number} drag
+     */
+    updateEuler(methodName, acceleration, drag) {
+        let dt = this.commonParameters.getDt();
+        let newSpeed = this.v() + acceleration * dt;
+        let newAltitude = this.h() + newSpeed * dt;
+
+        this.v(newSpeed);
+        this.h(Constraints.alwaysPositive(newAltitude));
+
+        this.shareData(methodName, acceleration, drag);
+
+        return this;
+    }
+
+    /**
+     *
+     * @param {string} methodName
+     * @param {number} acceleration
+     * @param {number} drag
+     *
+     * TODO : need to apply Heun twice. First time on Speed, then on Altitude
+     */
+    updateHeun(methodName, acceleration, drag) {
+        let dt = this.commonParameters.getDt();
+        let d_n = this.calculateDrag(this.v())
+        let a_n = this.calculateAcceleration(this.v(), d_n);
+        let v_pred = this.v() + dt * a_n;
+        let h_pred = this.h() + dt * this.v();
+        let d_pred = this.calculateDrag(v_pred);
+        let a_pred = this.calculateAcceleration(v_pred, d_pred);
+        acceleration  = (a_n + a_pred)/2;
+
+        let newSpeed = this.v() + dt * acceleration;
+        let newAltitude = this.h() + (dt / 2) * (newSpeed + v_pred);
+
+        this.v(newSpeed);
+        this.h(Constraints.alwaysPositive(newAltitude));
+
+        this.shareData(methodName, acceleration, drag);
+
+        return this;
+    }
+
+    /**
+     *
+     * @param {string} methodName
+     * @param {number} acceleration
+     * @param {number} drag
+     *
+     * TODO : need to apply RK4 twice. First time on Speed, then on Altitude
+     *
+     */
+    updateRK4(methodName, acceleration, drag) {
+        let dt = this.commonParameters.getDt();
+        let k1 = acceleration;
+        let k2 = acceleration + (dt/2) * k1;
+        let k3 = acceleration + (dt/2) * k2;
+        let k4 = acceleration + dt * k3;
+        acceleration = (k1 + 2 * k2 + 2 * k3 + k4)/6;
+
+        let newSpeed = this.v() + dt * acceleration;
+        let newAltitude = this.h() + newSpeed * dt;
+        this.v(newSpeed);
+        this.h(Constraints.alwaysPositive(newAltitude));
+
+        this.shareData(methodName, acceleration, drag);
+
+        return this;
+    }
+
+    /**
+     * update variables that are calculation method independent
+     *
+     * @returns {RocketMotionStageExtended}
+     */
+    updateVariants() {
+        //console.clear();
+        this.log('####################################################################################')
+        let dt = this.commonParameters.getDt();
+        this.t(this.t() + dt);
+
+
+        if (this.running()) {
+            if (this.localM() > this.localM0()) {
+                // TODO : use Math.min so that it's not < to m0
+                let deltaM = (this.localF() === 0) ? 0 : this.localDm() * dt;
+                let initialMc = this.mc();
+                let initialTotalMass = this.m();
+                let initialM = this.localM();
+
+                this.mc(Constraints.alwaysPositive(this.localMc() - deltaM));
+
+                if (this.t()>190) {
+                    this.log('-----> '+this.name(), deltaM, this.t())
+                    this.log('-----> '+this.name()+' Carburant', initialMc,'->',  this.mc(), '=>', initialMc-this.mc())
+                    this.log('-----> '+this.name()+' Mass Local', initialM, '->',  this.localM())
+                    this.log('-----> '+this.name()+' Mass Total', initialTotalMass, '->',  this.m())
+                    //this.log(this)
+                }
+            }
+        }
+
+        return this;
+    }
+
+    /**
+     *
+     * @returns {boolean}
+     */
+    processCalculations() {
+
+        this.log('processCalculations for ', this.name(), this.t(), this.isEnginePropelling(), this.localF())
+
+        let isLastElementOfStage = this.isLastElementOfModule();
+        let methodName = this.commonParameters.getIntegrationMethod().name;
+
+        let continueUpdate = false;
+
+        if (this.running()) {
+
+            const drag = this.calculateDrag(this.v());
+            let acceleration = this.calculateAcceleration(this.v(), drag);
+
+            switch(methodName) {
+                case "Euler" : this.updateEuler(methodName, acceleration, drag); break;
+                case "Heun" : this.updateHeun(methodName, acceleration, drag); break;
+                case "RK4" : this.updateRK4(methodName, acceleration, drag); break;
+            }
+
+            continueUpdate = (this.h() > 0);
+        }
+
+        return continueUpdate;
+    }
+}
+
+window.RocketMotionStageExtended = RocketMotionStageExtended;
+
+
+
+
+ class RepresentationCanvas extends RocketBase {
+
+    /**
+     * Enable logging.
+     * @type {boolean}
+     */
+    debugLog = false;
+
+    canvas;
+    ctx;
+    cloneCounter = 0;
+    constructor(parameters, id) {
+        super(parameters);
+        this.canvas = document.getElementById(id);
+        this.canvas.width = this.getWidth();
+        this.canvas.height = this.getHeight();
+        this.ctx = this.canvas.getContext("2d");
+    }
+
+    getContext() {
+        return this.ctx;
+    }
+
+    getCanvas() {
+        return this.canvas;
+    }
+
+    getWidth() {
+        return this.commonParameters.getRepresentationCanvasWidth();
+    }
+
+    getHeight() {
+        return this.commonParameters.getRepresentationCanvasHeight();
+    }
+
+    clone() {
+        let newCanvas = this.canvas.cloneNode(true);
+        newCanvas.id = this.canvas.id + '-clone-'+(this.cloneCounter++);
+        newCanvas.classList.add('clone');
+        this.canvas.after(newCanvas);
+        this.log('Cloning Canvas')
+
+        //return new RepresentationCanvas(this.commonParameters, this.canvas.id, this.getWidth(), this.getHeight());
+        return new RepresentationCanvas(this.commonParameters, newCanvas.id, this.getWidth(), this.getHeight());
+    }
+
+    static getClones(mainClass = '') {
+        return document.getElementsByClassName(mainClass + ' clone');
+    }
+
+}
+
+window.RepresentationCanvas = RepresentationCanvas;
+
+
+
+
+//
+
+ class RocketRepresentation extends RocketBase {
+    /**
+     *
+     * @type {boolean}
+     */
+    debugLog = false;
+
+    /**
+     * @type {RepresentationCanvas}
+     */
+    canvas;
+    ctx;
+    scale;
+    scaleId;
+    scaleFactor;
+    widthHeightScaleFactor = 5;
+    autoScaleValue = 1;
+
+    constructor(parameters = null,  scale = 2, scaleFactor = 2) {
+        super(parameters);
+        this.canvas = new RepresentationCanvas(this.commonParameters, "background-motion-canvas");
+        this.log('Creating ', this.canvas)
+        this.scaleFactor = scaleFactor;
+        this.commonParameters.addStoredVariable('scale', scale, ()=>this.updateScale(this.commonParameters.getScale()));
+
+
+        
+    }
+
+    autoScale() {
+        return this.getParameters().getAutoScale();
+    }
+
+    clear() {
+        let clones = RepresentationCanvas.getClones('motion-canvas');
+        for(let i=0; i<clones.length; i++) {
+            clones[i].style.display = "none";;
+        }
+    }
+
+    /**
+     *
+     * @param {string} id
+     * @returns {this}
+     */
+    configureScale(id) {
+        this.scaleId = id;
+        this.updateScale(this.commonParameters.getScale())
+        return this;
+    }
+
+    /**
+     *
+     * @param {RocketMotionBase} motion
+     * @param {boolean} isMainModuleLastModule
+     */
+    draw(motion, isMainModuleLastModule = true) {
+        this.log('draw', motion.name(), motion.specifications());
+        this.setMotionRepresentation(motion);
+
+        this.drawRepresentation(motion, isMainModuleLastModule);
+        isMainModuleLastModule && this.updateDocumentText([
+                                                                {name : 'time', value : motion.t()},
+                                                                {name : 'velocity', value : motion.v()},
+                                                                {name : 'altitude', value : motion.h()},
+                                                                {name : 'mass', value : motion.m()},
+                                                            ]);
+
+        return this;
+    }
+
+    /**
+     *
+     * @param {RocketMotionBase} motion
+     * @param {boolean} recalculateAutoScale
+     */
+    drawRepresentation(motion, recalculateAutoScale = false) {
+        /**
+         * @var {RepresentationCanvas} representation
+         */
+        let representation = motion.representation();
+        /**
+         * @var {RocketModuleSpecifications}
+         */
+        let specifications = motion.specifications();
+        let ctx = representation.getContext();
+        let canvasWidth = representation.getWidth();
+        let canvasHeight = representation.getHeight();
+        let color = this.commonParameters.getIntegrationMethod().color ?? 'white';
+        let scale = this.commonParameters.getScale();
+
+        this.log('Canvas width/height', canvasWidth, canvasHeight)
+        ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+        ctx.fillStyle = color;
+        //ctx.fillRect(canvasWidth / 2 - 10, canvasHeight - 50 - motion.h() / this.commonParameters.getScale(), 20, 50);
+        ctx.fillRect(
+            this.getX(canvasWidth, specifications.getDiameter(), specifications.getPosition(), this.widthHeightScaleFactor),
+            this.getY(canvasHeight, specifications.getHeight(), specifications.getAltitude(), motion.h(), scale, recalculateAutoScale),
+            specifications.getDiameter()*this.widthHeightScaleFactor,
+            specifications.getHeight()
+        );
+
+    }
+
+    /**
+     *
+     * @param {number} canvasWidth
+     * @param {number} moduleWidth
+     * @param {number} offset
+     * @param {number} scale
+     * @returns {number}
+     */
+    getX(canvasWidth, moduleWidth, offset, scale=1) {
+        let center = (canvasWidth - moduleWidth*scale) / 2 ;
+        return center + offset*scale;
+    }
+
+
+    /**
+     *
+     * @param {number} canvasHeight
+     * @param {number} moduleHeight
+     * @param {number} offset
+     * @param {number} altitude
+     * @param {number} scale
+     * @param {boolean} recalculateAutoScale
+     * @returns {number}
+     */
+    getY(canvasHeight, moduleHeight, offset, altitude, scale, recalculateAutoScale) {
+        if (!this.autoScale()) {
+            return canvasHeight - moduleHeight - offset - altitude/scale;
+        }
+
+        if (recalculateAutoScale) {
+            this.calculateAutoScale(canvasHeight, moduleHeight, offset, altitude);
+        }
+
+        return canvasHeight - moduleHeight - offset - altitude/this.autoScaleValue;
+    }
+
+    /**
+     *
+     * @param {number} canvasHeight
+     * @param {number} moduleHeight
+     * @param {number} offset
+     * @param {number} altitude
+     * @returns {RocketRepresentation}
+     */
+    calculateAutoScale(canvasHeight, moduleHeight, offset, altitude) {
+        let topModuleAltitude = altitude+offset+moduleHeight;
+        this.autoScaleValue = topModuleAltitude / (canvasHeight/1.3);
+
+        // if (this.autoScaleValue > 10000) {
+        //     this.autoScaleValue = (Math.floor(this.autoScaleValue/1000)+1) *1000 ;
+        // } else {
+        //     if (this.autoScaleValue > 1000) {
+        //         this.autoScaleValue = (Math.floor(this.autoScaleValue/1000)+1) *1000 ;
+        //     } else {
+        //         if (this.autoScaleValue > 100) {
+        //             this.autoScaleValue = (Math.floor(this.autoScaleValue/100)+1) *100 ;
+        //         } else {
+        //             if (this.autoScaleValue > 10) {
+        //                 this.autoScaleValue = (Math.floor(this.autoScaleValue/10)+1) *10 ;
+        //             }
+        //         }
+        //     }
+        // }
+
+        //console.log('autoScaleValue', this.autoScaleValue)
+
+        return this;
+    }
+
+    /**
+     * @param {RocketMotionBase} motion
+     * @returns {this}
+     */
+    setMotionRepresentation(motion) {
+        if (typeof motion.representation() === 'undefined') {
+            //alert('cloning')
+            motion.representation(this.canvas.clone());
+        }
+
+        return this;
+    }
+
+    /**
+     *
+     * @param {{name, value}[]}variables
+     * @returns {this}
+     */
+    updateDocumentText(variables) {
+        variables.forEach(function(variable){
+            document.getElementById(variable.name).innerText = variable.value.toFixed(1);
+        });
+
+        return this;
+    }
+
+    /**
+     *
+     * @param {number} newScale
+     * @returns {this}
+     */
+    updateScale(newScale) {
+        if (typeof newScale !== 'undefined') {
+            this.commonParameters.setScale(newScale);
+        }
+
+        if (this.scaleId) {
+            document.getElementById(this.scaleId).innerText = this.commonParameters.getScale();
+        }
+        return this;
+    }
+
+    /**
+     *
+     * @returns {this}
+     */
+    zoomIn() {
+        return this.updateScale(this.commonParameters.getScale() * this.scaleFactor);
+    }
+
+    /**
+     *
+     * @returns {this}
+     */
+    zoomOut() {
+        return this.updateScale(this.commonParameters.getScale() / this.scaleFactor);
+    }
+}
+
+window.RocketRepresentation = RocketRepresentation;
+
+
+
+
+
+ class RocketChart extends RocketBase {
+    /**
+     *
+     * @type {boolean}
+     */
+    debugLog = false;
+    
+    charts = [];
+    sources = [];
+    canvasBackgroundColor = '#dfeff0';
+
+    /**
+     *
+     * @param {'linear'|'logarithmic'} scaleType
+     * @param canvasName
+     * @param parameterName
+     * @param languageTitleIndex
+     * @param {Function|false} minFunction
+     * @param {Function|false} maxFunction
+     * @param {boolean} useAverage
+     * @returns {this}
+     */
+    addChart(scaleType, canvasName, parameterName, languageTitleIndex, minFunction = false, maxFunction = false, useAverage = false) {
+        this.charts.push(
+            {
+                canvas : document.getElementById(canvasName),
+                paramName : parameterName,
+                title: () => {
+                        let languages = this.commonParameters.getLanguages();
+                        let language = this.commonParameters.getLanguage();
+                        return languages[languageTitleIndex][language];
+                    },
+                graph : undefined,
+                min : minFunction,
+                max: maxFunction,
+                useAverage,
+                scaleType : scaleType,
+            }
+        )
+
+        return this;
+    }
+
+
+    /**
+     * @param {RocketModuleMethodData} moduleMethodData
+     */
+    addSource(moduleMethodData) {
+        //let getter = moduleMethodData.getter();
+        this.sources.push({
+            sourceArray : moduleMethodData.getData(),
+            label : moduleMethodData.getMethodName(),
+            color : moduleMethodData.getColor()
+        });
+
+        return this;
+    }
+
+    /**
+     *
+     * @returns {RocketChart}
+     */
+    clearSources() {
+        this.sources = [];
+
+        return this;
+    }
+
+    /**
+     *
+     * @param label
+     * @returns {*[]}
+     */
+    getSource(label) {
+        return this.sources.filter(source => source.label === label);
+    }
+
+    /**
+     *
+     * @param chart
+     * @returns {{label: *, data: *, borderColor: *, fill: boolean}[]}
+     */
+    getSources(chart) {
+        function minOrValue(value) {
+            return (chart.min===false)||(value>=chart.min()) ? value : chart.min();
+        }
+        function maxOrValue(value) {
+            return (chart.max===false)||(value<=chart.max()) ? value : chart.max();
+        }
+
+        let paramName = chart.paramName;
+
+
+        this.log('Sources : ', this.sources)
+
+        return this.sources.map(source => {
+            let sourceArray = source.sourceArray;
+            if (typeof sourceArray === 'function') {
+                sourceArray = sourceArray();
+            }
+            if (chart.useAverage === true) {
+                let min = 0;
+                let nbNegative = 0;
+                let nbPositive = 0;
+                let max = 0;
+                sourceArray.forEach(s => {
+                    let value = s[paramName];
+                    if (value<0) {
+                         min += value;
+                         nbNegative++;
+                    } else {
+                         max += value;
+                         nbPositive++;
+                    }
+                });
+                min = (nbNegative>0) ? min/nbNegative : 0;
+                max = (nbPositive>0) ? max/nbPositive : 0;
+                chart.min = (chart.min !== false)&&(chart.min()>min) ? chart.min : () => min;
+                chart.max = (chart.max !== false)&&(chart.max()<max) ? chart.max : () => max;
+            }
+
+            return {
+                label : source.label,
+                data : sourceArray.map( s => maxOrValue(minOrValue(s[paramName]))),
+                borderColor : source.color,
+                fill : false
+            }
+        })
+    }
+
+    /**
+     *
+     * @param {RocketModuleData} moduleData
+     */
+    drawCharts(moduleData = null) {
+        if (null === moduleData) {
+            //throw new Error('No module defined to draw charts');
+            this.log('No module defined to draw charts');
+            return;
+        }
+        this.clearSources();
+        moduleData.getMethods().forEach(method => {
+            this.addSource(moduleData.getMethodData(method))
+
+        });
+        this.charts.forEach(async (chart) => {
+            chart.graph = await this.drawChart(chart);
+        });
+    }
+
+    /**
+     *
+     * @param axisName
+     * @returns {any[]}
+     */
+    getHorizontalSteps(axisName) {
+        let maxTime = this.commonParameters.getMaxTime();
+        function arrayDt(a, axisName) {
+            // TODO : fix the uggly hard coded t<= maxTime
+            return a.map(d => d[axisName].toFixed(2)).filter(t=> t<=maxTime );
+        }
+
+        let newSet = new Set();
+        this.sources.forEach(function(s) {
+            let sourceArray = s.sourceArray;
+            if (typeof sourceArray === 'function') {
+                sourceArray = sourceArray();
+            }
+            let data = arrayDt(sourceArray, axisName);
+            data.forEach(d=>newSet.add(d))
+        });
+
+        return [...newSet];
+    }
+
+    /**
+     *
+     * @param chart
+     * @returns {{id: string, afterInit: *}}
+     */
+    contextMenuPlugin(chart) {
+        return {
+                    id : 'contextMenuPlugin',
+                    afterInit: (graph) =>
+                    {
+                        let menuId = 'menu-'+graph.canvas.id;
+                        let existingMenu = document.getElementById(menuId);
+                        if (null !== existingMenu) {
+                            existingMenu.remove();
+                        }
+                        let menu = document.getElementById("contextMenu").cloneNode(true);
+                        menu.setAttribute('id', menuId);
+                        graph.canvas.after(menu);
+
+                        let subMenus = menu.querySelectorAll('.menu-item');
+                        for(let i=0;i<subMenus.length;i++) {
+                            let action = subMenus[i].getAttribute('data-action');
+                            subMenus[i].addEventListener('click', (event)=>{
+                                this.handleMenuAction(chart, action);
+                                event.preventDefault();
+                                event.stopPropagation();
+                                menu.style.display = "none";
+                            })
+                        }
+
+                        const handleContextMenu = (event) =>  {
+                            // Hide opened menus
+                            let existingMenus = document.querySelectorAll('.context-menu');
+                            for(let i=0;i<existingMenus.length;i++) {
+                                existingMenus[i].style.display = "none";
+                            }
+
+                            // Show menu
+                            event.preventDefault();
+                            event.stopPropagation();
+                            menu.style.left = event.layerX-30 + "px";
+                            menu.style.top = event.layerY-30 + "px";
+                            menu.style.display = "block";
+                            return false;
+                        }
+
+                        const handleMouseDown = (event) => {
+                            menu.style.display = "none";
+                        }
+
+                        graph.canvas.addEventListener('contextmenu', handleContextMenu, false);
+                        graph.canvas.addEventListener('mousedown', handleMouseDown, false);
+                    } 
+                };
+    }
+
+    /**
+     *
+     * @returns {{id: string, beforeDraw: *}}
+     */
+    customCanvasBackgroundColorPlugin() {
+        return {
+                    id: 'customCanvasBackgroundColor',
+                    beforeDraw: (chart, args, options) => {
+                        const {ctx} = chart;
+                        ctx.save();
+                        ctx.globalCompositeOperation = 'destination-over';
+                        ctx.fillStyle = options.color || '#99ffff';
+                        ctx.fillRect(0, 0, chart.width, chart.height);
+                        ctx.restore();
+                    }
+                };
+    }
+
+    /**
+     *
+     * @param Chart chart
+     * @returns {Promise<Chart>}
+     */
+    async drawChart(chart) {
+        if (chart.graph) chart.graph.destroy();
+        let backgroundColor = this.commonParameters.getChartBackgroundColor()
+        return new Chart(chart.canvas.getContext("2d"), {
+            type: 'line',
+            options: {
+                plugins: {
+                    title: {
+                        display: true,
+                        text: chart.title()
+                    },
+                    customCanvasBackgroundColor: {
+                        color: backgroundColor
+                    }
+                },
+                scales: {
+                    x: {
+                        display: true,
+                    },
+                    y: {
+                        display: true,
+                        type: chart.scaleType,
+                    }
+                }
+            },
+            plugins: [
+                        this.contextMenuPlugin(chart),
+                        this.customCanvasBackgroundColorPlugin()
+                    ],
+            data: {
+                // TODO : add a parameter for axis (t, but it could be something else)
+                labels: this.getHorizontalSteps('t'),
+                datasets: this.getSources(chart)
+            }
+        });
+    }
+
+    /**
+     *
+     * @param newColor
+     * @returns {this}
+     */
+    updateCanvasBackgroundColor(newColor) {
+        this.canvasBackgroundColor = newColor;
+        return this;
+    }
+
+    /**
+     *
+     * @param chart
+     * @param action
+     */
+    handleMenuAction(chart, action) {
+        switch(action) {
+            case "print-pdf" :
+                this.printToPdf(chart);
+                break;
+            case "copy-to-clipboard" :
+                this.copyToClipBoard(chart);
+                break;
+            case "save-as-pdf" :
+                this.saveAsPdf(chart);
+                break;
+            case "save-as-png" :
+                this.saveAsPng(chart);
+                break;
+        }
+    }
+
+    /**
+     *
+     * @param chart
+     */
+    printToPdf(chart) {
+        this.saveAsPdf(chart, true);
+    }
+
+    /*
+    *  source : https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/write
+    */
+    /**
+     *
+     * @param chart
+     * @returns {Promise<void>}
+     */
+    async copyToClipBoard(chart) {
+        let languages = this.commonParameters.getLanguages();
+        let language = this.commonParameters.getLanguage();
+        async function getBlobFromCanvas(canvas) {
+            return new Promise((resolve, reject) => {
+                canvas.toBlob((blob) => {
+                if (blob) {
+                    resolve(blob);
+                } else {
+                    reject(new Error("Canvas toBlob failed"));
+                }
+                });
+            });
+        }
+
+        async function copyCanvasContentsToClipboard(canvas) {
+            if (ClipboardItem.supports("image/png")) {
+                // Copy canvas to blob
+                try {
+                    const blob = await getBlobFromCanvas(canvas);
+                    // Create ClipboardItem with blob and it's type, and add to an array
+                    const data = [new ClipboardItem({ [blob.type]: blob })];
+                    // Write the data to the clipboard
+                    await navigator.clipboard.write(data);
+                } catch (error) {
+                    let clipBoardErrorMessages = languages['lg-error-copy-clipboard'];
+                    let clipBoardErrorMessage = clipBoardErrorMessages&&clipBoardErrorMessages[language] || null;
+                    let message = (null !== clipBoardErrorMessage) ? clipBoardErrorMessage : 'Error while copying image to Clipboard';
+                    alert(message);
+                }
+            } else {
+                let clipBoardErrorMessages = languages['lg-error-copy-clipboard-not-supported'];
+                let clipBoardErrorMessage = clipBoardErrorMessages&&clipBoardErrorMessages[language] || null;
+                let message = (null !== clipBoardErrorMessage) ? clipBoardErrorMessage : 'Copying png image to Clipboard is not supported by your browser';
+                alert(message);
+            }
+        }
+        await copyCanvasContentsToClipboard(chart.canvas);
+    }
+
+    /**
+     *
+     * @param chart
+     * @param print
+     */
+    saveAsPdf(chart, print=false) {
+        let chartId = chart.canvas.id;
+        let chartTitle = 'chart['+chart.title()+'].pdf';
+        html2canvas(document.getElementById(chartId)).then(
+            function (canvas) {
+                var img = canvas.toDataURL(); //image data of canvas
+                let aspectRatio = canvas.width/canvas.height;
+                const jsPDF = window.jspdf.jsPDF;
+                var doc = new jsPDF("l", "mm", "a4");
+                let borderLeft = 20;
+                var finalWidth = doc.internal.pageSize.getWidth()-borderLeft*2;
+                let finalHeight = finalWidth/aspectRatio;
+                let borderTop = (doc.internal.pageSize.getHeight()-finalHeight)/2
+
+                doc.addImage(img, borderLeft, borderTop, finalWidth, finalHeight);
+                if (false === print) {
+                    doc.save(chartTitle);
+                } else {
+                    let blob = doc.output('blob')
+                    const fileURL = URL.createObjectURL(blob);
+                    window.open(fileURL).print();
+                    return;
+                }
+            }
+        );
+    }
+
+    /**
+     *
+     * @param chart
+     */
+    saveAsPng(chart) {
+        // Convert our canvas to a data URL
+        let canvasUrl = chart.canvas.toDataURL();
+        let chartTitle = 'chart['+chart.title()+'].png';
+
+        // Create an anchor, and set the href value to our data URL
+        const createEl = document.createElement('a');
+        createEl.href = canvasUrl;
+        createEl.download = chartTitle;
+        createEl.click();
+        createEl.remove();
+    }
+
+    /**
+     * @param {RocketModule} module
+     */
+    onSettingsChanged(module = null) {
+        this.drawCharts(module);
+    }
+}
+window.RocketChart = RocketChart;
+
+
+
+
+ class RocketDataTableBase extends RocketBase{
+
+    static MinStepToShowAllData = 0.1;
+
+    sources = {};
+    mainSourceLabel = false;
+    dataObject = {};
+    columns = [];
+    grids = {};
+    columnsConf = [];
+    gridParams = {};
+    defaultPrecision = 2;
+
+    paginationEnabled = true;
+    paginationSize = 100;
+
+    rendered = false;
+    printEnabled = true;
+    /**
+     *
+     * @type {{data, columns}}
+     */
+    gridInfo = {};
+
+    isRendered() {
+        return this.rendered === true;
+    }
+
+    /**
+     *
+     * @param newColumnsConf
+     * @returns {this}
+     */
+    setColumnsConfiguration(newColumnsConf) {
+        this.columnsConf = newColumnsConf || [];
+
+        return this;
+    }
+
+
+    /**
+     *
+     * @param gridId
+     */
+    printGrid(gridId) {
+        let grid = this.grids[gridId];
+        if (typeof grid === 'undefined') {
+            alert(window.Languages.get('lg-alert-no-grid-available'));
+            return;
+        }
+        //grid.print(false, true);
+        //grid.print();
+        if (this.printEnabled) {
+            grid.print("all", true);
+        } else {
+            if (this.isLocalFileLocation()) {
+                this.showToastMessage(window.Languages.get('lg-no-print-local') );
+            } else {
+                this.showToastMessage(window.Languages.get('lg-no-print-remote') );
+            }
+        }
+    }
+
+    /**
+     *
+     * @param {string} gridId
+     * @returns {string}
+     */
+    formatTitle(gridId) {
+        let gridParams = this.gridParams[gridId];
+        console.log('gridParams', gridParams)
+        let languages = this.commonParameters.getLanguages();
+        //let title = gridParams.title +' - '+Languages.get('params-'+gridParams.paramName)+' - '+Languages.get('time-step-simple')+' : '+gridParams.step;
+        let title = gridParams.title +' - '+Languages.get('time-step-simple')+' - '+gridParams.step;
+
+        console.log(title);
+
+        return title;
+    }
+
+
+    async downloadFromServer(hydraId, gridId, title, format='xlsx') {
+        let data = this.gridInfo[gridId];
+        data.fileFormat = format;
+        console.log('Posting data:', data)
+        const response = await fetch(url, {
+            method: "POST",
+            body: JSON.stringify(data),
+            headers: {
+                "Content-type": "application/json; charset=UTF-8"
+            }
+        });
+
+        const blob = await response.blob(); // create a new Blob object.
+        const tempUrl = window.URL.createObjectURL(blob); // create a new object hydraId
+        const a = document.createElement("a"); // create a new anchor element
+        a.href = tempUrl; // set its href to the object URL
+        a.download = title+'.'+format;  // set its download attribute to the deisred filename.
+        a.click(); // programmatically clicking the anchor element to trigger the file download.
+    }
+
+
+    /**
+     *
+     * @param gridId
+     * @param format
+     */
+    downloadGrid(gridId, format='pdf') {
+        let grid = this.grids[gridId];
+        let title = this.formatTitle(gridId);
+        if (typeof grid === 'undefined') {
+            alert('Grid doesnt exist yet.');
+            return;
+        }
+        switch(format) {
+            case 'pdf' :
+                try {
+                    // grid.download("pdf", title+".pdf", {
+                    //     orientation:"portrait", //set page orientation to portrait
+                    //     title:"Example Report", //add title to report
+                    // });
+                    if (this.isLocalFileLocation()) {
+                        grid.download("pdf", title+".pdf", {
+                            orientation:"portrait", //set page orientation to portrait
+                            title:"Example Report", //add title to report
+                        });
+                    } else {
+                        this.downloadFromServer('/', gridId, title, 'pdf')
+                    }
+                } catch (e) {
+                    alert('Error while generating PDF. See console for details.');
+                    console.log(e);
+                }
+
+                break;
+            case 'xlsx':
+                try {
+                    // TODO : implement a mechanism that checks if the data is too large for old way download. If so, use downloadFromServer
+
+                    // old way
+                    //grid.download("xlsx", "data.xlsx");
+                    if (this.isLocalFileLocation()) {
+                        grid.download("xlsx", "data.xlsx");
+                    } else {
+                        this.downloadFromServer('/', gridId, title, 'xlsx');
+                    }
+
+
+                } catch(e) {
+                    alert('Error while generating XLSX. See console for details.');
+                    console.log(e);
+                }
+                break;
+            case 'csv':
+                try {
+                    if (this.isLocalFileLocation()) {
+                        grid.download("csv", title+".csv");
+                    } else {
+                        this.downloadFromServer('/', gridId, title, 'csv')
+                    }
+                } catch(e) {
+                    alert('Error while generating CSV. See console for details.');
+                    console.log(e);
+                }
+                break;
+            case 'json':
+                try {
+                    if (this.isLocalFileLocation()) {
+                        grid.download("json", title+".json");
+                    } else {
+                        this.downloadFromServer('/', gridId, title, 'json')
+                    }
+
+                } catch(e) {
+                    alert('Error while generating JSON. See console for details.');
+                    console.log(e);
+                }
+                break;
+        }
+    }
+
+}
+
+window.RocketDataTableBase = RocketDataTableBase;
+
+
+
+
+
+ class RocketDataTable extends RocketDataTableBase {
+    /**
+     *
+     * @type {boolean}
+     */
+    debugLog = false;
+
+
+
+    /**
+     *
+     * @param {RocketModuleData} moduleData
+     */
+    prepare(moduleData = null) {
+        this.log('Preparing RocketDataTable for data', moduleData)
+        if (null === moduleData) {
+            //throw new Error('No module defined to draw charts');
+            this.log('No module defined to render DataTable : no moduleData provided');
+            return;
+        }
+
+        moduleData.getMethods().forEach(method => {
+            let moduleMethodData = moduleData.getMethodData(method);
+            let label = moduleMethodData.getMethodName();
+            let source = moduleMethodData.getData();
+            this.addSource(label, source, moduleMethodData.isMainSource());
+
+        });
+
+        this.configureColumns();
+
+        this.rendered = true;
+    }
+
+    /**
+     *
+     * @param label
+     * @param source
+     * @param isMainSource
+     * @returns {this}
+     */
+    addSource(label, source, isMainSource = false) {
+        this.sources[label] = source;
+        if (isMainSource) {
+            this.mainSourceLabel = label;
+        }
+
+        return this;
+    }
+
+    /**
+     *
+     * @param label
+     * @param asFunction
+     * @returns {*}
+     */
+    getSource(label, asFunction = true) {
+        //this.log('getSource', label, asFunction)
+        let func  = (label==='mainSource') && (false !== this.mainSourceLabel) ? this.sources[this.mainSourceLabel] : this.sources[label] ?? null;
+
+        //this.log('ok', func)
+        //let res =  asFunction ? func : ((null === func) ? func : func()) ;
+        let res = func;
+        //this.log('res', res)
+        return res;
+    }
+
+    /**
+     *
+     * @returns {*}
+     */
+    getMainSource() {
+        return this.getSource('mainSource');
+    }
+
+    /**
+     *
+     * @param titleAddOn
+     * @returns {*[]}
+     */
+    getColumns(titleAddOn = '') {
+        let formatedColumns = [];
+        this.columns.forEach((column)=>{
+
+            console.log(`column titleAddOn : "${titleAddOn}"`, (typeof column.transformer === 'function') ? column.transformer(column.title)(titleAddOn) : column.title);
+
+            formatedColumns.push({
+                title : (typeof column.transformer === 'function') ? column.transformer(column.title)(titleAddOn) : column.title,
+                field : column.field
+            })
+        });
+
+        console.log('------------------------------------------------------------------------------------')
+        
+        return formatedColumns;
+    }
+
+    /**
+     *
+     * @param stringSource
+     * @param precision
+     * @returns {(function(*): *)|(function(*, *): (*|null))|*}
+     */
+    getObjetValue(stringSource, precision = 2) {
+        let copiedString = stringSource;
+        let parts = copiedString.replace(']', '').split('[');
+        if (parts.length !== 2) {
+            throw new Error('Invalid RocketDataTable Source definition : '+stringSource);
+        }
+        let sourceName = parts[0];
+        let keyName = parts[1];
+
+        let source = this.getSource(sourceName);
+        if (null === source) {
+            throw new Error('Unknown Source Name : '+sourceName);
+        }
+
+        return (stringSource === 'mainSource[index]') ? 
+                        (index)=>index
+                    : 
+                        (index, paramName)=>{
+                            let key = keyName==='param' ? paramName : keyName;
+                            // if ((source().length>=index) && (typeof source()[index] !== 'undefined') ) {
+                            //     return source()[index][key].toFixed(precision);
+                            // }
+                            if ((source.length>=index) && (typeof source[index] !== 'undefined') ) {
+                                return source[index][key].toFixed(precision);
+                            }
+                            return null;
+                        };
+    }
+
+    /**
+     *
+     * @param newColumnsConf
+     * @returns {this}
+     */
+    configureColumns() {
+        if (this.columnsConf.length === 0) {
+            return this;
+        }
+        let dataObject = {};
+        let languages = this.commonParameters.getLanguages();
+        let language = this.commonParameters.getLanguage();
+        this.columns = [];
+
+        this.columnsConf.forEach((column) => {
+            let title = (languages['lg-'+column.field]&&languages['lg-'+column.field][language]) ?? column.title;
+            this.columns.push({
+                title: title, 
+                transformer : column.transformer,
+                field: column.field,
+                precision: (typeof column.precision !== 'undefined') ? column.precision : this.defaultPrecision
+            });
+
+            this.log('this.columns : ', this.columns);
+            let name = column.field;
+            if (column.hasOwnProperty('source')) {
+                this.dataObject[name] = this.getObjetValue(column.source, column.precision);
+            } else {
+                if (column.hasOwnProperty('callback')) {
+                    this.dataObject[name] = {
+                        callable : column.callback.callable.bind(this),
+                    };
+                }
+            }
+        });
+
+        return this;
+    }
+
+    /**
+     *
+     * @returns {this}
+     */
+    updateLanguage() {
+        this.configureColumns();
+        this.clear();
+        for (const[id, params] of Object.entries(this.gridParams)) {
+            this.showGrid(id, params.gridTitle, params.paramName, params.titleAddOn);
+        }
+        return this;
+    }
+
+    /**
+     *
+     * @param paramName
+     * @param {string} gridTitle
+     * @returns {Promise<*[]>}
+     */
+    async getGridData(paramName, gridTitle) {
+        let data = [];
+        let mainSource = this.getMainSource();
+
+        this.log('mainSource : ', mainSource);
+
+        if (null === mainSource) {
+            throw new Error('No mainSource found');
+        }
+
+        let increment = 1;
+        if (this.getParameters().getDt()<RocketDataTableBase.MinStepToShowAllData) {
+            this.printEnabled = false;
+            if (this.isLocalFileLocation()) {
+                increment = 10;
+            }
+        }
+
+        if (increment !==1) {
+            this.showToastMessage(window.Languages.get('lg-no-full-dataset'));
+            this.warn('Not Showing all data. Restricting step to 0.1')
+        }
+
+        console.log('getGridData Length', mainSource.length);
+
+        for(let i=0;i<mainSource.length;i+=increment) {
+            let newValue = {};
+            for (const [key, value] of Object.entries(this.dataObject)) {
+                if(typeof value === 'function') {
+                    //this.log('getGridData value function : ', paramName, value);
+                    newValue[key] = value(i, paramName);
+                } else {
+                    //this.log('getGridData value callable : ', paramName, value);
+                    newValue[key] = await value.callable(i, paramName);
+                }
+            }
+            data.push(newValue);
+        }
+
+        this.log('Processed data for '+gridTitle);
+
+        return data;
+    }
+
+    /**
+     *
+     * @param gridId
+     * @param gridTitle
+     * @param paramName
+     * @param step
+     * @param titleAddOn
+     * @returns {Promise<void>}
+     */
+    async showGrid(gridId, gridTitle, paramName, step, titleAddOn='') {
+        console.log('showGrid', gridId, gridTitle, paramName, titleAddOn);
+        this.gridParams[gridId] = {
+                                    title : gridTitle,
+                                    paramName : paramName,
+                                    step : step,
+                                    titleAddOn : titleAddOn
+                                }
+
+        //this.log('this.gridParams : ', this.gridParams);
+        console.log('this.gridParams : ', this.gridParams);
+        this.gridInfo[gridId] = {
+                                    data: await this.getGridData(paramName, gridTitle),
+                                    columns: this.getColumns(titleAddOn),
+                                }
+        let table  = new Tabulator('#'+gridId, {
+                                                            // data: await this.getGridData(paramName, gridTitle),
+                                                            // columns: this.getColumns(titleAddOn),
+                                                            data : this.gridInfo[gridId].data,
+                                                            columns : this.gridInfo[gridId].columns,
+                                                            pagination : this.paginationEnabled,
+                                                            paginationSize : this.paginationSize,
+                                                        });
+
+        this.grids[gridId] = table;
+    }
+
+
+    /**
+     *
+     */
+    clear() {
+        this.rendered = false;
+        for(const[id, grid] of Object.entries(this.grids)) {
+            let toDelete = [];
+            let element = document.getElementById(id);
+            for (const child of element.childNodes) {
+                toDelete.push(child);
+            }
+            toDelete.forEach(elem=>elem.remove())
+        }
+    }
+}
+
+window.RocketDataTable = RocketDataTable;
+
+
+
+
+// 
+// 
+
+ class RocketSubModule extends ParameteredRocket {
+
+    /**
+     *
+     * @type {boolean}
+     */
+    debugLog = false;
+
+    settings = {};
+    /**
+     * @type {RocketMotionBase}
+     */
+    motion;
+
+    /**
+     *
+     * @param {RocketModule} module
+     * @param parameters
+     * @param {*} settings
+     */
+    constructor(module, parameters = null, settings = null) {
+        super(parameters);
+
+        this.settings = settings;
+        this.module = module;
+        this.initSubModule(module);
+        this.initialize();
+    }
+
+    /**
+     *
+     * @param {RocketModule} module
+     * @returns {this}
+     */
+    changeModule(module) {
+        this.module = module;
+        this.motion.setModule(module);
+
+        return this;
+    }
+
+    /**
+     *
+     * @param {RocketModule} module
+     * @returns {this}
+     */
+    initSubModule(module) {
+        this.log('initSubModule', module)
+        let motionClass = this.settings.motion;
+            this.log('motionClass', motionClass)
+        this.motion = RocketMotionBase.getNewMotion(module, motionClass, this.getParameters());
+
+
+        this.log('--------- Init --------');
+        this.log(this.settings)
+
+        for(const [setting, value] of Object.entries(this.settings)) {
+            // ignore 'motions' settings
+            if (setting === 'motion') {
+                continue;
+            }
+
+            if (!this.motion.hasOwnProperty(setting)) {
+                if (typeof value === 'function') {
+                    this.motion.addFuncVariable(setting, value);
+                } else {
+                    this.motion.addVariable(setting);
+                }
+            }
+
+            this.log('setting', setting, value)
+            //this.motion[setting](value);
+            if (typeof value !== 'function') {
+                this.motion[setting](value);
+            }
+
+        }
+
+        //this.motion.initialize();
+        this.initSettings();
+        this.log('-------------------------------------');
+
+        return this;
+    }
+
+    getLastData() {
+        return this.motion.getLastData();
+    }
+
+    initialize() {
+        this.motion.initialize();
+
+        return this;
+    }
+
+    /**
+     *
+     * @returns {this}
+     */
+    initSettings() {
+        this.motion.initSettings();
+
+        return this;
+    }
+
+    /**
+     *
+     * @returns {this}
+     */
+    setModuleRunning() {
+        this.motion.running(true);
+
+        return this;
+    }
+
+    /**
+     *
+     * @returns boolean
+     */
+    isRunning() {
+        return this.motion.running();
+    }
+
+    isEnginePropelling() {
+        return this.motion.isEnginePropelling();
+    }
+
+    /**
+     *
+     * @returns {RocketSubModule}
+     */
+    updateVariants() {
+        this.motion.updateVariants();
+
+        return this;
+    }
+
+    /**
+     *
+     * @returns boolean
+     */
+    updateCalculations(isLastElementOfModule = false) {
+        let continueUpdate = this.motion.updateCalculations(isLastElementOfModule);
+        if (!continueUpdate) {
+            this.log('stopping motion', this.name())
+            this.motion.running(false);
+        }
+        return continueUpdate;
+    }
+
+    /**
+     *
+     * @returns {string}
+     */
+    name() {
+        return this.motion.name();
+    }
+
+    /**
+     *
+     * @param {RocketRepresentation} view
+     * @param {boolean} isMainModuleLastModule
+     * @returns {this}
+     */
+    draw(view, isMainModuleLastModule = true) {
+        view.draw(this.motion, isMainModuleLastModule);
+
+        return this;
+    }
+
+    /**
+     *
+     * @param {string} method
+     * @returns []
+     */
+    data(method) {
+        return this.motion.data(method);
+    }
+
+    /**
+     *
+     * @returns {RocketMotionMethods}
+     */
+    getMethods() {
+        return this.motion.getMethods();
+    }
+
+}
+
+window.RocketSubModule = RocketSubModule;
+
+
+// 
+// 
+
+
+// 
+// 
+
+
+/**
+ * A BuilderModule is an association of Rocket Sub Modules.
+ * A Sub BuilderModule can be a stage, a propeller, etc.
+ * A Sub BuilderModule has a RocketMotion and dimensions
+ * A Sub BuilderModule also has an indicator that can vary depending on parameters that says if it is active/inactive/detached.
+ * When detached, the Sub BuilderModule is then reaffected to a new standalone RocketModule
+ */
+ class RocketModule extends ParameteredRocket {
+
+    /**
+     *
+     * @type {boolean}
+     */
+    debugLog = false;
+
+    /**
+     * @type {Rocket}
+     */
+    rocket;
+    /**
+     *
+     * @type {RocketSubModule[]}
+     */
+    subModules = [];
+
+    internalCounter = 0
+
+    sourceParameters = null;
+
+    /**
+     *
+     * @param {Rocket} rocket
+     * @param parameters
+     */
+    constructor(rocket, parameters = null) {
+        super(parameters);
+        this.sourceParameters = parameters;
+
+        // TODO : rollback to this._internals = new RocketParameters().attachTo(this, true); and test
+        this._internals = new RocketParameters().attachTo(this, true);
+        //this._internals = new RocketParameters().attachTo(this, false);
+        this.rocket = rocket;
+
+        this.log('RocketModule created')
+    }
+
+    addSubModule(settings) {
+        this.subModules.push(new RocketSubModule(this, this.getParameters(), settings));
+
+        return this;
+    }
+
+    // initialize() {
+    //      this.subModules.forEach(subModule => {
+    //          subModule.initialize();
+    //      });
+    //
+    //     return this;
+    // }
+
+    initSettings() {
+        this.subModules.forEach(subModule => {
+            subModule.initSettings();
+        });
+
+        return this;
+    }
+
+    setModuleRunning() {
+        this.subModules.forEach(subModule => {
+            subModule.setModuleRunning();
+        });
+
+        return this;
+    }
+
+    /**
+     *
+     * @returns {boolean}
+     */
+    isModulesRunning() {
+        return this.subModules.some(subModule=>subModule.isRunning())
+    }
+
+    lastModule() {
+        return this.subModules[this.subModules.length-1];
+    }
+
+    isLastModule(subModuleIndex) {
+        return (subModuleIndex === this.subModules.length-1);
+    }
+
+    /**
+     *
+     * @returns {boolean}
+     */
+    update() {
+        this.internalCounter++;
+        let continueUpdate = true;
+        this.log('---------------------------------------------------------------', this.subModules.length)
+        // First, update each module's parameters
+        this.subModules.forEach((subModule, index) => {
+            this.log('--- Update SubModule', index)
+            subModule.updateVariants();
+        });
+
+        // Then rocket calculations for the last submodule. The calculations will be affected to all submodules. This saves time.
+        continueUpdate = this.lastModule().updateCalculations(true);
+
+        // Then check if subModules can be separated
+
+        let subModulesToDetach = []
+        this.subModules.forEach((subModule, index) => {
+            if (!this.isLastModule(index)&&!subModule.isEnginePropelling()) {
+                subModulesToDetach.push(subModule);
+            }
+        });
+        subModulesToDetach.forEach(subModule => {
+            this.separateModule(subModule.name());
+        })
+
+        //return (this.internalCounter<20);
+
+        return continueUpdate;
+    }
+
+    getLastData(varName = null) {
+        if (null !== varName) {
+            let lastData = this.lastModule().getLastData();
+            if (lastData.hasOwnProperty(varName)) {
+                return lastData[varName];
+            }
+            this.warn(`Variable "${varName}" not found in last module data. Last module data: ${JSON.stringify(lastData, null, 2)}`)
+            return null;
+        }
+
+        return this.lastModule().getLastData();
+    }
+
+    /**
+     *
+     * @param {RocketRepresentation} view
+     * @param {boolean} isMainModule
+     * @returns {this}
+     */
+    draw(view, isMainModule) {
+        // First Draw Last SubModule (important for autoScale)
+        this.subModules.forEach((subModule, index) => {
+            this.isLastModule(index) && subModule.draw(view, isMainModule );
+        });
+        // Then draw other SubModules
+        this.subModules.forEach((subModule, index) => {
+            !this.isLastModule(index) && subModule.draw(view, false );
+        });
+
+        return this;
+    }
+
+    /**
+     *
+     * @returns {RocketSubModule}
+     */
+    getUpperModule() {
+        let upperSubModule = null;
+        this.subModules.forEach((subModule, index) => {
+            if (index+1 === this.subModules.length) {
+                upperSubModule = subModule;
+            }
+        })
+
+        if (null === upperSubModule) {
+            throw new Error('No upper module found');
+        }
+
+        return upperSubModule;
+    }
+
+    /**
+     *
+     * @param {string} method
+     * @returns {[]}
+     */
+    data(method) {
+        return this.getUpperModule().data(method);
+    }
+
+    /**
+     *
+     * @returns {RocketMotionMethods}
+     */
+    getMethods() {
+        return this.getUpperModule().getMethods();
+    }
+
+    /**
+     *
+     * @param {string} name
+     * @returns {number}
+     */
+    findSubModuleIndex(name) {
+        let moduleIndex = -1;
+        this.subModules.forEach((subModule, index) => {
+            if (subModule.name() === name) {
+                moduleIndex = index;
+            }
+        });
+
+        return moduleIndex;
+    }
+
+    /**
+     *
+     * @param {string} subModuleName
+     * @returns {this}
+     */
+    separateModule(subModuleName) {
+
+        if (subModuleName==='Falcon 9 Stage 1') {
+            //mook()
+        }
+
+        let moduleIndex = this.findSubModuleIndex(subModuleName);
+        let subModule = this.subModules.splice(moduleIndex, 1)[0];
+        //let newMotionScript = new RocketModule(this.rocket, this.getParameters());
+        let newMotionScript = new RocketModule(this.rocket, this.sourceParameters);
+
+        this.log('separateModule', subModule, subModule.name())
+        subModule.changeModule(newModule);
+        newModule.subModules = [subModule];
+        this.rocket.addModule(newModule);
+
+        return this;
+    }
+}
+
+window.RocketModule = RocketModule;
+
+
+
+
+
+
+
+
+
+/**
+ * @class
+ * @extends {ParameteredRocket}
+ */
+ class VisualRocket extends ParameteredRocket {
+    /**
+     * @type {RocketRepresentation}
+     */
+    view;
+    /**
+     * @type {RocketChart}
+     */
+    charts;
+    /**
+     * @type {RocketDataTable}
+     */
+
+    /**
+     *
+     * @type {{}[]}
+     */
+    updatableScreenVariables = [];
+    dataTable;
+    languageInitialized;
+    constructor() {
+        super(new RocketParameters());
+
+        this.setLanguageInitialized(false);
+
+        this.commonParameters.addVariable('representationCanvasWidth', window.innerWidth);
+        this.commonParameters.addVariable('representationCanvasHeight', window.innerHeight);
+
+        this.view = new RocketRepresentation(this.getParameters());
+
+        this.charts = new RocketChart(this.getParameters());
+
+        this.dataTable = new RocketDataTable(this.getParameters());
+    }
+
+    /**
+     * // was returning {Promise<void>}
+     *
+     * @param callback
+     * @returns {this}
+     */
+    onLoaded = async (callback) => {
+        this.getParameters().isLoaded() ? await callback.apply(this) : setTimeout(async ()=>this.onLoaded(callback), 10)
+    }
+
+    /**
+     *
+     * @param width
+     * @param height
+     * @returns {this}
+     */
+    onResize = (width, height) => {
+        this.commonParameters.setRepresentationCanvasWidth(width);
+        this.commonParameters.setRepresentationCanvasHeight(height);
+
+        return this;
+    }
+
+    /**
+     *
+     * @param args
+     * @returns {this}
+     */
+    configureViewScale(...args) {
+        //console.log(this, this.view);
+        this.view.configureScale.apply(this.view, args);
+        return this;
+    }
+
+    /**
+     *
+     * @param args
+     * @returns {this}
+     */
+    addLinearChart(...args) {
+        args.unshift('linear');
+        this.charts.addChart.apply(this.charts, args);
+        return this;
+    }
+
+    /**
+     *
+     * @param args
+     * @returns {this}
+     */
+    addLogarithmicChart(...args) {
+        args.unshift('logarithmic');
+        this.charts.addChart.apply(this.charts, args);
+        return this;
+    }
+
+    /**
+     *
+     * @param label
+     * @param source
+     * @param color
+     * @param isMainSource
+     * @returns {this}
+     */
+    addSource(label, source, color, isMainSource=false) {
+        source = source.bind(this.getParameters());
+        this.charts.addSource(source, label, color);
+        this.dataTable.addSource(label, source, isMainSource);
+        return this;
+    }
+
+    /**
+     *
+     * @param args
+     * @returns {this}
+     */
+    addChartSource(...args) {
+        this.charts.addSource.apply(this.charts, args);
+        return this;
+    }
+
+    /**
+     *
+     * @param args
+     * @returns {this}
+     */
+    addDataTableSource(...args) {
+        this.dataTable.addSource.apply(this.dataTable, args);
+        return this;
+    }
+
+    /**
+     *
+     * @param args
+     * @returns {this}
+     */
+    setDataTableColumnsConfiguration(...args) {
+        this.dataTable.setColumnsConfiguration.apply(this.dataTable, args);
+        return this;
+    }
+
+    /**
+     *
+     * @param args
+     * @returns {this}
+     */
+    showGrid(...args) {
+        console.log('showGrid', args);
+        this.dataTable.showGrid.apply(this.dataTable, args);
+        return this;
+    }
+
+    /**
+     *
+     * @param args
+     * @returns {this}
+     */
+    printGrid(...args) {
+        this.dataTable.printGrid.apply(this.dataTable, args);
+        return this;
+    }
+
+    /**
+     *
+     * @param args
+     * @returns {this}
+     */
+    downloadGrid(...args) {
+        this.dataTable.downloadGrid.apply(this.dataTable, args);
+        return this;
+    }
+
+    /**
+     * @param {RocketModuleData} moduleData
+     * @returns {this}
+     */
+    drawCharts(moduleData = null) {
+        if (null === moduleData) {
+            //throw new Error('No module provided to drawCharts');
+            moduleData = this.studiedModuleData();
+
+            if (null === moduleData) {
+                this.warn('No module data provided to drawCharts');
+                return this;
+            }
+        }
+
+        this.charts.drawCharts(moduleData);
+        return this;
+    }
+
+    /**
+     *
+     * @returns {this}
+     */
+    zoomIn() {
+        this.view.zoomIn();
+        return this;
+    }
+
+    /**
+     *
+     * @returns {this}
+     */
+    zoomOut() {
+        this.view.zoomOut();
+        return this;
+    }
+
+    /**
+     *
+     * @param args
+     * @returns {this}
+     */
+    addConstant(...args) {
+        this.getParameters().addConstant.apply(this.getParameters(), args);
+        return this;
+    }
+
+    /**
+     *
+     * @param args
+     * @returns {this}
+     */
+    addScreenVariable(...args) {
+        this.getParameters().addScreenVariable.apply(this.getParameters(), args);
+        return this;
+    }
+
+    /**
+     *
+     * @param args
+     * @returns {this}
+     */
+    addStoredVariable(...args) {
+        this.getParameters().addStoredVariable.apply(this.getParameters(), args);
+        return this;
+    }
+
+    /**
+     * When Adding an updatable screen variable, you need to add a function to your Class that returns the result.
+     * @param id
+     * @param {string} varName
+     * @returns {VisualRocket}
+     */
+    addUpdatableScreenVariable(id, varName = null) {
+        const ucFirst = function(word) {
+            return word.charAt(0).toUpperCase() + word.replaceAll('-', '').slice(1);
+        }
+
+        let callback = 'get'+ucFirst(id);
+        if (null !== varName) {
+            callback = function() {
+                return this.studiedModule().getLastData(varName);
+            }.bind(this);
+        }
+
+        this.updatableScreenVariables.push({
+                                                id,
+                                                callback,
+                                                varName
+                                            });
+        return this;
+    }
+
+    setInputValue(id, value) {
+        let input = document.getElementById(id);
+        if (null !== input) {
+            if (input.tagName === 'INPUT') {
+                //input.setAttribute('value', value.toFixed(2));
+                input.setAttribute('value', formatNumbers(value));
+            } else {
+                //input.innerHTML = value.toFixed(2);
+                input.innerHTML = formatNumbers(value);
+            }
+
+        } else {
+            this.warn('No input with id "'+id+'"');
+        }
+    }
+
+    /**
+     *
+     * @returns {VisualRocket}
+     */
+    updateScreenVariables() {
+        this.updatableScreenVariables.forEach((screenVariable)=>{
+            if (typeof screenVariable.callback === 'function') {
+                let value = screenVariable.callback.apply(this);
+                this.setInputValue(screenVariable.id, value);
+                return this;
+            }
+
+            let callbackName = screenVariable.callback;
+            if (this.hasOwnProperty(callbackName)) {
+                let callback = this[callbackName];
+                if (typeof callback === 'function') {
+                    let value = callback.apply(this);
+                    this.setInputValue(screenVariable.id, value);
+                } else {
+                    this.warn('Callback "'+callbackName+'" is not a function');
+                }
+            }
+        })
+        return this;
+    }
+
+    /**
+     *
+     * @param args
+     * @returns {this}
+     */
+    addStoredScreenVariable(...args) {
+        let onChange = (args.length>1) ? args.pop() : null;
+        let varName = args[0];
+        if ((null !== onChange)&&(typeof onChange === 'function')) {
+            onChange = onChange.bind(this);
+            if (args.length === 1) {
+                args.push(varName);
+            }
+            args.push(onChange);
+        } else {
+            if (null !== onChange) {
+                args.push(onChange);
+            }
+        }
+        //console.log('Pushing, ', args)
+        this.getParameters().addStoredScreenVariable.apply(this.getParameters(), args);
+        return this;
+    }
+
+    /**
+     *
+     * @returns {this}
+     */
+    clearGrids() {
+        this.dataTable.clear();
+        return this;
+    }
+
+    clearView() {
+        this.view.clear();
+        return this;
+    }
+
+    /**
+     *
+     * @returns {boolean}
+     */
+    isLanguageInitialized() {
+        return (this.languageInitialized === true);
+    }
+
+    /**
+     *
+     * @param status
+     * @returns {this}
+     */
+    setLanguageInitialized(status = true) {
+        this.languageInitialized = status;
+
+        return this;
+    }
+
+    studiedModule() {
+        return null;
+    }
+
+    /**
+     *
+     * @param newLanguage
+     * @returns {this}
+     */
+    async updateLanguage(newLanguage) {
+        this.getParameters().setLanguage(newLanguage);
+        await this.drawCharts(this.studiedModuleData());
+        this.dataTable.isRendered() && this.dataTable.prepare(this.studiedModuleData());
+        //this.dataTable.updateLanguage();
+        return this;
+    }
+
+    /**
+     *
+     * @returns {this}
+     */
+    onLanguageChange() {
+        this.dataTable.isRendered() && this.dataTable.updateLanguage(this.studiedModule());
+        this.charts.onSettingsChanged();
+        if (this.isLanguageInitialized() === false) {
+            const event = new Event("init-languages");
+            document.dispatchEvent(event);
+        }
+        this.setLanguageInitialized();
+        return this;
+    }
+
+    /**
+     *
+     * @param newColor
+     * @returns {this}
+     */
+    updateChartBackgroundColor(newColor) {
+        this.getParameters().setChartBackgroundColor(newColor);
+        this.charts.onSettingsChanged();
+        return this;
+    }
+
+
+    /**
+     *
+     * @param {boolean} on
+     */
+    setAutoScale(on) {
+        this.getParameters().setAutoScale(on);
+    }
+
+
+    /**
+     *
+     */
+    getAutoScale() {
+        return this.getParameters().getAutoScale();
+    }
+}
+
+window.VisualRocket = VisualRocket;
+
+
+ class RocketModuleMethodData {
+    /**
+     * @type {string}
+     */
+    methodName;
+    /**
+     * @type {string}
+     */
+    color;
+    /**
+     * @type {boolean}
+     */
+    _isMainSource;
+    /**
+     * @type {*[]}
+     */
+    data;
+    constructor(methodName, color, isMainSource, data) {
+        this.methodName = methodName;
+        this.color = color;
+        this._isMainSource = isMainSource;
+        this.data = data;
+    }
+
+    getMethodName() {
+        return this.methodName;
+    }
+
+    getColor() {
+        return this.color;
+    }
+
+    isMainSource() {
+        return this._isMainSource;
+    }
+
+    getData() {
+        return this.data;
+    }
+
+}
+
+window.RocketModuleMethodData = RocketModuleMethodData;
+
+
+
+
+
+ class RocketModuleData extends Base {
+    /**
+     *
+     * @type {boolean}
+     */
+    debugLog = false;
+    /**
+     *
+     * @type {{RocketModuleMethodData}}
+     */
+    data = {}
+    /**
+     *
+     * @type {string[]}
+     */
+    methods = []
+
+    /**
+     *
+     * @param {string} methodName
+     * @param {string} color
+     * @param {boolean} isMainSource
+     * @param {any[]} data
+     */
+    addData(methodName, color, isMainSource, data) {
+        this.log('Adding', data)
+        if (this.methods.indexOf(methodName) === -1) {
+            this.methods.push(methodName);
+        }
+
+        this.data[ methodName ] = new RocketModuleMethodData(methodName, color, isMainSource, data);
+    }
+
+    /**
+     *
+     * @returns {string[]}
+     */
+    getMethods() {
+        return this.methods;
+    }
+
+    /**
+     *
+     * @param {string} methodName
+     * @returns {RocketModuleMethodData}
+     */
+    getMethodData(methodName) {
+        if (typeof this.data[methodName] === 'undefined') {
+            throw new Error('No data for method: ' + methodName);
+        }
+        return this.data[methodName];
+    }
+}
+
+window.RocketModuleData = RocketModuleData;
+
+
+
+//
+
+
+ class RocketModulesData extends Base {
+    /**
+     *
+     * @type {boolean}
+     */
+    debugLog = false;
+    /**
+     *
+     * @type {{string:RocketModuleData}}
+     */
+    data = {}
+
+    addData(id, methodName, color, isMainSource, data) {
+        this.log('------- addData', id, methodName, color, isMainSource, data, '-------')
+        this.data[id] = this.data[id] || new RocketModuleData();
+        this.data[id].addData(methodName, color, isMainSource, data);
+    }
+
+    /**
+     *
+     * @param id
+     * @returns {RocketModuleData}
+     */
+    getData(id) {
+        if (typeof this.data[id] === 'undefined') {
+            this.data[id] = new RocketModuleData();
+        }
+
+        return this.data[id]
+    }
+
+    /**
+     *
+     * @param id
+     * @param {string} methodName
+     * @returns {RocketModuleMethodData}
+     */
+    getMethodData(id, methodName) {
+        if (typeof this.data[id] === 'undefined') {
+            throw new Error('No data for id: ' + id);
+        }
+
+        return this.data[id].getMethodData(methodName);
+    }
+}
+
+window.RocketModulesData = RocketModulesData;
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * @class
+ * @extends {VisualRocket}
+ */
+ class Rocket extends VisualRocket {
+
+    /**
+     *
+     * @type {boolean}
+     */
+    debugLog = false;
+
+    /**
+     *
+     * @type {RocketModule[]}
+     */
+    motionScripts = []
+    modelsSettings = {};
+    currentModelSettings;
+    modulesData = {};
+
+    constructor() {
+        super();
+        this.reset();
+    }
+
+    /**
+     *
+     * @returns {Rocket}
+     */
+    reset() {
+        /**
+         * At first, there is only one module that can be composed of many stages/propellers, etc.
+         */
+        this.modules = [];
+        this.modulesData = new RocketModulesData();
+
+        return this;
+    }
+
+    /**
+     *
+     * @returns {this}
+     */
+    draw() {
+        this.modules.forEach((module, index)=>{
+            module.draw(this.view, index===0);
+        })
+
+        return this;
+    }
+
+    /**
+     * @param {RocketModule} module
+     */
+    addMotionScript(module) {
+        this.modules.push(module);
+
+        return this;
+    }
+
+    /**
+     *
+     * @param model
+     * @param settings
+     * @returns {this}
+     */
+    addModelSettings(model, settings) {
+        this.modelsSettings[model] = settings;
+
+        return this;
+    }
+
+    /**
+     *
+     * @param model
+     * @returns {this}
+     */
+    useModel(model) {
+        this.reset();
+        this.currentModelSettings = this.modelsSettings[model];
+        this.log('modelSettings', this.currentModelSettings)
+        if (typeof this.currentModelSettings === 'undefined') {
+            throw new  Error('No Rocket Settings found for model "'+model+'"');
+        }
+
+        this.initModule()
+            //.initialize();
+
+        return this;
+    }
+
+    /**
+     *
+     * @returns {this}
+     */
+    initModule() {
+        let module = new RocketModule(this, this.getParameters())
+        // Init module from settings
+        this.currentModelSettings.modules.forEach((stageSettings)=> {
+            module.addSubModule(stageSettings);
+        });
+
+        this.modules = [module];
+
+        return this;
+    }
+
+    /**
+     *
+     * @returns {this}
+     */
+    // initialize() {
+    //     this.motionScripts.forEach((module)=>{
+    //         module.initialize();
+    //     })
+    //
+    //     this.log('Initialize', this.motionScripts)
+    //
+    //     return this;
+    // }
+
+    /**
+     *
+     * @returns {this}
+     */
+    initModuleSettings() {
+        this.log('InitModuleSettings')
+        this.modules.forEach((module)=>{
+            module.initSettings();
+        })
+
+        return this;
+    }
+
+    /**
+     *
+     * @returns {this}
+     */
+    setModulesRunning() {
+        this.modules.forEach((module)=>{
+            module.setModuleRunning();
+        })
+
+        return this;
+    }
+
+    /**
+     *
+     * @returns {boolean}
+     */
+    areModulesRunning() {
+        return this.modules.some((module)=>{
+            return module.isModulesRunning();
+        });
+    }
+
+    /**
+     *
+     * @returns {boolean}
+     */
+    updateMotionScript() {
+
+        this.log('################################## Entering UpdateModule', this.modules.length)
+        // let continueUpdate = true;
+        // this.motionScripts.forEach((module)=>{
+        //     continueUpdate &&= module.update();
+        // });
+
+        let continueUpdate = false;
+        this.modules.forEach((module, index)=>{
+            this.log('++++++ Updating module', index);
+            let moduleContinueUpdate = module.update();
+            continueUpdate ||= moduleContinueUpdate;
+        });
+
+        // let continueUpdate = true;
+        // continueUpdate = this.motionScripts[0].update();
+
+        this.log('################################## UpdateModule', this.modules.length, continueUpdate)
+        return continueUpdate;
+    }
+
+    /**
+     *
+     * @param index
+     * @returns {RocketModule}
+     */
+    getModule(index=0) {
+        if (index >= this.modules.length) {
+            return null;
+        }
+        return this.modules[index];
+    }
+
+    /**
+     *
+     * @returns {RocketModule}
+     */
+    studiedModule() {
+        return this.getModule(0);
+    }
+
+    studiedModuleData() {
+        // TODO : handle other than 0
+        return this.modulesData.getData(0);
+    }
+
+    /**
+     *
+     * @returns {this}
+     */
+    async animate() {
+        let idx = this.getParameters().getIdx();
+        this.getParameters().setIdx(idx+1);
+        //this.log('Animate', this.getParameters().getIdx());
+        let continueUpdate = this.updateModule();
+        this.updateScreenVariables();
+        this.draw();
+        if (!continueUpdate) {
+            //this.log('Stop')
+            //this.initModuleSettings();
+            let currentIntegrationMethod = this.getParameters().getIntegrationMethod();
+            let currentIntegrationMethodName = currentIntegrationMethod.name;
+            let currentIntegrationMethodColor = currentIntegrationMethod.color;
+            let currentIntegrationMethodIsMainSource = currentIntegrationMethod.isMainSource;
+            this.log('Current Integration Method', currentIntegrationMethod)
+            //mook()
+            this.log('Current Integration Method', currentIntegrationMethodName)
+            this.modules.forEach((module, index)=>{
+                this.log('data', module.data(currentIntegrationMethodName))
+                this.modulesData.addData(index, currentIntegrationMethodName, currentIntegrationMethodColor, currentIntegrationMethodIsMainSource, module.data(currentIntegrationMethodName));
+                // this.modulesData[currentIntegrationMethod] = this.modulesData[currentIntegrationMethod] ?? [];
+                // this.modulesData[currentIntegrationMethod].push(module.data(currentIntegrationMethod));
+            })
+            this.log('this.modulesData', this.modulesData)
+            this.log('this.modulesData', this.studiedModuleData())
+            //await this.drawCharts(this.studiedModule());
+            await this.drawCharts(this.studiedModuleData());
+        }
+        //if (this.areModulesRunning()) {
+        if (continueUpdate){
+            requestAnimationFrame(await this.animate.bind(this));
+        } else {
+            this.log('Modules are not running, stop animation')
+            if (this.getParameters().getRunningAllIntegrationMethods()) {
+                this.runAll();
+                this.log('END')
+            }
+        }
+
+        return this;
+    }
+
+    /**
+     * Runs all integration methods entirely, one after one (runs method 1 entirely, then method 2 entirely, etc.)
+     *
+     * @param {Function} onFinishedCallback
+     * @returns {this}
+     */
+    async runAll(onFinishedCallback) {
+        this.log('RunAll', onFinishedCallback)
+        if (this.getParameters().getIntegrationMethods().length === this.getParameters().getAllIntegrationMethods().length) {
+            //this.initialize();
+            this.clearGrids();
+        }
+        if (this.getParameters().getIntegrationMethods().length > 0) {
+            this.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
+            this.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
+            this.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
+            this.getParameters().setIntegrationMethod(this.getParameters().getIntegrationMethods().shift()) ;
+            this.log('Switching Method to', this.getParameters().getIntegrationMethod())
+            this.getParameters().setRunningAllIntegrationMethods(true);
+            this.clearView();
+            this.initModule();
+            this.setModulesRunning();
+            await this.animate();
+        } else {
+            this.getParameters().setIntegrationMethods([...this.getParameters().getAllIntegrationMethods()]);
+            this.getParameters().setRunningAllIntegrationMethods(false);
+            //this.clear();
+            this.dataTable.prepare(this.studiedModuleData());
+            document.getElementById('altitudeButton').click();
+            document.getElementById('speedButton').click();
+
+            this.log('RunAll END', this, this.onRunFinshedCallback)
+            this.onRunFinshedCallback && this.onRunFinshedCallback();
+        }
+
+        return this;
+    }
+
+    /**
+     *
+     * @param {Function} onFinishedCallback
+     * @returns {this}
+     */
+    async runMethods(onFinishedCallback = null) {
+        this.log('RunMethods', onFinishedCallback)
+        let integrationMethods = this.studiedModule().getMethods().methodObjects();
+        this.getParameters().setAllIntegrationMethods(integrationMethods);
+        this.getParameters().setIntegrationMethods([...integrationMethods]);
+        this.useModel(this.getParameters().getRocketModel())
+        this.onRunFinshedCallback = onFinishedCallback;
+        await this.runAll();
+
+        return this;
+    }
+
+    getVelocity() {
+        return this.studiedModule().getLastData('v');
+    }
+}
+
+window.Rocket = Rocket;
+
+    /**
+     * paramName can be h or v
+     */
+    function calculateError(from, to, index, paramName) {
+        let minLength = Math.min(from.length, to.length);
+        if (index < minLength) {
+            if (from[index].hasOwnProperty(paramName) && to[index].hasOwnProperty(paramName)) {
+                let lastFrom = from[index][paramName];
+                let lastTo = to[index][paramName];
+                let error = Math.abs((lastTo - lastFrom) / lastTo) * 100;
+                return error.toFixed(2)+' %';
+            }
+        }
+        return 'n/a';
+    }
+
+    function getMinValue(valueName) {
+        return document.getElementById(valueName)?.value ?? 0;
+    }
+
+
+
+    document.addEventListener("DOMContentLoaded", (event) => {
+        new TabsSlider('.tabs');
+
+        /**
+         * Rocket Configuration
+         */
+
+        rocket = new Rocket();
+        rocket
+            .addVariable('languages', window.RocketLanguages)
+            .addStoredScreenVariable('language', 'language-select', function () {
+                return this.onLanguageChange();
+            })
+            .addStoredVariable('chartBackgroundColor', '#dfeff0')
+            .addStoredVariable('autoScale', true)
+            .addVariable('v')                                   // Vitesse
+            .addVariable('h')                                   // Altitude
+            .addVariable('t')                                   // Temps
+            .addVariable('m')                                   // Masse Totale
+            .addUpdatableScreenVariable('gravity', 'g')
+            .addUpdatableScreenVariable('acceleration', 'a')
+            .addUpdatableScreenVariable('velocity', 'v')
+            .addUpdatableScreenVariable('drag', 'd')
+            .addUpdatableScreenVariable('altitude', 'h')
+            .addUpdatableScreenVariable('mass', 'm')
+            .addUpdatableScreenVariable('rocketMass', 'm0')
+            .addUpdatableScreenVariable('fuel', 'mc')
+            .addUpdatableScreenVariable('fuelConsumption', 'dm')
+            .addUpdatableScreenVariable('frontSection', 'A')
+            .addUpdatableScreenVariable('thrust', 'th')
+            .addStoredScreenVariable('dt', 'step')              // Pas de temps
+//            .addStoredScreenVariable('m0', 'rocketMass')        // Masse à vide de la fusée
+//            .addStoredScreenVariable('mc', 'fuel')              // Masse de Carburant
+//            .addStoredScreenVariable('dm', 'fuelConsumption')   // Consommation de carburant kg/s
+//            .addStoredScreenVariable('A', 'frontSection')       // Section frontale de la fusée (m²)
+//            .addStoredScreenVariable('F', 'thrust')             // Poussée (N)
+            .addStoredScreenVariable('minSpeed')
+            .addStoredScreenVariable('minAcceleration')
+            .addStoredScreenVariable('maxTime')
+            .addStoredScreenVariable('rocketModel', 'rocket-select')
+            .addVariable('running', false)
+            .addVariable('allIntegrationMethods')
+            .addVariable('runningAllIntegrationMethods')
+            .addVariable('integrationMethods')
+            .addVariable('integrationMethod')
+            .addVariable('idx', 0)
+            .onLoaded(
+                async function () {
+                    console.log('Rocket Parameters Loaded');
+                    /**
+                     * @this {Rocket}
+                     */
+                    this.configureViewScale('scale')
+                        .addLinearChart('chartHeightCanvas', 'h', 'lg-chart-title-altitude', function () {
+                            return getMinValue('height');
+                        })
+                        .addLinearChart('chartThrustCanvas', 'th', 'lg-chart-title-thrust', function () {
+                            return 0;
+                        })
+                        .addLinearChart('chartGravityCanvas', 'g', 'lg-chart-title-gravity', function () {
+                            return 0;
+                        })
+                        .addLinearChart('chartSpeedCanvas', 'v', 'lg-chart-title-speed', function () {
+                            return getMinValue('minSpeed');
+                        })
+                        .addLinearChart('chartAccelerationCanvas', 'a', 'lg-chart-title-acceleration', function () {
+                            return getMinValue('minAcceleration');
+                        }, false, true  )
+                        .addLinearChart('chartMassCanvas', 'm', 'lg-chart-title-mass', function () {
+                            return 0;
+                        })
+                        .addLinearChart('chartDragCanvasLinear', 'd', 'lg-chart-title-drag-linear', false, false , true)
+                        .addLogarithmicChart('chartDragCanvasLog', 'd', 'lg-chart-title-drag-log', false, false , true)
+                        .setDataTableColumnsConfiguration(
+                            [
+                                {title: "Index", field: "index", source: 'mainSource[index]'},
+                                {title: "Time", field: "time", source: 'mainSource[t]'},
+                                {title: "Acceleration (m/s^2)", field: "acceleration", source: 'mainSource[a]'},
+                                {title: "Trainée", field: "drag", source: 'mainSource[d]', precision: 0},
+                                {title: "Masse (kg)", field: "mass", source: 'mainSource[m]', precision: 1},
+                                {
+                                    title: 'Euler',
+                                    transformer: (title) => (titleAddOn) => title + titleAddOn,
+                                    field: "Euler",
+                                    source: 'Euler[param]'
+                                },
+                                {
+                                    title: 'Heun',
+                                    transformer: (title) => (titleAddOn) => title + titleAddOn,
+                                    field: "Heun",
+                                    source: 'Heun[param]'
+                                },
+                                {
+                                    title: 'Runge-Kutta 4',
+                                    transformer: (title) => (titleAddOn) => title + titleAddOn,
+                                    field: "RK4",
+                                    source: 'RK4[param]'
+                                },
+                                {
+                                    title: "Error Euler/RK4", field: "errorEulerRK4", callback: {
+                                        callable: async function (index, paramName) {
+                                            let errs = await calculateError(this.getSource('Euler', false), this.getSource('RK4', false), index, paramName);
+                                            return errs;
+                                        },
+                                    }
+                                },
+                                {
+                                    title: "Error Heun/RK4", field: "errorHeunRK4", callback: {
+                                        callable: async function (index, paramName) {
+                                            let errs = await calculateError(this.getSource('Heun', false), this.getSource('RK4', false), index, paramName);
+                                            return errs;
+                                        }
+                                    }
+                                }
+                            ]
+                        )
+                        .addModelSettings('basic', {
+                            modules : [{
+                                'name': 'Single Stage Rocket',
+                                'm0': 100,
+                                'mc': 50,
+                                'dm': 1,
+                                'A': 1,
+                                'F': 5000,
+                                'Cd': 0.5,       // Drag coefficient at zero altitude of the Rocket. This depends on each Rocket
+                                'motion': RocketMotionStageExtended
+                            }]
+                        } )
+                        .addModelSettings('falcon9', {
+                            modules : [
+                                {
+                                    // Source : https://fr.wikipedia.org/wiki/Falcon_Heavy#:~:text=Chaque%20propulseur%20d'appoint%20est,%2C6%20tonnes%20de%20k%C3%A9ros%C3%A8ne).
+                                    // Premier étage constitué de 9 Moteurs Merlin D+ -- 914000 tonnes-forces converties en Newton ( https://www.translatorscafe.com/unit-converter/fr-FR/force/25-1/ton-force%20(metric)-newton/ )
+                                    //      Chaque moteur Merlin D+ a une poussée max de 845 kN / moteur ( https://fr.wikipedia.org/wiki/Merlin_(moteur-fus%C3%A9e )
+                                    //      Le premier étage mesure 42,6 × 3,66 m
+                                    //      Il a une masse à vide de 25,6 tonnes et embarque une masse de carburant de 411 tonnes
+                                    // Sur le premier étage sont couplés 2 Propulseurs d'apoint constitués chacuns de 9 moteurs Merlin D+. La poussée maximale des 18 moteurs est de 11710 kN
+                                    //      Les propulseurs mesurent  42,6 × 3,66 m
+                                    //      Chaque propulseur pèse 22,5 tonnes, et embarque 411 tonnes de carburant
+                                    // Le dernier étage est constitué d'un moteur Merlin 1D+ Vac. Sa poussée maximale est de 934 kN
+                                    //      Il mesure 12,6 × 3,66 m
+                                    //      Il a une masse à vide de 4 tonnes et embarque 107,5 tonnes de carburant
+                                    'name': 'Falcon 9 Stage 1',
+                                    'dimensions': {
+                                        altitude: 0,                 // altitude du module quand la fusée est au sol
+                                        height: 42.6,               // hauteur du module
+                                        diameter: 3.66,             // diamètre du module
+                                        position: 'central'         // 5 choix possibles: central, left, right, front, rear
+                                    },
+                                    'm0': 25600,                   // Masse du module à vide
+                                    'mc': 400000,                  // Masse de carburant embarquée dans le module
+                                    'dm': 1739,                    // Consommation de carburant / s
+                                    'A': 11,                       // Section frontale (en m²)
+                                    //'F': 845000 * 9,
+                                    'F' : function(){return this.t()<230 ? 845000 * 9 : 0},// Poussée totale du module
+                                    'Cd': 0.5,       // Drag coefficient at zero altitude of the module
+                                    'motion': RocketMotionStageExtended,
+                                    'enginePropellingStartTime':0,
+                                    'enginePropellingDuration':230,
+                                    'separationTime':'endOfPropulsion'
+                                },
+                                {
+                                    'name': 'Falcon 9 Prop Left',
+                                    'dimensions': {
+                                        altitude: 0,
+                                        height: 44.6,
+                                        diameter: 3.66,
+                                        offset: 3.66/2,
+                                        position: 'left'
+                                    },
+                                    'm0': 22500,
+                                    'mc': 411000,
+                                    'dm': 1739,
+                                    'A': 11,
+                                    //'F': 11710000,
+                                    'F' : function(){return this.t()<195 ? 11710000/2 : 0},
+                                    'Cd': 0.5,       // Drag coefficient at zero altitude of the module
+                                    'motion': RocketMotionStageExtended,
+                                    'enginePropellingStartTime':0,
+                                    //'enginePropellingDuration':195,
+                                    'enginePropellingDuration':162,
+                                    'separationTime':'endOfPropulsion'
+                                },
+                                {
+                                    'name': 'Falcon 9 Prop right',
+                                    'dimensions': {
+                                        altitude: 0,
+                                        height: 44.6,
+                                        diameter: 3.66,
+                                        offset: 3.66/2,
+                                        position: 'right'
+                                    },
+                                    'm0': 22500,
+                                    'mc': 411000,
+                                    'dm': 1739,
+                                    'A': 11,
+                                    //'F': 11710000,
+                                    'F' : function(){return this.t()<195 ? 11710000/2 : 0},
+                                    'Cd': 0.5,       // Drag coefficient at zero altitude of the module
+                                    'motion': RocketMotionStageExtended,
+                                    'enginePropellingStartTime':0,
+                                    //'enginePropellingDuration':195,
+                                    'enginePropellingDuration':162,
+                                    'separationTime':'endOfPropulsion'
+                                },
+                                {
+                                    'name': 'Falcon 9 Stage 2',
+                                    'dimensions': {
+                                        altitude: 42.6,
+                                        height: 12.6,
+                                        diameter: 3.66,
+                                        position: 'central'
+                                    },
+                                    'm0': 4000,
+                                    'mc': 107500,
+                                    'dm': 1739,
+                                    'A': 11,
+                                    //'F': 934000,
+                                    'F' : function(){return this.t()<230 ? 0 : 934000},
+                                    'Cd': 0.5,       // Drag coefficient at zero altitude of the module
+                                    'motion': RocketMotionStageExtended,
+                                    'enginePropellingStartTime':230,
+                                },
+                                ]
+                            }
+
+                        );
+                    await rocket
+                            .drawCharts()
+                            .useModel(this.getParameters().getRocketModel())
+                    ;
+
+                    initColorPicker();
+                    initAutoScale();
+
+                    console.log('Rocket', rocket)
+
+                });
+
+    });
+
+
+</script>
+</body>
+</html>
+
+

@@ -1,0 +1,319 @@
+
+
+
+<script tag="rocket" src="/js/Utils/MemUtils.js" type="module"></script>
+<script tag="rocket" src="/js/Lang/Languages.js" type="module"></script>
+<script tag="rocket" src="/js/Interactions/Interactions.js" type="module"></script>
+<script tag="rocket" src="/js/Plugins/ColorPicker.js" type="module"></script>
+<script tag="rocket" src="/js/Menu/MenuManager.js" type="module"></script>
+<script tag="rocket" src="/js/Builder/ExtensionManager.js" type="module"></script>
+<script tag="rocket" src="/js/Builder/ModelBuilderManager.js" type="module"></script>
+<script tag="rocket" src="/js/Builder/ScriptMotionManager.js" type="module"></script>
+<script tag="rocket" src="/js/RocketMotionStageExtended.js" type="module"></script>
+<script tag="rocket" src="/js/Api/RocketApi.js" type="module"></script>
+<script tag="rocket" src="/js/Rocket.js" type="module"></script>
+
+<script>
+    const allIntegrationMethods = [{name:'Euler', color:'red'}, {name:'Heun', color:'blue'}, {name:'RK4', color:'green'}];
+    let integrationMethods = [...allIntegrationMethods];
+    let integrationMethod;
+    let rocket;
+
+    // Don't remove this next line. This is used by the server to loadFromDb the scripts.
+    // js-include-here
+
+    /**
+     * paramName can be h or v
+     */
+    function calculateError(from, to, index, paramName) {
+        let minLength = Math.min(from.length, to.length);
+        if (index < minLength) {
+            if (from[index].hasOwnProperty(paramName) && to[index].hasOwnProperty(paramName)) {
+                let lastFrom = from[index][paramName];
+                let lastTo = to[index][paramName];
+                let error = Math.abs((lastTo - lastFrom) / lastTo) * 100;
+                return error.toFixed(2)+' %';
+            }
+        }
+        return 'n/a';
+    }
+
+    function getMinValue(valueName) {
+        return document.getElementById(valueName)?.value ?? 0;
+    }
+
+
+
+    document.addEventListener("DOMContentLoaded", (event) => {
+        new TabsSlider('.tabs');
+
+        /**
+         * Rocket Configuration
+         */
+
+        rocket = new Rocket();
+        rocket
+            .addVariable('languages', window.RocketLanguages)
+            .addStoredScreenVariable('language', 'language-select', function () {
+                return this.onLanguageChange();
+            })
+            .addStoredVariable('chartBackgroundColor', '#dfeff0')
+            .addStoredVariable('autoScale', true)
+            .addVariable('v')                                   // Vitesse
+            .addVariable('h')                                   // Altitude
+            .addVariable('t')                                   // Temps
+            .addVariable('m')                                   // Masse Totale
+            .addUpdatableScreenVariable('gravity', 'g')
+            .addUpdatableScreenVariable('acceleration', 'a')
+            .addUpdatableScreenVariable('velocity', 'v')
+            .addUpdatableScreenVariable('drag', 'd')
+            .addUpdatableScreenVariable('altitude', 'h')
+            .addUpdatableScreenVariable('mass', 'm')
+            .addUpdatableScreenVariable('rocketMass', 'm0')
+            .addUpdatableScreenVariable('fuel', 'mc')
+            .addUpdatableScreenVariable('fuelConsumption', 'dm')
+            .addUpdatableScreenVariable('frontSection', 'A')
+            .addUpdatableScreenVariable('thrust', 'th')
+            .addStoredScreenVariable('dt', 'step')              // Pas de temps
+//            .addStoredScreenVariable('m0', 'rocketMass')        // Masse à vide de la fusée
+//            .addStoredScreenVariable('mc', 'fuel')              // Masse de Carburant
+//            .addStoredScreenVariable('dm', 'fuelConsumption')   // Consommation de carburant kg/s
+//            .addStoredScreenVariable('A', 'frontSection')       // Section frontale de la fusée (m²)
+//            .addStoredScreenVariable('F', 'thrust')             // Poussée (N)
+            .addStoredScreenVariable('minSpeed')
+            .addStoredScreenVariable('minAcceleration')
+            .addStoredScreenVariable('maxTime')
+            .addStoredScreenVariable('rocketModel', 'rocket-select')
+            .addVariable('running', false)
+            .addVariable('allIntegrationMethods')
+            .addVariable('runningAllIntegrationMethods')
+            .addVariable('integrationMethods')
+            .addVariable('integrationMethod')
+            .addVariable('idx', 0)
+            .onLoaded(
+                async function () {
+                    console.log('Rocket Parameters Loaded');
+                    /**
+                     * @this {Rocket}
+                     */
+                    this.configureViewScale('scale')
+                        .addLinearChart('chartHeightCanvas', 'h', 'lg-chart-title-altitude', function () {
+                            return getMinValue('height');
+                        })
+                        .addLinearChart('chartThrustCanvas', 'th', 'lg-chart-title-thrust', function () {
+                            return 0;
+                        })
+                        .addLinearChart('chartGravityCanvas', 'g', 'lg-chart-title-gravity', function () {
+                            return 0;
+                        })
+                        .addLinearChart('chartSpeedCanvas', 'v', 'lg-chart-title-speed', function () {
+                            return getMinValue('minSpeed');
+                        })
+                        .addLinearChart('chartAccelerationCanvas', 'a', 'lg-chart-title-acceleration', function () {
+                            return getMinValue('minAcceleration');
+                        }, false, true  )
+                        .addLinearChart('chartMassCanvas', 'm', 'lg-chart-title-mass', function () {
+                            return 0;
+                        })
+                        .addLinearChart('chartDragCanvasLinear', 'd', 'lg-chart-title-drag-linear', false, false , true)
+                        .addLogarithmicChart('chartDragCanvasLog', 'd', 'lg-chart-title-drag-log', false, false , true)
+                        .setDataTableColumnsConfiguration(
+                            [
+                                {title: "Index", field: "index", source: 'mainSource[index]'},
+                                {title: "Time", field: "time", source: 'mainSource[t]'},
+                                {title: "Acceleration (m/s^2)", field: "acceleration", source: 'mainSource[a]'},
+                                {title: "Trainée", field: "drag", source: 'mainSource[d]', precision: 0},
+                                {title: "Masse (kg)", field: "mass", source: 'mainSource[m]', precision: 1},
+                                {
+                                    title: 'Euler',
+                                    transformer: (title) => (titleAddOn) => title + titleAddOn,
+                                    field: "Euler",
+                                    source: 'Euler[param]'
+                                },
+                                {
+                                    title: 'Heun',
+                                    transformer: (title) => (titleAddOn) => title + titleAddOn,
+                                    field: "Heun",
+                                    source: 'Heun[param]'
+                                },
+                                {
+                                    title: 'Runge-Kutta 4',
+                                    transformer: (title) => (titleAddOn) => title + titleAddOn,
+                                    field: "RK4",
+                                    source: 'RK4[param]'
+                                },
+                                {
+                                    title: "Error Euler/RK4", field: "errorEulerRK4", callback: {
+                                        callable: async function (index, paramName) {
+                                            let errs = await calculateError(this.getSource('Euler', false), this.getSource('RK4', false), index, paramName);
+                                            return errs;
+                                        },
+                                    }
+                                },
+                                {
+                                    title: "Error Heun/RK4", field: "errorHeunRK4", callback: {
+                                        callable: async function (index, paramName) {
+                                            let errs = await calculateError(this.getSource('Heun', false), this.getSource('RK4', false), index, paramName);
+                                            return errs;
+                                        }
+                                    }
+                                }
+                            ]
+                        )
+                        .addModelSettings('basic', {
+                            modules : [{
+                                'name': 'Single Stage Rocket',
+                                'm0': 100,
+                                'mc': 50,
+                                'dm': 1,
+                                'A': 1,
+                                'F': 5000,
+                                'Cd': 0.5,       // Drag coefficient at zero altitude of the Rocket. This depends on each Rocket
+                                'motion': RocketMotionStageExtended
+                            }]
+                        } )
+                        .addModelSettings('falcon9', {
+                            modules : [
+                                {
+                                    // Source : https://fr.wikipedia.org/wiki/Falcon_Heavy#:~:text=Chaque%20propulseur%20d'appoint%20est,%2C6%20tonnes%20de%20k%C3%A9ros%C3%A8ne).
+                                    // Premier étage constitué de 9 Moteurs Merlin D+ -- 914000 tonnes-forces converties en Newton ( https://www.translatorscafe.com/unit-converter/fr-FR/force/25-1/ton-force%20(metric)-newton/ )
+                                    //      Chaque moteur Merlin D+ a une poussée max de 845 kN / moteur ( https://fr.wikipedia.org/wiki/Merlin_(moteur-fus%C3%A9e )
+                                    //      Le premier étage mesure 42,6 × 3,66 m
+                                    //      Il a une masse à vide de 25,6 tonnes et embarque une masse de carburant de 411 tonnes
+                                    // Sur le premier étage sont couplés 2 Propulseurs d'apoint constitués chacuns de 9 moteurs Merlin D+. La poussée maximale des 18 moteurs est de 11710 kN
+                                    //      Les propulseurs mesurent  42,6 × 3,66 m
+                                    //      Chaque propulseur pèse 22,5 tonnes, et embarque 411 tonnes de carburant
+                                    // Le dernier étage est constitué d'un moteur Merlin 1D+ Vac. Sa poussée maximale est de 934 kN
+                                    //      Il mesure 12,6 × 3,66 m
+                                    //      Il a une masse à vide de 4 tonnes et embarque 107,5 tonnes de carburant
+                                    'name': 'Falcon 9 Stage 1',
+                                    'dimensions': {
+                                        altitude: 0,                 // altitude du module quand la fusée est au sol
+                                        height: 42.6,               // hauteur du module
+                                        diameter: 3.66,             // diamètre du module
+                                        position: 'central'         // 5 choix possibles: central, left, right, front, rear
+                                    },
+                                    'm0': 25600,                   // Masse du module à vide
+                                    'mc': 400000,                  // Masse de carburant embarquée dans le module
+                                    'dm': 1739,                    // Consommation de carburant / s
+                                    'A': 11,                       // Section frontale (en m²)
+                                    //'F': 845000 * 9,
+                                    'F' : function(){return this.t()<230 ? 845000 * 9 : 0},// Poussée totale du module
+                                    'Cd': 0.5,       // Drag coefficient at zero altitude of the module
+                                    'motion': RocketMotionStageExtended,
+                                    'enginePropellingStartTime':0,
+                                    'enginePropellingDuration':230,
+                                    'separationTime':'endOfPropulsion'
+                                },
+                                {
+                                    'name': 'Falcon 9 Prop Left',
+                                    'dimensions': {
+                                        altitude: 0,
+                                        height: 44.6,
+                                        diameter: 3.66,
+                                        offset: 3.66/2,
+                                        position: 'left'
+                                    },
+                                    'm0': 22500,
+                                    'mc': 411000,
+                                    'dm': 1739,
+                                    'A': 11,
+                                    //'F': 11710000,
+                                    'F' : function(){return this.t()<195 ? 11710000/2 : 0},
+                                    'Cd': 0.5,       // Drag coefficient at zero altitude of the module
+                                    'motion': RocketMotionStageExtended,
+                                    'enginePropellingStartTime':0,
+                                    //'enginePropellingDuration':195,
+                                    'enginePropellingDuration':162,
+                                    'separationTime':'endOfPropulsion'
+                                },
+                                {
+                                    'name': 'Falcon 9 Prop right',
+                                    'dimensions': {
+                                        altitude: 0,
+                                        height: 44.6,
+                                        diameter: 3.66,
+                                        offset: 3.66/2,
+                                        position: 'right'
+                                    },
+                                    'm0': 22500,
+                                    'mc': 411000,
+                                    'dm': 1739,
+                                    'A': 11,
+                                    //'F': 11710000,
+                                    'F' : function(){return this.t()<195 ? 11710000/2 : 0},
+                                    'Cd': 0.5,       // Drag coefficient at zero altitude of the module
+                                    'motion': RocketMotionStageExtended,
+                                    'enginePropellingStartTime':0,
+                                    //'enginePropellingDuration':195,
+                                    'enginePropellingDuration':162,
+                                    'separationTime':'endOfPropulsion'
+                                },
+                                {
+                                    'name': 'Falcon 9 Stage 2',
+                                    'dimensions': {
+                                        altitude: 42.6,
+                                        height: 12.6,
+                                        diameter: 3.66,
+                                        position: 'central'
+                                    },
+                                    'm0': 4000,
+                                    'mc': 107500,
+                                    'dm': 1739,
+                                    'A': 11,
+                                    //'F': 934000,
+                                    'F' : function(){return this.t()<230 ? 0 : 934000},
+                                    'Cd': 0.5,       // Drag coefficient at zero altitude of the module
+                                    'motion': RocketMotionStageExtended,
+                                    'enginePropellingStartTime':230,
+                                },
+                                ]
+                            }
+
+                        );
+                    await rocket
+                            .drawCharts()
+                            .useModel(this.getParameters().getRocketModel())
+                    ;
+
+                    const storageConfig = {
+                        storage: 'remote', // Options: 'local' or 'remote'
+                        //storage: 'local', // Options: 'local' or 'remote'
+                        api: {
+                            // motionScripts: '/api/rocket_modules',
+                            // subModules: '/api/rocket_sub_modules'
+                            modules: 'rocket_modules',
+                            subModules: 'rocket_sub_modules',
+                            motionScripts: 'rocket_motion_scripts'
+                        }
+                    };
+
+                    extensionManager.setStorageConfig(storageConfig);
+                    console.log(extensionManager);
+                    {% if is_logged is defined  and  (is_logged==true ) %}
+                        RocketApi.configureLoginEndpoint('/api/login', '/api/logout', '/api/me');
+                        if (await RocketApi.checkIsAuthenticated("{{ path('app_login') }}")) {
+                            extensionManager.setLoggedIn(true);
+                            // initModelBuilderManager(true, storageConfig);
+                            // initScriptMotionManager(true, storageConfig);
+                        } else {
+                            extensionManager.setLoggedIn(false);
+                        }
+                    {% else %}
+                        extensionManager.setLoggedIn(false);
+                        // initModelBuilderManager(false, storageConfig);
+                        // initScriptMotionManager(false, storageConfig);
+                    {% endif %}
+                    await extensionManager.init();
+                    initMenuManager(window.onMenuAction);
+                    initColorPicker();
+                    initAutoScale();
+
+                    console.log('Rocket', rocket)
+
+                });
+
+    });
+
+
+</script>

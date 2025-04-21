@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rocket BuilderModule Designer</title>
+    <meta name="description" content="Design rocket motionScripts like SpaceX" />
+    <meta name="author" content="Lovable" />
+    <meta property="og:image" content="/og-image.png" />
+<!--    <link rel="stylesheet" href="model-builder-styles.css">-->
+</head>
+
+<body>
+<div id="root">
+    <div class="container mx-auto p-4">
+        <div id="rocket-designer-app" class="flex flex-col items-center justify-center min-h-[60vh]">
+            <h1 class="text-3xl font-bold mb-6">Rocket BuilderModule Designer</h1>
+            <button
+                    id="open-rocket-designer"
+                    class="btn primary px-6 py-3 rounded-lg"
+            >
+                Open Rocket Designer
+            </button>
+        </div>
+    </div>
+</div>
+
+
+<!-- Application Scripts -->
+<script type="module">
+    import ModelStorageManager from '../../public/js/Builder/ModelBuilder/ModelStorageManager.js';
+    import ModelSubModulesBuilder from '../../public/js/Builder/ModelBuilder/ModelSubModulesBuilder.js';
+    import ModelMotionScriptsBuilder from '../../public/js/Builder/ModelBuilder/ModelModulesBuilder.js';
+    import ModelBuilderUserInterface from '../../public/js/Builder/ModelBuilder/ModelBuilderUserInterface.js';
+
+    // Initialize the model builders and storage manager
+    const modelStorageManager = new ModelStorageManager();
+    const subModulesBuilder = new ModelSubModulesBuilder();
+    const modulesBuilder = new ModelModulesBuilder();
+    let modelBuilderUI = null;
+
+    // Add event listener to the button
+    document.getElementById('open-rocket-designer').addEventListener('click', () => {
+        console.log("Opening model builder");
+
+        if (!modelBuilderUI) {
+            // Initialize the UI with the target element ID and the builders
+            modelBuilderUI = new ModelBuilderUserInterface(
+                'rocket-designer-app',
+                modulesBuilder,
+                subModulesBuilder,
+                storageManager
+            );
+        }
+
+        // Show the model builder interface
+        modelBuilderUI.showModelBuilder();
+    });
+</script>
+</body>
+</html>
