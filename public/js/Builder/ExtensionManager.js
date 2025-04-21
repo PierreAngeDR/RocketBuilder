@@ -52,13 +52,22 @@ export default class ExtensionManager {
             this.modelBuilderManager = new ModelBuilderManager(this.storageManager);
             this.scriptMotionManager = new ScriptMotionManager(this.storageManager);
 
-            await this.modelBuilderManager.init();
-            await this.scriptMotionManager.init();
+            const initPromises = [];
+
+            initPromises.push(await this.modelBuilderManager.init());
+            initPromises.push(await this.scriptMotionManager.init());
+
+            // TODO. we could add a success result from promises.
+            const results = await Promise.all(initPromises);
+            console.log('Models and Scripts Initialized')
+
+            return true;
         } else {
             this.modelBuilderManager = null;
             this.scriptMotionManager = null;
         }
 
+        return false;
         // initModelBuilderManager(this.loggedIn, this.storageConfig);
         // initScriptMotionManager(this.loggedIn, this.storageConfig);
 

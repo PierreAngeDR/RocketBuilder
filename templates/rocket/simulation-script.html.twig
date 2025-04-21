@@ -9,6 +9,8 @@
 <script tag="rocket" src="/js/Builder/ExtensionManager.js" type="module"></script>
 <script tag="rocket" src="/js/Builder/ModelBuilderManager.js" type="module"></script>
 <script tag="rocket" src="/js/Builder/ScriptMotionManager.js" type="module"></script>
+<script tag="rocket" src="/js/Builder/RocketConfigurationsManager.js" type="module"></script>
+
 <script tag="rocket" src="/js/RocketMotionStageExtended.js" type="module"></script>
 <script tag="rocket" src="/js/Api/RocketApi.js" type="module"></script>
 <script tag="rocket" src="/js/Rocket.js" type="module"></script>
@@ -304,7 +306,14 @@
                         // initModelBuilderManager(false, storageConfig);
                         // initScriptMotionManager(false, storageConfig);
                     {% endif %}
-                    await extensionManager.init();
+                    let modulesAndScriptsInitialized = await extensionManager.init();
+                    if (modulesAndScriptsInitialized) {
+                        let rocketConfigurationsManager = new RocketConfigurationsManager(this);
+                        rocketConfigurationsManager.getRocketsConfigurations();
+                    }
+                    console.log('------------------------------------------------')
+                    console.log('ExtensionManager', extensionManager)
+                    console.log('------------------------------------------------')
                     initMenuManager(window.onMenuAction);
                     initColorPicker();
                     initAutoScale();

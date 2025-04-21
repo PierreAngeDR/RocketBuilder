@@ -82,6 +82,12 @@ export default class Rocket extends VisualRocket {
         return this;
     }
 
+    clearModelSettings() {
+        this.modelsSettings = {};
+
+        return this;
+    }
+
     /**
      *
      * @param model
