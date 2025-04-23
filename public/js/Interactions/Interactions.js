@@ -82,13 +82,13 @@ window.runAll = async function() {
 window.disableControls = function(off = true) {
     let controlIds = ['language-select', 'rocketMass', 'fuel', 'fuelConsumption', 'frontSection', 'thrust', 'step', 'rocket-select', 'rocket-buttons']
     controlIds.forEach(id => {
-        console.log('Disabling', id);
+        //console.log('Disabling', id);
         let element = document.getElementById(id);
         if (null !== element) {
-            console.log(element)
+            //console.log(element)
             element.disabled = off;
         } else {
-            console.log(`Could not find element "${id}"`)
+            console.log(`Could not disable element "${id}"`)
         }
     })
 }
@@ -133,6 +133,24 @@ document.addEventListener("init-languages", (event)=>{
 addEventListener("resize", (event) => {
     rocket&&rocket.onResize(window.innerWidth, window.innerHeight)
 });
+
+document.addEventListener("recreate-rocket-selector", (event)=>{
+    console.log('recreate-rocket-selector', event.detail);
+    let rocketModels = event.detail || [];
+    //let rocketSelect = document.getElementById('rocket-select');
+    rocketSelect.innerHTML = null;
+    rocketModels.forEach((rocketModel, index) => {
+        let option = document.createElement('option');
+        option.value = rocketModel;
+        option.innerText = rocketModel;
+        if (index === 0) {
+            option.setAttribute('selected', 'selected')
+            rocketSelect.value = rocketModel;
+            rocket.useModel(rocketModel);
+        }
+        rocketSelect.appendChild(option);
+    })
+})
 
 
 /**

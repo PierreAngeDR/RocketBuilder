@@ -19,7 +19,7 @@ export default class Rocket extends VisualRocket {
      *
      * @type {boolean}
      */
-    debugLog = false;
+    debugLog = true;
 
     /**
      *
@@ -82,6 +82,10 @@ export default class Rocket extends VisualRocket {
         return this;
     }
 
+    getModelsNames() {
+        return Object.keys(this.modelsSettings);
+    }
+
     clearModelSettings() {
         this.modelsSettings = {};
 
@@ -93,10 +97,12 @@ export default class Rocket extends VisualRocket {
      * @param model
      * @returns {this}
      */
-    useModel(model) {
+    useModel(model, fallbackModel = null) {
+        this.log('useModel', model)
         this.reset();
-        this.currentModelSettings = this.modelsSettings[model];
-        this.log('modelSettings', this.currentModelSettings)
+        let isExistingModel = this.modelsSettings.hasOwnProperty(model);
+        this.currentModelSettings = isExistingModel ? this.modelsSettings[model] : this.modelsSettings[fallbackModel];
+        this.log('modelSettings', this.currentModelSettings, this.modelsSettings)
         if (typeof this.currentModelSettings === 'undefined') {
             throw new  Error('No Rocket Settings found for model "'+model+'"');
         }
@@ -113,6 +119,7 @@ export default class Rocket extends VisualRocket {
      */
     initModule() {
         let module = new RocketModule(this, this.getParameters())
+        this.log('module', module)
         // Init module from settings
         this.currentModelSettings.modules.forEach((stageSettings)=> {
             module.addSubModule(stageSettings);
@@ -209,6 +216,8 @@ export default class Rocket extends VisualRocket {
         }
         return this.modules[index];
     }
+
+
 
     /**
      *
@@ -317,6 +326,7 @@ export default class Rocket extends VisualRocket {
         let integrationMethods = this.studiedModule().getMethods().methodObjects();
         this.getParameters().setAllIntegrationMethods(integrationMethods);
         this.getParameters().setIntegrationMethods([...integrationMethods]);
+        this.log('UseModel', this.getParameters().getRocketModel())
         this.useModel(this.getParameters().getRocketModel())
         this.onRunFinshedCallback = onFinishedCallback;
         await this.runAll();

@@ -273,9 +273,10 @@
                             }
 
                         );
+                    let rocketSelect = document.getElementById('rocket-select');
                     await rocket
                             .drawCharts()
-                            .useModel(this.getParameters().getRocketModel())
+                            .useModel(this.getParameters().getRocketModel(), rocketSelect.value)
                     ;
 
                     const storageConfig = {
@@ -307,7 +308,8 @@
                         let rocketConfigurationsManager = new RocketConfigurationsManager(this);
                         await rocketConfigurationsManager.getRocketsConfigurations();
                         // TODO : Rebuild Rocket Selection selector
-
+                        const recreateRocketSelectorEvent = new CustomEvent("recreate-rocket-selector", { detail: this.getModelsNames() });
+                        document.dispatchEvent(recreateRocketSelectorEvent);
                     }
                     console.log('------------------------------------------------')
                     console.log('ExtensionManager', extensionManager)
