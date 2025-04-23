@@ -2,6 +2,7 @@
 @import url("./builder-button.css");
 @import url("./js-motion-editor.css");
 @import url("./menu.css");
+@import url('registration.css');
 
 @tailwind base;
 @tailwind components;

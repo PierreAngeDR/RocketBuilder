@@ -21,7 +21,7 @@ use Symfony\Component\Serializer\Attribute\Ignore;
     security: "is_granted('ROLE_USER')",
     operations: [
         new GetCollection(),
-        new Get(security: "object.getOwner() == user"),
+        new Get(security: "object.getOwner() == user or object.getOwner() == null"),
         new Post(security: "is_granted('ROLE_USER')"),
         new Put(security: "object.getOwner() == user"),
         new Delete(security: "object.getOwner() == user"),

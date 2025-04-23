@@ -8,3 +8,13 @@ Editer le fichier .env.dev ou .env.prod et configurer la connection base de donn
 # Création de la base de données
 
     php bin/console doctrine:database:create
+
+    php bin/console make:migration
+
+    php bin/console doctrine:migrations:migrate
+
+
+# Initialiser la base :
+
+    php bin/console app:init-defaults-db 
+

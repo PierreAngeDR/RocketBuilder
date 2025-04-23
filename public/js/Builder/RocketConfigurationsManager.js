@@ -28,7 +28,10 @@ export default class RocketConfigurationsManager {
                 let rocketConfiguration = {name:module.getName(), modules:[], motions:[]};
                 let subModules = module.getSubModules();
                 for(let subModule of subModules) {
-                    rocketConfiguration.modules.push(subModule.getData());
+                    let subModuleData = this.evaluateData(subModule.getData());
+                    subModuleData.motion = subModule.getMotionScripts()[0].getName();
+                    rocketConfiguration.modules.push(subModuleData);
+
                     let motionClasses = subModule.getMotionScripts();
                     for(let motionClass of motionClasses) {
                         let motionClassName = motionClass.getName();
@@ -70,6 +73,34 @@ export default class RocketConfigurationsManager {
                 console.log('Dismissed module: ' + module.getName() + '. Error was : '+err.message);
             }
         }
+    }
+
+    evaluateData(data) {
+        if (data.constructor === Array) {
+            data = data.map(element => this.evaluateData(element))
+        } else {
+            if (typeof data === 'object') {
+                for(const [key, value] of Object.entries(data)) {
+                    data[key] = this.evaluateData(value);
+                }
+            } else {
+                try {
+                    data = this.evaluateFunction(data);
+                }catch(e) {
+                    data = this.evaluateString(data);
+                }
+            }
+        }
+        return data;
+    }
+    evaluateString(data) {
+        let value = (`'${data}'`) ;
+        return eval(value);
+    }
+
+    evaluateFunction(data) {
+        let value = '('+data+')' ;
+        return eval(value);
     }
 
     async evaluateMotionScript(motionScript, motionClassName) {

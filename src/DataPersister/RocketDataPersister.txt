@@ -1,0 +1,68 @@
+<?php
+
+namespace App\DataPersister;
+
+use ApiPlatform\Metadata\Operation;
+use ApiPlatform\State\ProcessorInterface;
+use Symfony\Bundle\SecurityBundle\Security;
+use App\Entity\User;
+
+abstract class RocketDataPersister implements ProcessorInterface
+{
+    protected string $resourceClass;
+    protected array $methods;
+
+    public function __construct(
+        private readonly ProcessorInterface $decorated,
+        private readonly Security $security
+    ) {
+        $this->setProcessParameters();
+    }
+
+    /**
+     * À définir dans chaque sous-classe :
+     *  - $this->resourceClass = NomDeLEntité::class
+     *  - $this->methods = [ 'getXxx' => 'NomEntitéAmie' ]
+     */
+    abstract public function setProcessParameters(): void;
+
+    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): mixed
+    {
+        if (!$data instanceof $this->resourceClass) {
+            return $this->decorated->process($data, $operation, $uriVariables, $context);
+        }
+
+        /** @var User $user */
+        $user = $this->security->getUser();
+
+        // ⚠️ Si l'objet est public (owner = null), on interdit toute modification
+        if ($data->getOwner() !== null && $data->getOwner() !== $user) {
+            throw new \RuntimeException('Vous ne pouvez modifier que vos propres objets.');
+        }
+
+        // ⚠️ Si l'objet est public et que c'est une modification → interdit
+        if ($data->getOwner() === null && $operation->getMethod() !== 'POST') {
+            throw new \RuntimeException('Les objets partagés sont en lecture seule.');
+        }
+
+        // 📝 Lors d’un POST → assigner l’utilisateur
+        if ($operation->getMethod() === 'POST') {
+            $data->setOwner($user);
+        }
+
+        // 🔄 Relations imbriquées (ManyToMany)
+        foreach ($this->methods as $method => $relatedEntityLabel) {
+            foreach ($data->$method() as $sub) {
+                if ($sub->getId()) {
+                    if ($sub->getOwner() !== null && $sub->getOwner() !== $user) {
+                        throw new \RuntimeException("Un(e) $relatedEntityLabel lié(e) ne vous appartient pas.");
+                    }
+                } else {
+                    $sub->setOwner($user);
+                }
+            }
+        }
+
+        return $this->decorated->process($data, $operation, $uriVariables, $context);
+    }
+}

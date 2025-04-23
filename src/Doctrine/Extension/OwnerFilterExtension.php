@@ -27,9 +27,13 @@ class OwnerFilterExtension implements QueryCollectionExtensionInterface, QueryIt
         }
 
         $rootAlias = $queryBuilder->getRootAliases()[0];
-        $queryBuilder
-            ->andWhere(sprintf('%s.owner = :current_user', $rootAlias))
-            ->setParameter('current_user', $user);
+//        $queryBuilder
+//            ->andWhere(sprintf('%s.owner = :current_user', $rootAlias))
+//            ->setParameter('current_user', $user);
+
+
+        $queryBuilder->andWhere(sprintf('%s.owner = :user OR %s.owner IS NULL', $rootAlias, $rootAlias))
+            ->setParameter('user', $user);
     }
     public function applyToCollection(QueryBuilder $queryBuilder, QueryNameGeneratorInterface $queryNameGenerator, string $resourceClass, ?Operation $operation = null, array $context = []): void
     {

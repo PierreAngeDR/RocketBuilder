@@ -94,13 +94,15 @@ export default class Rocket extends VisualRocket {
 
     /**
      *
-     * @param model
+     * @param {string} model
+     * @param {string|null} fallbackModel
      * @returns {this}
      */
-    useModel(model, fallbackModel = null) {
-        this.log('useModel', model)
+    useModel(model, fallbackModel = 'basic') {
+        this.log('useModel', model, fallbackModel)
         this.reset();
         let isExistingModel = this.modelsSettings.hasOwnProperty(model);
+        console.log('isExistingModel', model, isExistingModel, this.modelsSettings)
         this.currentModelSettings = isExistingModel ? this.modelsSettings[model] : this.modelsSettings[fallbackModel];
         this.log('modelSettings', this.currentModelSettings, this.modelsSettings)
         if (typeof this.currentModelSettings === 'undefined') {

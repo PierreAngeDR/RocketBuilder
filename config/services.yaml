@@ -41,11 +41,6 @@ services:
             - '@App\DataPersister\RocketSubModuleDataPersister.inner'
             - '@security.helper'
 
-#    App\DataPersister\RocketSubModuleDataPersister:
-#        arguments:
-#            $decorated: '@api_platform.doctrine.orm.state.persist_processor'
-#        tags: ['api_platform.state_processor']
-
     App\DataPersister\RocketMotionScriptDataPersister:
         decorates: 'api_platform.doctrine.orm.state.persist_processor'
         arguments:
