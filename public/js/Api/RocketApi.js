@@ -4,16 +4,39 @@ export default class RocketApi {
     static #token = localStorage.getItem('jwt_token');
     static #login = null;
     static #password = null;
+    static sitePrefix = '';
     static baseUrl = '/api';
     static loginEndpoint = '/api/login';
     static logoutEndpoint = '/api/logout';
     static userEndpoint = '/api/me';
     static requestsEnabled = false;
 
+    static configureSitePrefix(sitePrefix='') {
+        RocketApi.sitePrefix = sitePrefix;
+    }
+
+    static getSitePrefix(url = '') {
+        return RocketApi.sitePrefix+url;
+    }
+
     static configureLoginEndpoint(loginEndpoint, logoutEndpoint, userEndpoint) {
-        RocketApi.loginEndpoint = loginEndpoint || RocketApi.loginEndpoint;
+        RocketApi.loginEndpoint = this.loginEndpoint || RocketApi.loginEndpoint;
         RocketApi.logoutEndpoint = logoutEndpoint || RocketApi.logoutEndpoint;
         RocketApi.userEndpoint = userEndpoint || RocketApi.userEndpoint;
+    }
+
+    static getLoginEndpoint() {
+        return RocketApi.getSitePrefix(RocketApi.loginEndpoint);
+    }
+    static getLogoutEndpoint() {
+        return RocketApi.getSitePrefix(RocketApi.logoutEndpoint);
+    }
+    static getUserEndpoint() {
+        return RocketApi.getSitePrefix(RocketApi.userEndpoint);
+    }
+
+    static getBaseUrl() {
+        return RocketApi.getSitePrefix(RocketApi.baseUrl);
     }
 
     static init() {
@@ -25,7 +48,7 @@ export default class RocketApi {
             password = RocketApi.#password;
         }
         try {
-            const response = await fetch(RocketApi.loginEndpoint, {
+            const response = await fetch(RocketApi.getLoginEndpoint(), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/ld+json',
@@ -73,7 +96,7 @@ export default class RocketApi {
     }
 
     static async checkIsAuthenticated(redirectOnError = null) {
-        let isAuthenticated = await this.callApi(this.userEndpoint);
+        let isAuthenticated = await this.callApi(this.getUserEndpoint());
         console.log('isAuthenticated',isAuthenticated);
         if (isAuthenticated.code === 401) {
             this.logout();
@@ -141,7 +164,7 @@ export default class RocketApi {
 
     static async fetchCollection(resource, queryParams = '') {
         console.log('fetchCollection', resource, queryParams);
-        const url = `${this.baseUrl}/${resource}${queryParams ? '?' + queryParams : ''}`;
+        const url = `${this.getBaseUrl()}/${resource}${queryParams ? '?' + queryParams : ''}`;
 
         const response = await fetch(url, { headers:this.getHeaders() });
         //const response = await fetch(hydraId, {...this.getHeaders()});
@@ -165,7 +188,7 @@ export default class RocketApi {
     }
 
     static async fetchItem(resource, id) {
-        const url = `${this.baseUrl}/${resource}/${id}`;
+        const url = `${this.getBaseUrl()}/${resource}/${id}`;
 
         //const response = await fetch(hydraId, { headers:this.getHeaders() });
         const response = await fetch(url, this.getHeaders());
@@ -177,7 +200,7 @@ export default class RocketApi {
     }
 
     static async create(resource, data) {
-        const url = `${this.baseUrl}/${resource}`;
+        const url = `${this.getBaseUrl()}/${resource}`;
 
         const response = await fetch(url, {
             method: 'POST',
@@ -194,7 +217,7 @@ export default class RocketApi {
     }
 
     static async update(resource, id, data) {
-        const url = `${this.baseUrl}/${resource}/${id}`;
+        const url = `${this.getBaseUrl()}/${resource}/${id}`;
 
         data.id = id;
         const response = await fetch(url, {
@@ -212,7 +235,7 @@ export default class RocketApi {
     }
 
     static async delete(resource, id) {
-        const url = `${this.baseUrl}/${resource}/${id}`;
+        const url = `${this.getBaseUrl()}/${resource}/${id}`;
 
         const response = await fetch(url, {
             method: 'DELETE',

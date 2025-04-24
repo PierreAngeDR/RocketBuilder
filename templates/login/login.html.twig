@@ -39,6 +39,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            RocketApi.configureSitePrefix(window.sitePrefix());
             RocketApi.configureLoginEndpoint('/api/login', '/api/logout', '/api/user')
 
             const form = document.getElementById('login-form');
