@@ -46,6 +46,7 @@
             //RocketApi.configureSitePrefix(window.sitePrefix());
             //RocketApi.configureLoginEndpoint('/api/login', '/api/logout', '/api/user')
             RocketApi.configureLoginEndpoint(
+                "{{ path('api_entrypoint') }}",
                 "{{ path('api_login_check') }}",
                 "{{ path('app_logout') }}",
                 "{{ path('api_me') }}");

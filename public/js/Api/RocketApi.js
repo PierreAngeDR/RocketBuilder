@@ -20,8 +20,10 @@ export default class RocketApi {
         return RocketApi.sitePrefix+url;
     }
 
-    static configureLoginEndpoint(loginEndpoint, logoutEndpoint, userEndpoint) {
-        RocketApi.loginEndpoint = this.loginEndpoint || RocketApi.loginEndpoint;
+    static configureLoginEndpoint(entryPoint, loginEndpoint, logoutEndpoint, userEndpoint) {
+        console.log('Configure loginEndpoint', loginEndpoint, logoutEndpoint, userEndpoint);
+        RocketApi.baseUrl = entryPoint || RocketApi.baseUrl;
+        RocketApi.loginEndpoint = loginEndpoint || RocketApi.loginEndpoint;
         RocketApi.logoutEndpoint = logoutEndpoint || RocketApi.logoutEndpoint;
         RocketApi.userEndpoint = userEndpoint || RocketApi.userEndpoint;
     }
@@ -98,7 +100,7 @@ export default class RocketApi {
 
     static async checkIsAuthenticated(redirectOnError = null) {
         let isAuthenticated = await this.callApi(this.getUserEndpoint());
-        console.log('isAuthenticated',isAuthenticated);
+        console.log('isAuthenticated',isAuthenticated, this.getUserEndpoint());
         if (isAuthenticated.code === 401) {
             this.logout();
             if (null !== redirectOnError) {
