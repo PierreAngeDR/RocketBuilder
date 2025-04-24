@@ -11,4 +11,4 @@ controllers:
 
 # Added Define route for api login
 api_login_check:
-    path: /api/login
+    path: '%route_prefix%/api/login'
