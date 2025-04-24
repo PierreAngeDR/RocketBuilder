@@ -8,26 +8,23 @@ security:
                 class: App\Entity\User
                 property: email
 
-
-    # Changed Configuration for api login.
-
     firewalls:
         login:
-            pattern: ^/api/login
+            pattern: '^%route_prefix%/api/login'
             stateless: true
             json_login:
-                check_path: /api/login
+                check_path: '%route_prefix%/api/login'
                 success_handler: lexik_jwt_authentication.handler.authentication_success
                 failure_handler: lexik_jwt_authentication.handler.authentication_failure
 
         api:
-            pattern:   ^/api
+            pattern:   '^%route_prefix%/api'
             stateless: true
             jwt: ~
 
     access_control:
-        - { path: ^/api/login, roles: PUBLIC_ACCESS }
-        - { path: ^/api,       roles: IS_AUTHENTICATED_FULLY }
+        - { path: '^%route_prefix%/api/login', roles: PUBLIC_ACCESS }
+        - { path: '^%route_prefix%/api',       roles: IS_AUTHENTICATED_FULLY }
 
 
 
