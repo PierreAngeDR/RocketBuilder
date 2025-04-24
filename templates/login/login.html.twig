@@ -35,10 +35,14 @@
         </div>
     </div>
 
-    <script src="/js/Api/RocketApi.js" type="module"></script>
+    <script src="js/Api/RocketApi.js" type="module"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            window.sitePrefix = function(url = '') {
+                return "{{ app.request.server.get('ROUTE_PREFIX') }}"+url;
+            }
+
             RocketApi.configureSitePrefix(window.sitePrefix());
             RocketApi.configureLoginEndpoint('/api/login', '/api/logout', '/api/user')
 
