@@ -6,7 +6,7 @@ export default class RocketPhysics extends Base {
      * Enable logging.
      * @type {boolean}
      */
-    debugLog = true;
+    debugLog = false;
 
     /**
      * Used calculation model. Can be 'standard' or 'realistic'

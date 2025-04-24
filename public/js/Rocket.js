@@ -19,7 +19,7 @@ export default class Rocket extends VisualRocket {
      *
      * @type {boolean}
      */
-    debugLog = true;
+    debugLog = false;
 
     /**
      *

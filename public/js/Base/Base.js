@@ -4,7 +4,7 @@ export default class Base {
      * Enable logging.
      * @type {boolean}
      */
-    debugLog = true;
+    debugLog = false;
 
 
     /**
