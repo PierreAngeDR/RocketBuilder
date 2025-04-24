@@ -12,6 +12,7 @@ export default class RocketApi {
     static requestsEnabled = false;
 
     static configureSitePrefix(sitePrefix='') {
+        alert('Configure sitePrefix "' + sitePrefix + '"');
         RocketApi.sitePrefix = sitePrefix;
     }
 
