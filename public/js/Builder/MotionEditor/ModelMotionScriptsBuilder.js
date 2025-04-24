@@ -4,7 +4,7 @@ export default class ModelMotionScriptsBuilder {
      * @param {ModelStorageManager} modelStorageManager
      */
     constructor(modelStorageManager = null) {
-        console.log('Creating ModelMotionScriptsBuilder', modelStorageManager);
+        //console.log('Creating ModelMotionScriptsBuilder', modelStorageManager);
         this.motionScripts = [];
         this.modelStorageManager = modelStorageManager;
 
@@ -23,7 +23,7 @@ export default class ModelMotionScriptsBuilder {
             try {
                 //this.motionScripts = await this.modelStorageManager.loadMotionScripts();
                 this.motionScripts = savedMotionScripts;
-                console.log('Loaded motion scripts...', this.motionScripts)
+                //console.log('Loaded motion scripts...', this.motionScripts)
                 //this.motionScripts = JSON.parse(savedMotionScripts);
             } catch (error) {
                 console.error('Error loading saved motion scripts:', error);
@@ -33,7 +33,7 @@ export default class ModelMotionScriptsBuilder {
     }
 
     async saveMotionScripts() {
-        console.log('Saving motion scripts', this.motionScripts)
+        //console.log('Saving motion scripts', this.motionScripts)
         await this.modelStorageManager.saveMotionScripts(this.motionScripts);
     }
 
@@ -66,7 +66,7 @@ export default class ModelMotionScriptsBuilder {
         return true;
         const index = this.motionScripts.findIndex(m => m.name === motionScript.name);
 
-        console.log('Updating motionScript', motionScript, index)
+        //console.log('Updating motionScript', motionScript, index)
 
         if (index !== -1) {
             this.motionScripts[index] = motionScript;

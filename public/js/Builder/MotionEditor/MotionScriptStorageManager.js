@@ -18,7 +18,7 @@ export default class MotionScriptStorageManager {
     }
 
     async loadMotionScripts() {
-        console.log('Loading motion scripts')
+        //console.log('Loading motion scripts')
         try {
             if (this.config.storage === 'local') {
                 const data = localStorage.getItem(this.storageKey.motionScripts);

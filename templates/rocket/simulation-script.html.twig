@@ -292,7 +292,7 @@
                     };
 
                     extensionManager.setStorageConfig(storageConfig);
-                    console.log(extensionManager);
+//                    console.log(extensionManager);
                     //RocketApi.configureSitePrefix(window.sitePrefix());
                     {% if is_logged is defined  and  (is_logged==true ) %}
                         //RocketApi.configureLoginEndpoint('/api/login', '/api/logout', '/api/me');
@@ -318,9 +318,9 @@
                         const recreateRocketSelectorEvent = new CustomEvent("recreate-rocket-selector", { detail: this.getModelsNames() });
                         document.dispatchEvent(recreateRocketSelectorEvent);
                     }
-                    console.log('------------------------------------------------')
-                    console.log('ExtensionManager', extensionManager)
-                    console.log('------------------------------------------------')
+                    // console.log('------------------------------------------------')
+                    // console.log('ExtensionManager', extensionManager)
+                    // console.log('------------------------------------------------')
                     initMenuManager(window.onMenuAction);
                     initColorPicker();
                     initAutoScale();

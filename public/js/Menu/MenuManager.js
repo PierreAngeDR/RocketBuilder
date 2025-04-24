@@ -73,7 +73,7 @@ export default class MenuManager {
      * @param {string} action
      */
     static onMenuItem(action) {
-        console.log(`onMenuItem ${action}`);
+        //console.log(`onMenuItem ${action}`);
         MenuManager.callback&&MenuManager.callback(action);
     }
 }

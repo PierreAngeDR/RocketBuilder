@@ -48,7 +48,7 @@ export default class MotionScriptsManager extends BaseManager {
 
         this.subModules = ModulesManager.getSubModules();
 
-        console.log('assignScriptSubModules', this.motionScripts, this.subModules);
+        //console.log('assignScriptSubModules', this.motionScripts, this.subModules);
         this.motionScripts.forEach(motionScript => {
             motionScript.subModules = this.getMotionScriptSubModules(motionScript);
         })
@@ -67,7 +67,7 @@ export default class MotionScriptsManager extends BaseManager {
      * @returns {BuilderSubModule[]}
      */
     static getMotionScriptSubModules(motionScript) {
-        console.log('getMotionScriptSubModules', motionScript, ...this.subModules);
+        //console.log('getMotionScriptSubModules', motionScript, ...this.subModules);
         let subModules = this.subModules.filter(subModule => subModule.getMotionScripts().indexOf(motionScript.getHydraId())!==-1);
         //console.log('getMotionScriptSubModules', motionScript, subModules);
         return subModules;

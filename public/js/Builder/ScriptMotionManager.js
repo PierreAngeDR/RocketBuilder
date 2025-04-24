@@ -21,7 +21,6 @@ export default class ScriptMotionManager extends ExtensionBase {
 
             // Set up the click handler for the open button
             document.getElementById(this.getCurrentId()).addEventListener('click', () => {
-                console.log('Click')
                 scriptMotionUi.openModal();
             });
         }

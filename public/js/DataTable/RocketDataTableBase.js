@@ -70,12 +70,12 @@ export default class RocketDataTableBase extends RocketBase{
      */
     formatTitle(gridId) {
         let gridParams = this.gridParams[gridId];
-        console.log('gridParams', gridParams)
+        //console.log('gridParams', gridParams)
         let languages = this.commonParameters.getLanguages();
         //let title = gridParams.title +' - '+Languages.get('params-'+gridParams.paramName)+' - '+Languages.get('time-step-simple')+' : '+gridParams.step;
         let title = gridParams.title +' - '+Languages.get('time-step-simple')+' - '+gridParams.step;
 
-        console.log(title);
+        //console.log(title);
 
         return title;
     }
@@ -84,7 +84,7 @@ export default class RocketDataTableBase extends RocketBase{
     async downloadFromServer(url, gridId, title, format='xlsx') {
         let data = this.gridInfo[gridId];
         data.fileFormat = format;
-        console.log('Posting data:', data)
+        //console.log('Posting data:', data)
         const response = await fetch(url, {
             method: "POST",
             body: JSON.stringify(data),

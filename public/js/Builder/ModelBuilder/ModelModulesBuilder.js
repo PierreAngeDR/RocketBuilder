@@ -4,7 +4,7 @@ export default class ModelModulesBuilder {
      * @param {ModelStorageManager} modelStorageManager
      */
     constructor(modelStorageManager = null) {
-        console.log('Creating ModelMotionScriptsBuilder', modelStorageManager);
+        //console.log('Creating ModelMotionScriptsBuilder', modelStorageManager);
         this.modules = [];
         this.modelStorageManager = modelStorageManager;
 

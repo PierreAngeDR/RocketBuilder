@@ -59,7 +59,7 @@ export default class BaseManager {
      * @returns {boolean}
      */
     static elementWithSameNameExists(elementName, type) {
-        console.log('Testing elementName', elementName)
+        //console.log('Testing elementName', elementName)
         return this.getSearchType(type).find(element => element.getName() === elementName) || false;
     }
 

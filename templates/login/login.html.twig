@@ -39,12 +39,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            window.sitePrefix = function(url = '') {
-                return "{{ app.request.server.get('ROUTE_PREFIX') }}"+url;
-            }
 
-            //RocketApi.configureSitePrefix(window.sitePrefix());
-            //RocketApi.configureLoginEndpoint('/api/login', '/api/logout', '/api/user')
             RocketApi.configureLoginEndpoint(
                 "{{ path('api_entrypoint') }}",
                 "{{ path('api_login_check') }}",

@@ -65,6 +65,12 @@
 
     }
 
+    window.appRedirects = {
+        'login' : "{{ path('app_login') }}",
+        'logout' : "{{ path('app_logout') }}",
+        'info' : "{{ path('app_info') }}",
+    }
+
     window.sitePrefix = function(url = '') {
         return "{{ app.request.server.get('ROUTE_PREFIX') }}"+url;
     }

@@ -97,7 +97,7 @@ export default class ModulesManager extends BaseManager {
             throw new Error('module with same name exists');
         }
 
-        console.log('----> subModule name', moduleName);
+        //console.log('----> subModule name', moduleName);
 
         let newSubModule = new BuilderSubModule({
             name : moduleName,

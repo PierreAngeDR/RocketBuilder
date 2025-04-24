@@ -85,7 +85,7 @@ export default class RocketDataTable extends RocketDataTableBase {
         let formatedColumns = [];
         this.columns.forEach((column)=>{
 
-            console.log(`column titleAddOn : "${titleAddOn}"`, (typeof column.transformer === 'function') ? column.transformer(column.title)(titleAddOn) : column.title);
+            //console.log(`column titleAddOn : "${titleAddOn}"`, (typeof column.transformer === 'function') ? column.transformer(column.title)(titleAddOn) : column.title);
 
             formatedColumns.push({
                 title : (typeof column.transformer === 'function') ? column.transformer(column.title)(titleAddOn) : column.title,
@@ -93,7 +93,6 @@ export default class RocketDataTable extends RocketDataTableBase {
             })
         });
 
-        console.log('------------------------------------------------------------------------------------')
         
         return formatedColumns;
     }
@@ -214,7 +213,7 @@ export default class RocketDataTable extends RocketDataTableBase {
             this.warn('Not Showing all data. Restricting step to 0.1')
         }
 
-        console.log('getGridData Length', mainSource.length);
+        //console.log('getGridData Length', mainSource.length);
 
         for(let i=0;i<mainSource.length;i+=increment) {
             let newValue = {};
@@ -245,7 +244,7 @@ export default class RocketDataTable extends RocketDataTableBase {
      * @returns {Promise<void>}
      */
     async showGrid(gridId, gridTitle, paramName, step, titleAddOn='') {
-        console.log('showGrid', gridId, gridTitle, paramName, titleAddOn);
+        //console.log('showGrid', gridId, gridTitle, paramName, titleAddOn);
         this.gridParams[gridId] = {
                                     title : gridTitle,
                                     paramName : paramName,
@@ -254,7 +253,7 @@ export default class RocketDataTable extends RocketDataTableBase {
                                 }
 
         //this.log('this.gridParams : ', this.gridParams);
-        console.log('this.gridParams : ', this.gridParams);
+        //console.log('this.gridParams : ', this.gridParams);
         this.gridInfo[gridId] = {
                                     data: await this.getGridData(paramName, gridTitle),
                                     columns: this.getColumns(titleAddOn),

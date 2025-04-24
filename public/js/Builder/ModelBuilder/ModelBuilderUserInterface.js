@@ -43,7 +43,7 @@ export default class ModelBuilderUserInterface {
     uiInterfaceContainer = undefined;
 
     constructor(containerId, storageManager) {
-        console.log('Creating ModelBuilderUserInterface', storageManager);
+        //console.log('Creating ModelBuilderUserInterface', storageManager);
         this.containerId = containerId;
         this.storageManager = storageManager;
         ModulesManager.initModelStorageManager(this.storageManager);

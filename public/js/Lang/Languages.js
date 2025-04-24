@@ -83,8 +83,8 @@ export default class Languages {
         self.currentLanguage = language;
     }
     static get(key) {
-        console.log('GET Language', key, Languages.currentLanguage)
-        console.log(RocketLanguages);
+        //console.log('GET Language', key, Languages.currentLanguage)
+        //console.log(RocketLanguages);
         if (typeof RocketLanguages[key] === 'undefined') {
             if (typeof RocketLanguages['lg-'+key] === 'undefined') {
                 return key;

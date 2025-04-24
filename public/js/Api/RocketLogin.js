@@ -5,7 +5,7 @@ export default class RocketLogin {
         const htmlContent = RocketLoginHtml.getHtml();
         let loginForm = document.getElementById(RocketLogin.loginId);
         if (!loginForm) {
-            console.log('Creating login form');
+            //console.log('Creating login form');
             loginForm = document.createElement('div');
             loginForm.id = RocketLogin.loginId;
             loginForm.className = 'login-form-overlay';

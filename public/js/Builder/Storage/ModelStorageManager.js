@@ -39,7 +39,7 @@ export default class ModelStorageManager {
                     allOk = false;
                 }
             } else if (this.config.storage === 'remote') {
-                console.log('--------motionScripts',modules);
+                //console.log('--------motionScripts',modules);
                 if (await RocketApi.checkIsAuthenticated() === false) {
                     RocketLogin.login(true);
                     return false;
@@ -48,10 +48,9 @@ export default class ModelStorageManager {
                 for(const module of modules) {
                     try {
                         if (null !== module.id) {
-                            console.log('Updating db module', module.id)
                             await RocketApi.update(this.config.api.modules, module.id, module.getStructure())
                         } else {
-                            console.log('Creating db module')
+                            //console.log('Creating db module')
                             let hydraData = await RocketApi.create(this.config.api.modules, module.getStructure())
                             module.setHydraId(hydraData["@id"]);
                             module.setId(hydraData.id)
@@ -94,16 +93,16 @@ export default class ModelStorageManager {
 
                 for (const subModule of subModules) {
                     try {
-                        console.log('Saving subModule', subModule, subModule.id, subModule.getStructure())
+                        //console.log('Saving subModule', subModule, subModule.id, subModule.getStructure())
 
                         if (subModule.id !== null) {
                             await RocketApi.update(this.config.api.subModules, subModule.getId(), subModule.getStructure())
                         } else {
-                            console.log('Creating db subModule')
+//                            console.log('Creating db subModule')
                             let hydraData = await RocketApi.create(this.config.api.subModules, subModule.getStructure())
                             subModule.setHydraId(hydraData["@id"]);
                             subModule.setId(hydraData.id)
-                            console.log('Created db subModule', hydraData)
+                            // console.log('Created db subModule', hydraData)
                         }
                     } catch (error) {
                         allOk = false;

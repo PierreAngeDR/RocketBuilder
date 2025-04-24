@@ -1,27 +1,18 @@
 
-
 export default class RocketApi {
     static #token = localStorage.getItem('jwt_token');
     static #login = null;
     static #password = null;
-    static sitePrefix = '';
     static baseUrl = '/api';
     static loginEndpoint = '/api/login';
     static logoutEndpoint = '/api/logout';
     static userEndpoint = '/api/me';
     static requestsEnabled = false;
 
-    static configureSitePrefix(sitePrefix='') {
-        alert('Configure sitePrefix "' + sitePrefix + '"');
-        RocketApi.sitePrefix = sitePrefix;
-    }
 
-    static getSitePrefix(url = '') {
-        return RocketApi.sitePrefix+url;
-    }
 
     static configureLoginEndpoint(entryPoint, loginEndpoint, logoutEndpoint, userEndpoint) {
-        console.log('Configure loginEndpoint', loginEndpoint, logoutEndpoint, userEndpoint);
+        //console.log('Configure loginEndpoint', loginEndpoint, logoutEndpoint, userEndpoint);
         RocketApi.baseUrl = entryPoint || RocketApi.baseUrl;
         RocketApi.loginEndpoint = loginEndpoint || RocketApi.loginEndpoint;
         RocketApi.logoutEndpoint = logoutEndpoint || RocketApi.logoutEndpoint;
@@ -29,17 +20,17 @@ export default class RocketApi {
     }
 
     static getLoginEndpoint() {
-        return RocketApi.getSitePrefix(RocketApi.loginEndpoint);
+        return RocketApi.loginEndpoint;
     }
     static getLogoutEndpoint() {
-        return RocketApi.getSitePrefix(RocketApi.logoutEndpoint);
+        return RocketApi.logoutEndpoint;
     }
     static getUserEndpoint() {
-        return RocketApi.getSitePrefix(RocketApi.userEndpoint);
+        return RocketApi.userEndpoint;
     }
 
     static getBaseUrl() {
-        return RocketApi.getSitePrefix(RocketApi.baseUrl);
+        return RocketApi.baseUrl;
     }
 
     static init() {

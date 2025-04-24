@@ -107,13 +107,13 @@ window.updateLanguage = function(newLanguage, updateRocketLanguage = true) {
 
 
 window.onMenuAction = function(action) {
-    console.log('onMenuAction', action);
+    //console.log('onMenuAction', action);
     switch (action) {
         case 'model-builder': window.extensionManager&&window.extensionManager.clickModelBuilder(); break;
         case 'motion-scripts': window.extensionManager&&window.extensionManager.clickScriptMotionBuilder(); break;
-        case 'application-login': window.location.href = window.sitePrefix()+'/login'; break;
-        case 'application-logout': window.location.href = window.sitePrefix()+'/logout'; break;
-        case 'application-info': window.location.href = window.sitePrefix()+'/info'; break;
+        case 'application-login': window.location.href = window.appRedirects.login; break;
+        case 'application-logout': window.location.href = window.appRedirects.logout; break;
+        case 'application-info': window.open(window.appRedirects.info, '_blank').focus(); break;
     }
 
 }
@@ -136,7 +136,7 @@ addEventListener("resize", (event) => {
 });
 
 document.addEventListener("recreate-rocket-selector", (event)=>{
-    console.log('recreate-rocket-selector', event.detail);
+    //console.log('recreate-rocket-selector', event.detail);
     let rocketModels = event.detail || [];
     //let rocketSelect = document.getElementById('rocket-select');
     rocketSelect.innerHTML = null;

@@ -151,7 +151,7 @@ export default class VisualRocket extends ParameteredRocket {
      * @returns {this}
      */
     showGrid(...args) {
-        console.log('showGrid', args);
+        //console.log('showGrid', args);
         this.dataTable.showGrid.apply(this.dataTable, args);
         return this;
     }

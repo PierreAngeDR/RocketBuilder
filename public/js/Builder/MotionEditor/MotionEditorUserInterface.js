@@ -48,7 +48,7 @@ export default class MotionEditorUserInterface {
             //this.uiInterfaceContainer.className = 'model-builder-overlay';
             this.uiInterfaceContainer.innerHTML = MotionEditorUserInterfaceHtml.getModelBuilderContainerHtml();
 
-            console.log('this.uiInterfaceContainerId', this.uiInterfaceContainerId, document.getElementById(this.uiInterfaceContainerId));
+            //console.log('this.uiInterfaceContainerId', this.uiInterfaceContainerId, document.getElementById(this.uiInterfaceContainerId));
 
 
             document.getElementById(this.uiInterfaceContainerId).appendChild(this.uiInterfaceContainer);
@@ -106,7 +106,7 @@ export default class MotionEditorUserInterface {
         this.scriptsList.innerHTML = '';
         //this.scripts.forEach(script => {
         MotionScriptsManager.getMotionScripts().forEach(script => {
-            console.log('script', script)
+            //console.log('script', script)
             const scriptEl = document.createElement('div');
             scriptEl.className = 'script-item p-3 border-b cursor-pointer';
             scriptEl.dataset.id = script.getInternalId();
@@ -127,7 +127,7 @@ export default class MotionEditorUserInterface {
     async openScript(script) {
         // Mark script as active in the list
         let scriptId = script.getInternalId();
-        console.log('openScript', script, scriptId)
+        //console.log('openScript', script, scriptId)
 
         this.updateActiveScriptInList(scriptId);
 

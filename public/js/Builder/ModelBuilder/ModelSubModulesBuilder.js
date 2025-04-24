@@ -25,7 +25,7 @@ export default class ModelSubModulesBuilder {
                 //this.subModules = JSON.parse(savedSubModules);
 
                 this.subModules = savedSubModules;
-                console.log('Loaded sub motionScripts...', this.subModules)
+                //console.log('Loaded sub motionScripts...', this.subModules)
             } catch (error) {
                 console.error('Error loading saved submodules:', error);
                 this.subModules = [];
@@ -37,7 +37,7 @@ export default class ModelSubModulesBuilder {
         // Save submodules to localStorage
         try {
             //localStorage.setItem('rocketSubModules', JSON.stringify(this.subModules));
-            console.log('Saving submodules', this.subModules)
+            //console.log('Saving submodules', this.subModules)
             await this.modelStorageManager.saveSubModules(this.subModules);
         } catch (error) {
             console.error('Error saving submodules:', error);

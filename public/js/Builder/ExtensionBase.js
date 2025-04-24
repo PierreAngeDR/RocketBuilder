@@ -16,7 +16,7 @@ export default class ExtensionBase extends Base {
         super();
 
         //this.currentId = this.getDefaultId();
-        console.log(this.getDefaultId())
+        //console.log(this.getDefaultId())
         this.setStorageManager(storageManager);
         this.setId(id);
 
@@ -45,14 +45,14 @@ export default class ExtensionBase extends Base {
     }
 
     setId(id = null) {
-        console.log('SetId', id, this)
+        //console.log('SetId', id, this)
         if (null === id) {
             this.currentId = this.getDefaultId();
         } else {
             this.currentId = id;
 
         }
-        console.log('self.defaultId', this.currentId);
+        //console.log('self.defaultId', this.currentId);
         return this;
     }
 
@@ -71,7 +71,7 @@ export default class ExtensionBase extends Base {
         }
 
         let element = document.getElementById(this.getCurrentId());
-        console.log("click", element);
+        //console.log("click", element);
         if (element) {
             element.click();
         }
@@ -80,7 +80,7 @@ export default class ExtensionBase extends Base {
     createInterfaceElement(elementName) {
 
         elementName = this.getCurrentId();
-        console.log('init Base', elementName );
+        //console.log('init Base', elementName );
 
         // Add event listener to the button
         //let managerElement = document.getElementById(this.getCurrentId());

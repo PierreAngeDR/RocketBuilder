@@ -59,7 +59,7 @@ export default class ExtensionManager {
 
             // TODO. we could add a success result from promises.
             const results = await Promise.all(initPromises);
-            console.log('Models and Scripts Initialized')
+            //console.log('Models and Scripts Initialized')
 
             return true;
         } else {
