@@ -6,7 +6,7 @@
 parameters:
 
     # parameter used by routes.yaml & eventually controllers
-    route_prefix: ''
+    route_prefix: '/rocket'
 
     # parameter used by framework.yaml & eventually controllers
     asset_base_path: '%env(ASSET_BASE_PATH)%'
