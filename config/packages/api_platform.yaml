@@ -3,5 +3,6 @@ api_platform:
     version: 1.0.0
     defaults:
         stateless: true
+        path_prefix: '%route_prefix%/api'
         cache_headers:
             vary: ['Content-Type', 'Authorization', 'Origin']

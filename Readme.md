@@ -10,6 +10,12 @@ Editer le fichier .env.dev ou .env.prod et configurer la connection base de donn
 
     bin/console cache:clear
 
+Configurer éventuellement la clé ROUTE_PREFIX dans .env.prod ou .env.dev, et lancer la régénération de la clé pour services.yaml :
+
+    php bin/console update:route-prefix 
+
+
+
 # Régéneration des clés jwt
 
     php bin/console lexik:jwt:generate-keypair
