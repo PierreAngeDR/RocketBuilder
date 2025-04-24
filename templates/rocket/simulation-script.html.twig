@@ -293,9 +293,14 @@
 
                     extensionManager.setStorageConfig(storageConfig);
                     console.log(extensionManager);
-                    RocketApi.configureSitePrefix(window.sitePrefix());
+                    //RocketApi.configureSitePrefix(window.sitePrefix());
                     {% if is_logged is defined  and  (is_logged==true ) %}
-                        RocketApi.configureLoginEndpoint('/api/login', '/api/logout', '/api/me');
+                        //RocketApi.configureLoginEndpoint('/api/login', '/api/logout', '/api/me');
+                    RocketApi.configureLoginEndpoint(
+                                                        "{{ path('api_login_check') }}",
+                                                        "{{ path('app_logout') }}",
+                                                        "{{ path('api_me') }}");
+                                                        //'/api/login', '/api/logout', '/api/me');
                         if (await RocketApi.checkIsAuthenticated("{{ path('app_login') }}")) {
                             extensionManager.setLoggedIn(true);
                         } else {

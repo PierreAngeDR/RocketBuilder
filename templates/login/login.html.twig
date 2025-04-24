@@ -43,8 +43,12 @@
                 return "{{ app.request.server.get('ROUTE_PREFIX') }}"+url;
             }
 
-            RocketApi.configureSitePrefix(window.sitePrefix());
-            RocketApi.configureLoginEndpoint('/api/login', '/api/logout', '/api/user')
+            //RocketApi.configureSitePrefix(window.sitePrefix());
+            //RocketApi.configureLoginEndpoint('/api/login', '/api/logout', '/api/user')
+            RocketApi.configureLoginEndpoint(
+                "{{ path('api_login_check') }}",
+                "{{ path('app_logout') }}",
+                "{{ path('api_me') }}");
 
             const form = document.getElementById('login-form');
             const emailInput = document.getElementById('email');
