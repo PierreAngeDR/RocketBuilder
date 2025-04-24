@@ -51,7 +51,6 @@ class RocketModule
     #[ORM\ManyToMany(targetEntity: RocketSubModule::class, mappedBy: 'rocketModules', cascade: ['persist'])]
     #[ApiProperty(writableLink: true)]
     #[Groups(['rocket_module:read', 'rocket_module:write'])]
-    #[ApiProperty(writableLink: true)]
     private Collection $rocketSubModules;
 
     public function __construct()
