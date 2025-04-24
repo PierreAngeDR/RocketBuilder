@@ -64,4 +64,8 @@
         toggleMenu();
 
     }
+
+    window.sitePrefix = function() {
+        return "{{ app.request.server.get('ROUTE_PREFIX') }}";
+    }
 </script>
