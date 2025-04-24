@@ -65,7 +65,7 @@
 
     }
 
-    window.sitePrefix = function() {
-        return "{{ app.request.server.get('ROUTE_PREFIX') }}";
+    window.sitePrefix = function(url = '') {
+        return "{{ app.request.server.get('ROUTE_PREFIX') }}"+url;
     }
 </script>
