@@ -1,0 +1,22 @@
+format: jb-book
+root: index
+
+chapters:
+  - file: user/index  # First pseudo-root
+    sections:
+      - file: user/main
+      - file: user/login
+      - file: user/concepteur
+      - file: user/script
+  - file: tech/index  # Second pseudo-root
+    sections:
+      - file: tech/installation
+      - file: tech/arborescence
+      - file: tech/javascript
+      - file: tech/php
+      - file: tech/api
+      - file: tech/entities
+      - file: tech/schema
+      - file: tech/utilisation
+
+
