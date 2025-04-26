@@ -97,5 +97,5 @@ await RocketAuthentication.fetchWithAuth('/api/rocket_modules', { method: 'GET' 
   → Connectez-vous, allez dans « Mes fusées », cliquez sur « Modifier ».
 
 ## 10. Auteurs / Crédits
-- Développé par **[Pierre-Ange Delbary Rouillé]** (projet CAS - IB 2024/2025)
+- Développé par **Pierre-Ange Delbary Rouillé** (projet CAS - IB 2023/2025)
 - Merci à toutes les ressources pédagogiques utilisées : Planète Sciences, CNES, ESA, etc.
