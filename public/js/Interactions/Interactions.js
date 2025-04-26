@@ -139,18 +139,21 @@ document.addEventListener("recreate-rocket-selector", (event)=>{
     //console.log('recreate-rocket-selector', event.detail);
     let rocketModels = event.detail || [];
     //let rocketSelect = document.getElementById('rocket-select');
-    rocketSelect.innerHTML = null;
-    rocketModels.forEach((rocketModel, index) => {
-        let option = document.createElement('option');
-        option.value = rocketModel;
-        option.innerText = rocketModel;
-        if (index === 0) {
-            option.setAttribute('selected', 'selected')
-            rocketSelect.value = rocketModel;
-            rocket.useModel(rocketModel);
-        }
-        rocketSelect.appendChild(option);
-    })
+    if(rocketModels.length>0) {
+        rocketSelect.innerHTML = null;
+        rocketModels.forEach((rocketModel, index) => {
+            let option = document.createElement('option');
+            option.value = rocketModel;
+            option.innerText = rocketModel;
+            if (index === 0) {
+                option.setAttribute('selected', 'selected')
+                rocketSelect.value = rocketModel;
+                rocket.useModel(rocketModel);
+            }
+            rocketSelect.appendChild(option);
+        })
+        rocketSelect.dispatchEvent(new Event('change'));
+    }
 })
 
 
