@@ -305,7 +305,7 @@ canvas {
         <p>
             <div>
                 <div style="float: left"><label for="step" class="lg-time-step">Pas d'échantillonnage (s) :</label></div>
-                <div style="float: right"><input type="number" id="step" value="0.5" step="0.1" min="0.1" max="2" onchange="updateValue('step')" /></div>
+                <div style="float: right"><input type="number" id="step" value="2" step="0.1" min="0.01" max="5" onchange="updateValue('step')" /></div>
                 <div style="clear: both;"></div>
             </div>
         <p>
@@ -323,7 +323,7 @@ canvas {
         <p>
             <div>
                 <div style="float: left"><label for="maxTime" class="lg-maximum-printable-time">Durée maximale affichée (s) :</label></div>
-                <div style="float: right"><input type="number" id="maxTime" value="300" step="10" min="0" max="50000000" onchange="updateValue('maxTime')"/></div>
+                <div style="float: right"><input type="number" id="maxTime" value="20000" step="10" min="0" max="50000000" onchange="updateValue('maxTime')"/></div>
                 <div style="clear: both;"></div>
             </div>
     </div>

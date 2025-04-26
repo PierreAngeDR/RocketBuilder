@@ -20,7 +20,7 @@ export default class RocketConfigurationsManager {
 
     async getRocketsConfigurations() {
         this.rocket.clearModelSettings();
-        let handledMotionClasses = [];
+        let handledMotionClasses = ['RocketMotionStageExtended'];
 
         let modules = ModulesManager.getModules();
         for(let module of modules) {
