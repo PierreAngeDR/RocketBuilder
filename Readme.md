@@ -117,7 +117,7 @@ await RocketAuthentication.fetchWithAuth('/api/rocket_modules', { method: 'GET' 
 
 ## 9. FAQ
 - **Full documentation**
-  → Available [here](https://pierre-ange.delbary-rouille.net/rocket/doc).
+  → Available <a href="https://pierre-ange.delbary-rouille.net/rocket/doc" target="_blank">here</a>.
 - **I can't log in.**
   → Make sure the backend API is reachable and you are using a valid token.
 - **The simulation doesn't start.**
