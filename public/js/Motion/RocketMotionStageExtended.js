@@ -130,7 +130,6 @@ export default class RocketMotionStageExtended extends RocketMotionBase {
      */
     calculateDrag(speed) {
         this.log('Calculate drag for speed', speed, 'and A', this.A())
-        // TODO : shouldn't it depend on the speed sign ?
         return 0.5 * this.Cd() * this.calculateRho() * this.A() * speed * speed * Math.sign(speed);
     }
 

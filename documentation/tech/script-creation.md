@@ -69,14 +69,15 @@ La classe **`"RocketMotionStageExtended"`** propose des méthodes publiques qui 
 
 Les variables accessibles propres aux Sous-Modules sont les suivantes : 
 
-* t (temps), qui peut être accédée globalement en appelant `this.t()`
-* v (vitesse), qui peut être accédée globalement en appelant `this.v()`
-* h (altitude), qui peut être accédée globalement en appelant `this.h()`
-* m (masse totale), qui peut être accédée globalement en appelant `this.m()`
-* specifications (spécifications du sous-module), qui peut être accédée globalement en appelant `this. specifications()`
-* running (est-ce que le -sousmodule est encore actif. Si oui, il reste dans le module, sinon, il devient un nouveau module indépendant), qui peut être accédée globalement en appelant `this.running()`
-* enginePropellingStartTime (temps à partir duquel le moteur s'allume), qui peut être accédée globalement en appelant `this.enginePropellingStartTime()`
-* enginePropellingDuration (temps de fonctionnement du moteur), qui peut être accédée globalement en appelant `this.enginePropellingDuration()`
+* `t` (temps), qui peut être accédée globalement en appelant `this.t()`
+* `dt` (pas de temps), qui peut être accédée globalement en appelant `this.getDt()`
+* `v` (vitesse), qui peut être accédée globalement en appelant `this.v()`
+* `h` (altitude), qui peut être accédée globalement en appelant `this.h()`
+* `m` (masse totale), qui peut être accédée globalement en appelant `this.m()`
+* `specifications` (spécifications du sous-module), qui peut être accédée globalement en appelant `this. specifications()`
+* `running` (est-ce que le -sousmodule est encore actif. Si oui, il reste dans le module, sinon, il devient un nouveau module indépendant), qui peut être accédée globalement en appelant `this.running()`
+* `enginePropellingStartTime` (temps à partir duquel le moteur s'allume), qui peut être accédée globalement en appelant `this.enginePropellingStartTime()`
+* `enginePropellingDuration` (temps de fonctionnement du moteur), qui peut être accédée globalement en appelant `this.enginePropellingDuration()`
 
 
 
@@ -86,19 +87,149 @@ Les variables locales/globales sont des variables qui sont à la fois propres au
 
 Les variables locales/globales propres aux Sous-Modules sont les suivantes : 
 
-* F (force de pousée), qui peut être accédée globalement en appelant `this.m0()`
-* m0 (masse à vide), qui peut être accédée globalement en appelant `this.m0()`
-* mc (masse de carburant), qui peut être accédée globalement en appelant `this.m()`
-* A (section frontale), qui peut être accédée globalement en appelant `this.A()`
-* dm (masse total de tous les sous-module du module), qui peut être accédée globalement en appelant `this.dm()`
+* `F` (force de pousée), qui peut être accédée globalement en appelant `this.m0()`
+* `m0` (masse à vide), qui peut être accédée globalement en appelant `this.m0()`
+* `mc` (masse de carburant), qui peut être accédée globalement en appelant `this.m()`
+* `A` (section frontale), qui peut être accédée globalement en appelant `this.A()`
+* `dm` (masse total de tous les sous-module du module), qui peut être accédée globalement en appelant `this.dm()`
 
 
 #### Les méthodes publiques héritables
 
 Les méthodes suivantes peuvent être modifiées :
 
-* 
+* `sharedF`
+* `sharedA`
+* `sharedM0`
+* `sharedMc`
+* `sharedM`
+* `sharedDm`
+* `calculateDrag`
+* `calculateAcceleration`
+* `updateEuler` (méthode de calcul par Euler)
+* `updateHeun` (méthode de calcul par Heun)
+* `updateRK4` (méthode de calcul par Runge-Kutta 4)
+* `updateVariants`
+* `addInternalVariables` (permet l'ajout de nouvelles variables locales)
+* `doLoadSharedVariables` (permet l'ajout de nouvelles variables globales)
 
 
 ### Déclaration d'une nouvelle variable locale/globale
 
+Imaginons que vous souhaitez ajouter une nouvelle variable qui interviendra dans votre calcul de trajectoire. Par exmple **`l'angle théta`** de la fusée avec l'axe vertical. Cette variable n'existe pas initialement dans le programme, mais vous avez la possibilité de la créer et de l'exploiter.
+
+Pour ce faire, il vous faudra :
+
+* Ajouter la variable via la méthode `RocketMotionSharedVariable.add`
+* Créer une fonction qui renvoie une valeur partagée.
+
+
+#### Exemple de déclaration de la variable locale Theta
+
+Surchargez la méthode d'initialisation des variables locales/globales `addInternalVariables ` :
+
+
+```javascript 
+
+    addInternalVariables() {
+        super.addInternalVariables();
+        
+        this._internals
+            .addVariable('theta',0)           // Angle Theta
+
+        return this;
+    }
+    
+```
+
+Ainsi, dans votre classe, vous aurez maintenant accès à une nouvelle variable propre à votre sous-module, et pourrez y accéder via : 
+
+```javascript 
+
+    this.tetha()	    // getter
+    this.tetha(30)   // setter -- met la variable à la valeur 30.
+    
+```
+    
+
+
+#### Exemple de déclaration de la variable locale/globale Theta
+
+
+Pour initialiser une nouvelle variable globale, vous devez d'abord avoir défini une variable **locale** comme vu juste avant.
+
+Surchargez la méthode d'initialisation des variables locales/globales `doLoadSharedVariables ` :
+
+
+```javascript 
+
+    doLoadSharedVariables() {
+        super.doLoadSharedVariables();
+
+        // Angle thêta
+        RocketMotionSharedVariable.add(this, 'theta', this.localTheta, this.sharedTheta);
+
+        return this;
+    }
+    
+
+```
+
+où :
+
+* this.localTheta() sera la valeur locale (identique à this.theta(), mais this.theta `locale` a été remplacée par this.localTheta)
+* this.theta() sera la valeur globale commune ou compilée à tous les sous-modules du module.
+
+Il vous faut maintenant définir la méthode **`sharedTheta`** qui permet de définir la méthode globale de la variable :
+
+
+```javascript 
+
+
+    sharedTheta() {
+        return this.all().reduce((acc, motion)=> {
+            // "all" est la fonction qui renvoie la liste de tous les sous-modules du module
+            // "motion" est la classe de trajectoire du sous-module renvoyé
+            return acc + motion.localTheta();
+        }, 0);
+    }
+    
+```
+
+Par exemple, `this.theta()` renverra la somme des angles theta de chaque sous-module. En l'espèce, calculer la somme des angles thêta n'a pas forcément de sens, mais c'était pour donner un exemple.
+
+Votre classe **`NewMotionClass `** ressemblerait alors à ceci : 
+
+
+```javascript 
+
+    export default class NewMotionClass extends RocketMotionStageExtended {
+	    addInternalVariables() {
+	        super.addInternalVariables();
+	        
+	        this._internals
+	            .addVariable('theta',0)           // Angle Theta
+	
+	        return this;
+	    }
+	
+	    doLoadSharedVariables() {
+	        super.doLoadSharedVariables();
+	
+	        // Angle thêta
+	        RocketMotionSharedVariable.add(this, 'theta', this.localTheta, this.sharedTheta);
+	
+	        return this;
+	    }
+	
+	    sharedTheta() {
+	        return this.all().reduce((acc, motion)=> {
+	            // "all" est la fonction qui renvoie la liste de tous les sous-modules du module
+	            // "motion" est la classe de trajectoire du sous-module renvoyé
+	            return acc + motion.localTheta();
+	        }, 0);
+	    }
+	}
+    
+```
+    
