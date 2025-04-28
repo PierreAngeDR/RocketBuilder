@@ -239,5 +239,5 @@ Votre classe **`NewMotionClass `** ressemblerait alors à ceci :
     
 ```
 
-# Exemple concret d'une nouvelle classe : 
+# Exemple concret d'une nouvelle classe avec mouvement 2D
     

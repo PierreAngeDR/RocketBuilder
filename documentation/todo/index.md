@@ -88,12 +88,12 @@ function getWindAtAltitude(y) {
 
 | Amélioration | Complexité | Intérêt pour le réalisme |
 |:---|:---:|:---:|
-| Mouvement 2D/3D (x,y) | ⭐⭐ | ⭐⭐⭐⭐ |
-| Variation d'angle (pitch program) | ⭐⭐ | ⭐⭐⭐⭐ |
-| Vent (variable en altitude) | ⭐⭐⭐ | ⭐⭐⭐⭐ |
-| Poussée variable | ⭐⭐⭐ | ⭐⭐⭐ |
-| Masse variable | ⭐⭐⭐ | ⭐⭐⭐⭐ |
-| Traînée Mach dépendante | ⭐⭐⭐⭐ | ⭐⭐⭐ |
-| Rotation de la Terre (Coriolis) | ⭐⭐⭐⭐ | ⭐⭐ |
-| Séparation d'étage | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
-| Température/pression détaillée | ⭐⭐ | ⭐⭐ |
+| Mouvement 2D/3D (x,y) | 👍👍 | 👍👍👍👍 |
+| Variation d'angle (pitch program) | 👍👍 | 👍👍👍👍 |
+| Vent (variable en altitude) | 👍👍👍 | 👍👍👍👍 |
+| Poussée variable | 👍👍👍 | 👍👍👍 |
+| Masse variable | 👍👍👍 | 👍👍👍👍 |
+| Traînée Mach dépendante | 👍👍👍👍 | 👍👍👍 |
+| Rotation de la Terre (Coriolis) | 👍👍👍👍 | 👍👍 |
+| Séparation d'étage | 👍👍👍👍 | 👍👍👍👍 |
+| Température/pression détaillée | 👍👍 | 👍👍 |

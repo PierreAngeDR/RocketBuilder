@@ -70,15 +70,15 @@ function getWindAtAltitude(y) {
 
 | Amélioration | Complexité | Intérêt pour le réalisme |
 |:---|:---:|:---:|
-| Mouvement 2D/3D (x,y) | ⭐⭐ | ⭐⭐⭐⭐ |
-| Variation d'angle (pitch program) | ⭐⭐ | ⭐⭐⭐⭐ |
-| Vent (variable en altitude) | ⭐⭐⭐ | ⭐⭐⭐⭐ |
-| Poussée variable | ⭐⭐⭐ | ⭐⭐⭐ |
-| Masse variable | ⭐⭐⭐ | ⭐⭐⭐⭐ |
-| Traînée Mach dépendante | ⭐⭐⭐⭐ | ⭐⭐⭐ |
-| Rotation de la Terre (Coriolis) | ⭐⭐⭐⭐ | ⭐⭐ |
-| Séparation d'étage | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
-| Température/pression détaillée | ⭐⭐ | ⭐⭐ |
+| Mouvement 2D/3D (x,y) | 👍👍 | 👍👍👍👍 |
+| Variation d'angle (pitch program) | 👍👍 | 👍👍👍👍 |
+| Vent (variable en altitude) | 👍👍👍 | 👍👍👍👍 |
+| Poussée variable | 👍👍👍 | 👍👍👍 |
+| Masse variable | 👍👍👍 | 👍👍👍👍 |
+| Traînée Mach dépendante | 👍👍👍👍 | 👍👍👍 |
+| Rotation de la Terre (Coriolis) | 👍👍👍👍 | 👍👍 |
+| Séparation d'étage | 👍👍👍👍 | 👍👍👍👍 |
+| Température/pression détaillée | 👍👍 | 👍👍 |
 
 ---
 
@@ -88,6 +88,8 @@ function getWindAtAltitude(y) {
 - Ajouter l'axe **x**.
 - Décomposer la vitesse en **vx** et **vy**.
 - Ajouter les équations de mouvement pour x et y.
+
+[Mouvement 2D](./point1-mouvement2D.md)
 
 ## Étape 2 : Angle de poussée variable
 - Ajouter un **angle de poussée θ(t)**.

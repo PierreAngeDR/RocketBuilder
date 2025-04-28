@@ -22,5 +22,8 @@ chapters:
   - file: todo/index  # Third pseudo-root
     sections:
       - file: todo/implementation
+      - file: todo/point1-mouvement2D
+
+      
 
 
