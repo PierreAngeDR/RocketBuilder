@@ -40,22 +40,48 @@
   - Docker Compose : services `php-fpm`, `mysql`, `nginx-proxy`, `certbot` (éventuellement)
 
 ## 4. Installation locale (développeurs)
-```bash
-# Cloner le projet
-git clone https://github.com/PierreAngeDR/RocketBuilder
 
-# Aller dans le dossier
-cd RocketBuilder
+## Initialisation
 
-# Lancer l'environnement Docker
-sudo docker compose up -d
+Editer le fichier .env.dev ou .env.prod et configurer la connection base de données
 
-# Accéder à l'interface sur localhost (ex: http://localhost/rocket)
-```
+    DATABASE_URL="mysql://root:motdepasse@127.0.0.1:3306/rocket?serverVersion=8.0"
+
+    composer install
+
+    ./build-tailwind.sh
+
+    bin/console cache:clear
+
+Configurer éventuellement la clé ROUTE_PREFIX dans .env.prod ou .env.dev, et lancer la régénération de la clé pour services.yaml :
+
+    php bin/console update:route-prefix 
+
+
+
+## Régéneration des clés jwt
+
+    php bin/console lexik:jwt:generate-keypair
+
+## Régénération assetmapper
+
+    php bin/console asset-map:compile
+
+## Création de la base de données
+
+    php bin/console doctrine:database:create
+
+    php bin/console make:migration
+
+    php bin/console doctrine:migrations:migrate
+
+
 
 - Variables d'environnement : `.env`
 - Migration de la base de données : `php bin/console doctrine:migrations:migrate`
 - Création d'un utilisateur via l'API POST `/api/register` (si prévu)
+
+
 
 ## 5. Utilisation de l'API
 - Authentification : `POST /api/login`
