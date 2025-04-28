@@ -1,8 +1,8 @@
-import RocketMotionBase from './Motion/RocketMotionBase.js';
-import RocketMotionMethods from "./Motion/RocketMotionMethods.js";
-import RocketMotionSharedVariable from "./Motion/RocketMotionSharedVariable.js";
-import Constraints from "./Constraint/Constraints.js";
-import RocketPhysics from "./Physics/RocketPhysics.js";
+import RocketMotionBase from './RocketMotionBase.js';
+import RocketMotionMethods from "./RocketMotionMethods.js";
+import RocketMotionSharedVariable from "./RocketMotionSharedVariable.js";
+import Constraints from "../Constraint/Constraints.js";
+import RocketPhysics from "../Physics/RocketPhysics.js";
 
 export default class RocketMotionStageExtended extends RocketMotionBase {
     debugLog = false;
