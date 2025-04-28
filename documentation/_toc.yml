@@ -19,5 +19,8 @@ chapters:
       - file: tech/schema
       - file: tech/utilisation
       - file: tech/script-creation
+  - file: todo/index  # Third pseudo-root
+    sections:
+      - file: todo/implementation
 
 

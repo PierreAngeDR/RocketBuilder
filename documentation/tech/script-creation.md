@@ -1,4 +1,5 @@
-# Creation de Scripts de trajectoire
+# Creation de Scripts de Trajectoire
+
 
 ## Contexte
 
@@ -10,9 +11,11 @@ Votre **`"NewMotionClass"`** sera implémentée grâce à l'éditeur de script f
 
 Vous pourrez y ajouter toutes les variables nécessaires à votre calcul de trajectoire, et y définir vos propres méthodes de calcul.
 
+
 ## Principe 
 
 Chaque nouvelle classe sera affectée à un Sous-Module (par exemple, un étage de la fusée).
+
 
 ### Comment fonctionnent les modules et sous-modules ?
 
@@ -29,6 +32,7 @@ Au fil du temps, chaque Sous-Module va avoir son mode de fonctionnement propre. 
 * booster gauche
 
 Pour calculer la trajectoire de **chaque** module, notre programme prend pour **chaque** module, celui qui est le plus haut. Pour chaque module, il calcule la nouvelle trajectoire en fonction des sous-modules actifs du module, et prend le sous-module le plus élevé du module pour calculer la position finale **du module**.
+
 
 ### Affectation des classes de trajectoire
 
@@ -47,6 +51,7 @@ Pour tout ceci, il faut créer des classes de fonctionnement.
 
 **`"NewMotionClass"`** doit explicitement hériter de la classe **`"RocketMotionStageExtended"`**.
 
+
 ### La classe de base héritée
 
 Le fichier de script qui contient **`"NewMotionClass"`**  ne **doit pas** faire d'import. Ce doit donc être un fichier de classe **autonôme**
@@ -64,6 +69,7 @@ export default class NewMotionClass extends RocketMotionStageExtended {
 ### Les méthodes et variables globales/locales
 
 La classe **`"RocketMotionStageExtended"`** propose des méthodes publiques qui peuvent être modifiées/héritées par chaque classe qui l'étend. De même, elle propose des variables accessibles, et variables locales/globales qui peuvent être visibles d'un Sous-Module à l'autre.
+
 
 #### Les variables communes
 
@@ -232,4 +238,6 @@ Votre classe **`NewMotionClass `** ressemblerait alors à ceci :
 	}
     
 ```
+
+# Exemple concret d'une nouvelle classe : 
     
