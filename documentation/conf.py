@@ -34,7 +34,7 @@ html_theme_options = {
     "use_edit_page_button": False,
     "path_to_docs": "docs/",  # chemin vers les docs dans le repo
     "home_page_in_toc": True,  # lien vers la page d'accueil dans la ToC
-    "show_navbar_depth": 2,  # Profondeur du menu navbar (2 = sections + sous-sections)
+    "show_navbar_depth": 3,  # Profondeur du menu navbar (2 = sections + sous-sections)
     "launch_buttons": {  # (optionnel) désactiver lancement Binder/Colab
         "binderhub_url": "",
         "colab_url": "",
@@ -65,5 +65,5 @@ myst_title_to_header = True
 
 # -- Extra HTML options -------------------------------------------------------
 html_title = "Documentation du projet RocketBuilder"
-html_logo = "_static/logo.png"  # (optionnel) ton logo
-html_favicon = "_static/favicon.ico"  # (optionnel) ton favicon
+html_logo = "_static/favicon.png"  
+html_favicon = "_static/favicon.ico"  
