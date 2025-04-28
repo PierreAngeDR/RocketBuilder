@@ -116,6 +116,8 @@ await RocketAuthentication.fetchWithAuth('/api/rocket_modules', { method: 'GET' 
 - Specific environment variables for `.env.prod`
 
 ## 9. FAQ
+- **Full documentation**
+  → Available [here](https://pierre-ange.delbary-rouille.net/rocket/doc).
 - **I can't log in.**
   → Make sure the backend API is reachable and you are using a valid token.
 - **The simulation doesn't start.**
