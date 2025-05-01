@@ -12,7 +12,7 @@
 
 
 
-![Ecran d'accueil](./_static/ecran-d-accueil.png "écran d'accueil de l'application :)")
+![Ecran d'accueil](./_static/user/ecran-d-accueil.png "écran d'accueil de l'application :)")
 
 
 

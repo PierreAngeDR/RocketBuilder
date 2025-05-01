@@ -3,6 +3,7 @@ import RocketMotionMethods from "./RocketMotionMethods.js";
 import RocketMotionSharedVariable from "./RocketMotionSharedVariable.js";
 import Constraints from "../Constraint/Constraints.js";
 import RocketPhysics from "../Physics/RocketPhysics.js";
+import MotionVector from "../Vector/MotionVector.js";
 
 export default class RocketMotionStageExtended extends RocketMotionBase {
     debugLog = false;
@@ -51,7 +52,7 @@ export default class RocketMotionStageExtended extends RocketMotionBase {
      *
      * There is no setter for all submodules of the module at the same time (each submodule has to set its own _F value
      *
-     * @returns {RocketMotionStage2}
+     * @returns {RocketMotionStageExtended}
      */
     doLoadSharedVariables() {
         super.doLoadSharedVariables();
@@ -125,31 +126,82 @@ export default class RocketMotionStageExtended extends RocketMotionBase {
      *              Cd is the rocket drag coefficient. It depends on each Rocket
      *
      *
-     * @param {number} speed
-     * @returns {number}
+     * @param {MotionVector} speedVector
+     * @returns {MotionVector}
      */
-    calculateDrag(speed) {
-        this.log('Calculate drag for speed', speed, 'and A', this.A())
-        return 0.5 * this.Cd() * this.calculateRho() * this.A() * speed * speed * Math.sign(speed);
+    calculateDragVector(speedVector) {
+        this.log('Calculate drag for speed', speedVector.clone(), speedVector.getNorm(), 'and A', this.A())
+        let speedNorm = speedVector.getNorm();
+        //return 0.5 * this.Cd() * this.calculateRho() * this.A() * speedNorm * speedNorm * speed.verticalSign();
+        let coefficient = -0.5 * this.Cd() * this.calculateRho() * this.A() * speedNorm;
+        this.log('Drag coefficient', coefficient)
+        return MotionVector.multiply(speedVector, coefficient);
     }
 
     /**
      *
-     * @param {number} speed
-     * @param {number} drag
-     * @returns {number}
+     * @param {MotionVector}dragVector
+     * @param {number}thrustNorm
+     * @returns {MotionVector}
      */
-    calculateAcceleration(speed, drag) {
-        return (this.F() - this.calculateGravitationForce() - drag) / this.m();
+    calculateThrustForceVector(thrustNorm) {
+        // let unitaryVector = dragVector.scale(-1/dragVector.getNorm());
+        // unitaryVector = unitaryVector.isNull() ? unitaryVector.unitaryVector() : unitaryVector;
+
+        //let unitaryVector = (dragVector.getNorm()===0) ? dragVector.unitaryVector() : dragVector.scale(-1/dragVector.getNorm());
+
+
+        this.log('Unitary Vector', this.directionVector().clone())
+        return this.directionVector().clone().scale(thrustNorm);
     }
 
-    shareData(methodName, acceleration, drag) {
+    /**
+     *
+     * @param {MotionVector} dragVector
+     * @returns {MotionVector}
+     */
+    calculateAccelerationVector(dragVector) {
+        //return (this.F() - this.calculateGravitationForce() - dragVector) / this.m();
+        this.log('calculateAccelerationVector', dragVector.clone())
+        let thrustForceVector = this.calculateThrustForceVector(this.F());
+        this.log('thrustForceVector', thrustForceVector.clone())
+
+        thrustForceVector
+                    .add(this.calculateGravitationForceVector())
+                    .add(dragVector)
+                    .scale(1/this.m());
+        this.log('Thrust Force Vector', thrustForceVector, this.F())
+        return thrustForceVector;
+    }
+
+    /**
+     *
+     * @param {*} data
+     * @return {RocketMotionStageExtended}
+     */
+    addExtraData(data) {
+        return this;
+    }
+
+    /**
+     *
+     * @param {RocketMotionBase}motion
+     * @param {*}data
+     * @return {RocketMotionStageExtended}
+     */
+    addExtraMotionData(motion, data) {
+        return this;
+    }
+
+    shareData(methodName, accelerationVector, dragVector) {
         let data = {
             t: this.t(),
-            h: this.h(),
-            v: this.v(),
-            a:acceleration,
-            d:drag,
+            //h: this.h(),
+            h: this.coordsVector().z(),
+            //v: this.v(),
+            v: this.speedVector().getNorm(),
+            a: accelerationVector.getNorm(),
+            d: dragVector.getNorm(),
             m : this.m(),
             mc : this.mc(),
             m0 : this.m0(),
@@ -158,6 +210,7 @@ export default class RocketMotionStageExtended extends RocketMotionBase {
             dm : this.dm(),
             g: this.calculateGravity()
         };
+        this.addExtraData(data);
         this.saveLastData(methodName, data);
 
 
@@ -165,6 +218,10 @@ export default class RocketMotionStageExtended extends RocketMotionBase {
         this.others().map(motion => {
             motion.v(this.v());
             motion.h(this.h());
+            motion.directionVector().set(this.directionVector());
+            motion.speedVector().set(this.speedVector());
+            motion.coordsVector().set(this.coordsVector());
+            this.addExtraMotionData(motion, data);
             motion.saveLastData(methodName, data);
         })
 
@@ -173,19 +230,27 @@ export default class RocketMotionStageExtended extends RocketMotionBase {
 
     /**
      *
-     * @param {string} methodName
-     * @param {number} acceleration
-     * @param {number} drag
+     * @param {MotionVector}newSpeedVector
+     * @returns {RocketMotionStageExtended}
      */
-    updateEuler(methodName, acceleration, drag) {
-        let dt = this.commonParameters.getDt();
-        let newSpeed = this.v() + acceleration * dt;
-        let newAltitude = this.h() + newSpeed * dt;
+    updateSpeed(newSpeedVector) {
+        this.speedVector().set(newSpeedVector);
+        this.v(newSpeedVector.getNorm());
 
-        this.v(newSpeed);
-        this.h(Constraints.alwaysPositive(newAltitude));
+        return this;
+    }
 
-        this.shareData(methodName, acceleration, drag);
+
+    /**
+     *
+     * @param {MotionVector}newCoordsVector
+     * @returns {RocketMotionStageExtended}
+     */
+    updateCoords(newCoordsVector) {
+        let newDirectionVector = newCoordsVector.clone().substract(this.coordsVector()).toUnitary();
+        this.directionVector().set(newDirectionVector);
+        this.coordsVector().set(newCoordsVector.x(), newCoordsVector.y(), Constraints.alwaysPositive(newCoordsVector.z()));
+        this.h(this.coordsVector().z());
 
         return this;
     }
@@ -193,28 +258,58 @@ export default class RocketMotionStageExtended extends RocketMotionBase {
     /**
      *
      * @param {string} methodName
-     * @param {number} acceleration
-     * @param {number} drag
+     * @param {MotionVector} accelerationVector
+     * @param {MotionVector} dragVector
+     */
+    updateEuler(methodName, accelerationVector, dragVector) {
+        let dt = this.commonParameters.getDt();
+        //let newSpeed = this.v() + acceleration * dt;
+        let newSpeedVector = MotionVector.sum(this.speedVector(),
+                                                        MotionVector.multiply(accelerationVector, dt));
+        //let newAltitude = this.h() + newSpeed * dt;
+        let newAltitudeVector = MotionVector.sum(this.coordsVector(),
+                                                        MotionVector.multiply(newSpeedVector, dt));
+
+
+        this.updateSpeed(newSpeedVector).updateCoords(newAltitudeVector);
+
+        this.shareData(methodName, accelerationVector, dragVector);
+
+        return this;
+    }
+
+    /**
+     *
+     * @param {string} methodName
+     * @param {MotionVector} accelerationVector
+     * @param {MotionVector} dragVector
      *
      * TODO : need to apply Heun twice. First time on Speed, then on Altitude
      */
-    updateHeun(methodName, acceleration, drag) {
+    updateHeun(methodName, accelerationVector, dragVector) {
         let dt = this.commonParameters.getDt();
-        let d_n = this.calculateDrag(this.v())
-        let a_n = this.calculateAcceleration(this.v(), d_n);
-        let v_pred = this.v() + dt * a_n;
-        let h_pred = this.h() + dt * this.v();
-        let d_pred = this.calculateDrag(v_pred);
-        let a_pred = this.calculateAcceleration(v_pred, d_pred);
-        acceleration  = (a_n + a_pred)/2;
+        //let d_n = this.calculateDragNorm(this.v())
+        let d_nVector = this.calculateDragVector(this.speedVector())
+        let a_nVector = this.calculateAccelerationVector(d_nVector);
+        let v_predVector = MotionVector.sum(this.speedVector(),
+                                            MotionVector.multiply( a_nVector, dt));
+        //let h_pred = this.h() + dt * this.v();
+        let h_pred = MotionVector.sum(this.coordsVector(),
+                                    MotionVector.multiply(this.speedVector(), dt));
+        let d_predVector = this.calculateDragVector(v_predVector);
+        let a_predVector = this.calculateAccelerationVector(d_predVector);
+        accelerationVector  = MotionVector.sum(a_nVector, a_predVector).scale(0.5);
 
-        let newSpeed = this.v() + dt * acceleration;
-        let newAltitude = this.h() + (dt / 2) * (newSpeed + v_pred);
+        let newSpeedVector = MotionVector.sum(this.speedVector(),
+                                MotionVector.multiply(accelerationVector, dt));
+        //let newAltitude = this.h() + (dt / 2) * (newSpeed + v_pred);
+        let newAltitudeVector = MotionVector.sum(this.coordsVector(),
+                        MotionVector.multiply(MotionVector.sum(newSpeedVector, v_predVector),  dt / 2));
 
-        this.v(newSpeed);
-        this.h(Constraints.alwaysPositive(newAltitude));
 
-        this.shareData(methodName, acceleration, drag);
+        this.updateSpeed(newSpeedVector).updateCoords(newAltitudeVector);
+
+        this.shareData(methodName, accelerationVector, dragVector);
 
         return this;
     }
@@ -222,46 +317,56 @@ export default class RocketMotionStageExtended extends RocketMotionBase {
     /**
      *
      * @param {string} methodName
-     * @param {number} acceleration
-     * @param {number} drag
+     * @param {MotionVector} accelerationVector
+     * @param {MotionVector} dragVector
      *
      * TODO : need to apply RK4 twice. First time on Speed, then on Altitude
      *
      */
-    updateRK4(methodName, acceleration, drag) {
+    updateRK4(methodName, accelerationVector, dragVector) {
         let dt = this.commonParameters.getDt();
-        let k1 = acceleration;
-        let k2 = acceleration + (dt/2) * k1;
-        let k3 = acceleration + (dt/2) * k2;
-        let k4 = acceleration + dt * k3;
-        acceleration = (k1 + 2 * k2 + 2 * k3 + k4)/6;
+        let k1 = accelerationVector.clone();
+        let k2 = accelerationVector.clone().add(k1.clone().scale(dt/2));
+        let k3 = accelerationVector.clone().add(k2.clone().scale(dt/2));
+        let k4 = accelerationVector.clone().add(k3.clone().scale(dt));
+        accelerationVector = k1.add(k2.scale(2)).add(k3.scale(2)).add(k4).scale(1/6);
 
-        let newSpeed = this.v() + dt * acceleration;
-        let newAltitude = this.h() + newSpeed * dt;
-        this.v(newSpeed);
-        this.h(Constraints.alwaysPositive(newAltitude));
+        let newSpeedVector = accelerationVector.clone().scale(dt).add(this.speedVector());
+        let newAltitudeVector = this.coordsVector().clone().add(newSpeedVector.clone().scale(dt));
 
-        this.shareData(methodName, acceleration, drag);
+        this.updateSpeed(newSpeedVector).updateCoords(newAltitudeVector);
+
+        this.shareData(methodName, accelerationVector, dragVector);
 
         return this;
     }
 
     /**
-     * update variables that are calculation method independent
+     *
+     * @returns {boolean}
+     */
+    hasFuel() {
+        return this.localM() > this.localM0();
+    }
+
+    /**
+     *
+     * @returns {boolean}
+     */
+    hasThrust() {
+        return this.localF() > 0;
+    }
+
+    /**
+     * Update sub module mass if running and has fuel and has thrust
      *
      * @returns {RocketMotionStageExtended}
      */
-    updateVariants() {
-        //console.clear();
-        this.log('####################################################################################')
-        let dt = this.commonParameters.getDt();
-        this.t(this.t() + dt);
-
-
+    updateMass() {
         if (this.running()) {
-            if (this.localM() > this.localM0()) {
-                // TODO : use Math.min so that it's not < to m0
-                let deltaM = (this.localF() === 0) ? 0 : this.localDm() * dt;
+            if (this.hasFuel()) {
+                let dt = this.commonParameters.getDt();
+                let deltaM = (this.hasThrust()) ? this.localDm() * dt : 0;
                 let initialMc = this.mc();
                 let initialTotalMass = this.m();
                 let initialM = this.localM();
@@ -281,6 +386,28 @@ export default class RocketMotionStageExtended extends RocketMotionBase {
         return this;
     }
 
+    incrementTime() {
+        let dt = this.commonParameters.getDt();
+        this.t(this.t() + dt);
+
+        return this;
+    }
+
+    /**
+     * update variables that are calculation method independent
+     *
+     * @returns {RocketMotionStageExtended}
+     */
+    updateVariants() {
+        //console.clear();
+        this.log('####################################################################################')
+        this.incrementTime();
+        this.updateMass();
+
+        return this;
+    }
+
+
     /**
      *
      * @returns {boolean}
@@ -296,16 +423,22 @@ export default class RocketMotionStageExtended extends RocketMotionBase {
 
         if (this.running()) {
 
-            const drag = this.calculateDrag(this.v());
-            let acceleration = this.calculateAcceleration(this.v(), drag);
+            this.log('Calculate Drag Vector', this.speedVector().clone())
+
+            const dragVector = this.calculateDragVector(this.speedVector());
+            let accelerationVector = this.calculateAccelerationVector(dragVector);
+
+            this.log('Drag Vector & Acceleration Vector', dragVector.clone(), accelerationVector.clone())
 
             switch(methodName) {
-                case "Euler" : this.updateEuler(methodName, acceleration, drag); break;
-                case "Heun" : this.updateHeun(methodName, acceleration, drag); break;
-                case "RK4" : this.updateRK4(methodName, acceleration, drag); break;
+                case "Euler" : this.updateEuler(methodName, accelerationVector, dragVector); break;
+                case "Heun" : this.updateHeun(methodName, accelerationVector, dragVector); break;
+                case "RK4" : this.updateRK4(methodName, accelerationVector, dragVector); break;
             }
 
-            continueUpdate = (this.h() > 0);
+
+            //continueUpdate = (this.h() > 0);
+            continueUpdate = (this.coordsVector().z() > 0);
         }
 
         return continueUpdate;

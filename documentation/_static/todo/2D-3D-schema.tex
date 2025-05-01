@@ -1,0 +1,52 @@
+\documentclass{standalone}
+\usepackage{tikz}
+\usepackage{tikz-3dplot}
+\usepackage{amsmath}
+
+\begin{document}
+
+% Set the main coordinates
+\tdplotsetmaincoords{70}{120}
+
+\begin{tikzpicture}[tdplot_main_coords, scale=4]
+
+% Axes
+\draw[->] (0,0,0) -- (1.2,0,0) node[anchor=north east] {$x$};
+\draw[->] (0,0,0) -- (0,1.2,0) node[anchor=north west] {$y$};
+\draw[->] (0,0,0) -- (0,0,1.2) node[anchor=south] {$z$};
+
+% Define vector components
+\def\vx{0.8}
+\def\vy{0.6}
+\def\vz{0.7}
+
+% Draw projections
+\draw[dashed] (\vx,\vy,0) -- (\vx,\vy,\vz);
+\draw[dashed] (\vx,0,0) -- (\vx,\vy,0);
+\draw[dashed] (0,\vy,0) -- (\vx,\vy,0);
+\draw[dashed] (0,\vy,0) -- (0,\vy,\vz);
+\draw[dashed] (\vx,0,0) -- (\vx,0,\vz);
+\draw[dashed] (0,0,\vz) -- (\vx,0,\vz);
+\draw[dashed] (0,0,\vz) -- (0,\vy,\vz);
+
+% Draw vectors
+\draw[->, thick] (0,0,0) -- (\vx,0,0) node[anchor=north] {$v_x$};
+\draw[->, thick] (0,0,0) -- (0,\vy,0) node[anchor=west] {$v_y$};
+\draw[->, thick] (0,0,0) -- (0,0,\vz) node[anchor=south] {$v_z$};
+
+\draw[->, thick] (0,0,0) -- (\vx,\vy,0) node[midway, below left] {$\vec{v}_i$};
+\draw[->, thick] (0,0,0) -- (\vx,\vy,\vz) node[anchor=south east] {$\vec{v}$};
+
+% Angle phi in XY plane
+\tdplotdrawarc[->]{(0,0,0)}{0.3}{0}{atan2(\vy,\vx)}{anchor=north}{$\phi$}
+
+% Manually draw theta: curve from vi to v
+\draw[->,thick]
+    (\vx*0.3,\vy*0.3,0)
+    .. controls (\vx*0.3,\vy*0.3,0.0) and (\vx*0.4,\vy*0.4,0.1)
+    .. (\vx*0.4,\vy*0.4,0.26)
+    node[pos=0.8, anchor=west] {$\theta$};
+
+\end{tikzpicture}
+
+\end{document}

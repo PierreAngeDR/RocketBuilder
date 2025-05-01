@@ -13,7 +13,7 @@ Vous arrivez sur la page principale qui est composée de 4 zones :
 * Une zone pour lancer et sélectionner la fusée en dessous,
 * Des graphiques tableaux représentant les données de la fusée au fil du temps tout en bas.
 
-![Fenêtre principale](../_static/ecran-d-accueil.png)
+![Fenêtre principale](../_static/user/ecran-d-accueil.png)
 
 ## Sélection d'un modèle de fusée
 

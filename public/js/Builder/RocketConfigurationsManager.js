@@ -75,6 +75,15 @@ export default class RocketConfigurationsManager {
         }
     }
 
+    /**
+     * converts json data to rocket parameters compatible data.
+     * data should be a json object.
+     * each key value can be an object, or a stringed function, or a string.
+     * if any value is a stringed function, it's evaluated as a function.
+     *
+     * @param data
+     * @returns {*[]}
+     */
     evaluateData(data) {
         if (data.constructor === Array) {
             data = data.map(element => this.evaluateData(element))

@@ -12,13 +12,13 @@ Une fois identifié, le menu en haut à droite vous permet de :
 * Concevoir un script propre.
 
 
-![Fenêtre principale](../_static/menu.png)
+![Fenêtre principale](../_static/user/menu.png)
 
 Sélectionnez alors **`"...des modèles de trajectoires"`**. 
 
 La fenêtre de conception de scripts de trajectoire apparaît alors :
 
-![Fenêtre principale](../_static/motion-editeur.png)
+![Fenêtre principale](../_static/user/motion-editeur.png)
 
 
 
@@ -35,7 +35,7 @@ Effectivement, il pourrait être utile de doter la fuseé de nouveaux paramètre
 La barre lattérale vous indique les scripts existants, et si vous en sélectionnez un, vous pouvez en observer le contenu : 
 
 
-![Motion](../_static/motion-saisie.png)
+![Motion](../_static/user/motion-saisie.png)
 
 
 ### Concevoir un nouveau script
@@ -45,10 +45,10 @@ Pour ajouter un nouveau script, il suffit de cliquer sur le **`+`** dans la barr
 Une fenêtre s'ouvre alors vous proposant de donner un nom à votre script :
 
 
-![Fenêtre principale](../_static/motion-nouveau-script.png)
+![Fenêtre principale](../_static/user/motion-nouveau-script.png)
 
 Une fois votre nom saisi, vous avez accès à la fenêtre de saisie dans laquelle vous pourrez entrer les paramètres de votre classe :
 
-### Documentation sur les classes
+## Comment créer une classe ?
 
-La documentation reste à compléter.
+La documentation est disponible [sur ce lien](../tech/script-creation.md)

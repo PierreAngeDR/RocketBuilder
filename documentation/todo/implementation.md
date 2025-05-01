@@ -23,6 +23,7 @@ Ajout d'une force supplémentaire :
 - **Vent variable selon l'altitude** : `wind_speed(y)`, `wind_direction(y)`.
 
 Exemple de fonction :
+
 ```javascript
 function getWindAtAltitude(y) {
     if (y < 500) return {speed: 5, direction: 90}; // Vent d'Est
@@ -37,17 +38,17 @@ function getWindAtAltitude(y) {
 
 ## 5. Effets aérodynamiques supplémentaires
 - Traînée dépendante de la vitesse : 
-  \[
+  $$
   F_{drag} = \frac{1}{2} \rho v^2 C_d S
-  \]
-- Variation de \( C_d \) selon le Mach.
-- Surface projetée \( S \) variable si orientation change.
+  $$
+- Variation de $ C_d $ selon le Mach.
+- Surface projetée $ S $ variable si orientation change.
 
 ## 6. Consommation de carburant (masse variable)
 - Diminution de la masse au cours du temps :
-  \[
+  $
   m(t) = m_0 - \dot{m} \times t
-  \]
+  $
 - Impact direct sur l'accélération.
 
 ## 7. Effet de la rotation de la Terre (Coriolis)
@@ -61,9 +62,9 @@ function getWindAtAltitude(y) {
 
 ## 9. Température et pression atmosphérique variables
 - Calcul amélioré de la pression dynamique :
-  \[
+  $
   q = \frac{1}{2} \rho v^2
-  \]
+  $
 - Impact sur la stabilité et l'aérodynamisme.
 
 # Résumé rapide
@@ -84,12 +85,22 @@ function getWindAtAltitude(y) {
 
 # Plan d'implémentation progressif
 
-## Étape 1 : Mouvement 2D de base
+## Étape 1 : Mouvement 2D / 3D de base
 - Ajouter l'axe **x**.
 - Décomposer la vitesse en **vx** et **vy**.
 - Ajouter les équations de mouvement pour x et y.
 
+![Schema](../_static/todo/2D-3D-schema.png) 
+
 [Mouvement 2D](./point1-mouvement2D.md)
+
+[Mouvement 3D](./point1-mouvement3D.md)
+
+[Calcul de l'accélération](./point1-mouvement3D-acceleration.md)
+
+[Méthode d'Euler](./point1-mouvement3D-Euler.md)
+
+
 
 ## Étape 2 : Angle de poussée variable
 - Ajouter un **angle de poussée θ(t)**.

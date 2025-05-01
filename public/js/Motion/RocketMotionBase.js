@@ -1,6 +1,7 @@
 import ParameteredRocket from '../Parameter/ParameteredRocket.js';
 import RocketModuleSpecifications from '../Module/RocketModuleSpecifications.js';
 import RocketPhysics from '../Physics/RocketPhysics.js';
+import MotionVector from '../Vector/MotionVector.js';
 
 export default class RocketMotionBase extends ParameteredRocket {
     static defaultAltitude = 0;
@@ -45,6 +46,12 @@ export default class RocketMotionBase extends ParameteredRocket {
 
     /**
      *
+     * @type {string} // See MotionVector.availableModels
+     */
+    vectorModel = "1D";
+
+    /**
+     *
      * @param {RocketModule} module
      * @param parameters
      */
@@ -55,6 +62,8 @@ export default class RocketMotionBase extends ParameteredRocket {
 
         this._shares = {};
 
+        this.setVectorModel();
+
         this.initPhysics()
             .setModule(module)
             .addInternalVariables()
@@ -62,6 +71,14 @@ export default class RocketMotionBase extends ParameteredRocket {
             .addInternalMethods();
 
         //this.loadSharedVariables();
+    }
+
+    /**
+     * @returns {RocketMotionBase}
+     */
+    setVectorModel() {
+        this.vectorModel = MotionVector.getModelType("1D");
+        return this;
     }
 
     /**
@@ -84,7 +101,11 @@ export default class RocketMotionBase extends ParameteredRocket {
          * @var {RocketParameters} self._internals
          */
         this._internals
-            .addVariable('v',0)           // Vitesse
+            .addVariable('v',0)           // Vitesse Norm
+            .addVariable('speedVector', MotionVector.new(this.vectorModel))
+            .addVariable('coordsVector',MotionVector.new(this.vectorModel))  // Coordinates
+            .addVariable('directionVector',MotionVector.new(this.vectorModel, 0,0,1).toUnitary())  // Coordinates
+            //.addVariable('h',0)           // Altitude
             .addVariable('h',0)           // Altitude
             .addVariable('t',0)           // Temps
             .addVariable('m',0)           // Masse Totale
@@ -268,9 +289,6 @@ export default class RocketMotionBase extends ParameteredRocket {
      */
     initSettings() {
         this.log('initSettings for '+this.name(), this)
-        // this.v(0);
-        // this.h(0);
-        // this.t(0);
         this.m(this.m0() + this.mc());
         if (!(this.specifications() instanceof RocketModuleSpecifications)) {
             this.specifications(new RocketModuleSpecifications(this.getDimensions()));
@@ -339,16 +357,31 @@ export default class RocketMotionBase extends ParameteredRocket {
          return false;
     }
 
-    calculateGravitationForce() {
-        return this.calculateGravity()*this.m();
+    /**
+     *
+     * @returns {MotionVector}
+     */
+    calculateGravitationForceVector() {
+        return new MotionVector(this.vectorModel,0,0,-this.calculateGravity()*this.m());
+        //return this.calculateGravity()*this.m();
     }
 
+    /**
+     *
+     * @returns {number}
+     */
     calculateGravity() {
-        return this.physics.gValue(this.h());
+        //return this.physics.gValue(this.h());
+        return this.physics.gValue(this.coordsVector().z());
     }
 
+    /**
+     *
+     * @returns {number}
+     */
     calculateRho() {
-        return this.physics.rhoValue(this.h());
+        //return this.physics.rhoValue(this.h());
+        return this.physics.rhoValue(this.coordsVector().z());
     }
 
 }

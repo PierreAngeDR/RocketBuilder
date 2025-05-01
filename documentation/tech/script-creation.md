@@ -118,11 +118,12 @@ Les méthodes suivantes peuvent être modifiées :
 * `updateVariants`
 * `addInternalVariables` (permet l'ajout de nouvelles variables locales)
 * `doLoadSharedVariables` (permet l'ajout de nouvelles variables globales)
+* `setVectorModel` (permet de spécifier le modèle de vecteurs -- 1D, 2D, 3D). De base initialisé à 1D
 
 
 ### Déclaration d'une nouvelle variable locale/globale
 
-Imaginons que vous souhaitez ajouter une nouvelle variable qui interviendra dans votre calcul de trajectoire. Par exmple **`l'angle théta`** de la fusée avec l'axe vertical. Cette variable n'existe pas initialement dans le programme, mais vous avez la possibilité de la créer et de l'exploiter.
+Imaginons que vous souhaitez ajouter une nouvelle variable qui interviendra dans votre calcul de trajectoire. Par exmple **`l'angle thêta`** de la fusée avec l'axe vertical. Cette variable n'existe pas initialement dans le programme, mais vous avez la possibilité de la créer et de l'exploiter.
 
 Pour ce faire, il vous faudra :
 
@@ -130,7 +131,7 @@ Pour ce faire, il vous faudra :
 * Créer une fonction qui renvoie une valeur partagée.
 
 
-#### Exemple de déclaration de la variable locale Theta
+#### Exemple de déclaration de la variable locale Angle
 
 Surchargez la méthode d'initialisation des variables locales/globales `addInternalVariables ` :
 
@@ -141,7 +142,7 @@ Surchargez la méthode d'initialisation des variables locales/globales `addInter
         super.addInternalVariables();
         
         this._internals
-            .addVariable('theta',0)           // Angle Theta
+            .addVariable('angle',0)           // Angle Thêta
 
         return this;
     }
@@ -152,14 +153,14 @@ Ainsi, dans votre classe, vous aurez maintenant accès à une nouvelle variable 
 
 ```javascript 
 
-    this.tetha()	    // getter
-    this.tetha(30)   // setter -- met la variable à la valeur 30.
+    this.angle()	    // getter
+    this.angle(30)   // setter -- met la variable à la valeur 30.
     
 ```
     
 
 
-#### Exemple de déclaration de la variable locale/globale Theta
+#### Exemple de déclaration de la variable locale/globale Angle
 
 
 Pour initialiser une nouvelle variable globale, vous devez d'abord avoir défini une variable **locale** comme vu juste avant.
@@ -173,7 +174,7 @@ Surchargez la méthode d'initialisation des variables locales/globales `doLoadSh
         super.doLoadSharedVariables();
 
         // Angle thêta
-        RocketMotionSharedVariable.add(this, 'theta', this.localTheta, this.sharedTheta);
+        RocketMotionSharedVariable.add(this, 'angle', this.localAngle, this.sharedAngle);
 
         return this;
     }
@@ -183,26 +184,26 @@ Surchargez la méthode d'initialisation des variables locales/globales `doLoadSh
 
 où :
 
-* this.localTheta() sera la valeur locale (identique à this.theta(), mais this.theta `locale` a été remplacée par this.localTheta)
-* this.theta() sera la valeur globale commune ou compilée à tous les sous-modules du module.
+* this.localAngle() sera la valeur locale (identique à this.angle(), mais this.angle `locale` a été remplacée par this.localAngle)
+* this.angle() sera la valeur globale commune ou compilée à tous les sous-modules du module.
 
-Il vous faut maintenant définir la méthode **`sharedTheta`** qui permet de définir la méthode globale de la variable :
+Il vous faut maintenant définir la méthode **`sharedAngle`** qui permet de définir la méthode globale de la variable :
 
 
 ```javascript 
 
 
-    sharedTheta() {
+    sharedAngle() {
         return this.all().reduce((acc, motion)=> {
             // "all" est la fonction qui renvoie la liste de tous les sous-modules du module
             // "motion" est la classe de trajectoire du sous-module renvoyé
-            return acc + motion.localTheta();
+            return acc + motion.localAngle();
         }, 0);
     }
     
 ```
 
-Par exemple, `this.theta()` renverra la somme des angles theta de chaque sous-module. En l'espèce, calculer la somme des angles thêta n'a pas forcément de sens, mais c'était pour donner un exemple.
+Par exemple, `this.angle()` renverra la somme des angles thêta de chaque sous-module. En l'espèce, calculer la somme des angles thêta n'a pas forcément de sens, mais c'était pour donner un exemple.
 
 Votre classe **`NewMotionClass `** ressemblerait alors à ceci : 
 
@@ -214,7 +215,7 @@ Votre classe **`NewMotionClass `** ressemblerait alors à ceci :
 	        super.addInternalVariables();
 	        
 	        this._internals
-	            .addVariable('theta',0)           // Angle Theta
+	            .addVariable('angle',0)           // Angle Thêta
 	
 	        return this;
 	    }
@@ -223,16 +224,16 @@ Votre classe **`NewMotionClass `** ressemblerait alors à ceci :
 	        super.doLoadSharedVariables();
 	
 	        // Angle thêta
-	        RocketMotionSharedVariable.add(this, 'theta', this.localTheta, this.sharedTheta);
+	        RocketMotionSharedVariable.add(this, 'angle', this.localAngle, this.sharedAngle);
 	
 	        return this;
 	    }
 	
-	    sharedTheta() {
+	    sharedAngle() {
 	        return this.all().reduce((acc, motion)=> {
 	            // "all" est la fonction qui renvoie la liste de tous les sous-modules du module
 	            // "motion" est la classe de trajectoire du sous-module renvoyé
-	            return acc + motion.localTheta();
+	            return acc + motion.localAngle();
 	        }, 0);
 	    }
 	}
@@ -240,4 +241,6 @@ Votre classe **`NewMotionClass `** ressemblerait alors à ceci :
 ```
 
 # Exemple concret d'une nouvelle classe avec mouvement 2D
+
+
     
