@@ -1,5 +1,7 @@
 export default class MotionVector {
     static availableModels = ["1D", "2D", "3D"];
+    static verticalVector = new MotionVector("1D", 0, 0, 1);
+
     model = "1D";
 
     /**

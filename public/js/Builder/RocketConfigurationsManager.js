@@ -18,6 +18,10 @@ export default class RocketConfigurationsManager {
         this.rocket = rocket;
     }
 
+
+    // TODO : add a test on each Motion Classes of a module to see if their vectorModel is compatible.
+    //          this can be done with : let vectorModel = RocketMotionBase.getNewMotion(null, <motion class>).getVectorModel()
+    //          and implement the logic.
     async getRocketsConfigurations() {
         this.rocket.clearModelSettings();
         let handledMotionClasses = ['RocketMotionStageExtended'];

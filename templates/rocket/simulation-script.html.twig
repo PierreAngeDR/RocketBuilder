@@ -12,6 +12,7 @@
 <script tag="rocket" src="/js/Builder/RocketConfigurationsManager.js" type="module"></script>
 
 <script tag="rocket" src="/js/Motion/RocketMotionStageExtended.js" type="module"></script>
+<script tag="rocket" src="/js/MotionClasses/RocketMotion2D.js" type="module"></script>
 <script tag="rocket" src="/js/Api/RocketApi.js" type="module"></script>
 <script tag="rocket" src="/js/Rocket.js" type="module"></script>
 
@@ -172,6 +173,18 @@
                                 'F': 5000,
                                 'Cd': 0.5,       // Drag coefficient at zero altitude of the Rocket. This depends on each Rocket
                                 'motion': RocketMotionStageExtended
+                            }]
+                        } )
+                        .addModelSettings('Basic3D', {
+                            modules : [{
+                                'name': 'Single Stage Rocket',
+                                'm0': 100,
+                                'mc': 50,
+                                'dm': 1,
+                                'A': 1,
+                                'F': 5000,
+                                'Cd': 0.5,       // Drag coefficient at zero altitude of the Rocket. This depends on each Rocket
+                                'motion': RocketMotion2D
                             }]
                         } )
                         .addModelSettings('Falcon9', {

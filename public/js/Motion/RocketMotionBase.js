@@ -55,7 +55,7 @@ export default class RocketMotionBase extends ParameteredRocket {
      * @param {RocketModule} module
      * @param parameters
      */
-    constructor(module, parameters = null) {
+    constructor(module=null, parameters = null) {
         super(parameters, '_internals');
 
         this.uuid = self.crypto.randomUUID();
@@ -64,11 +64,16 @@ export default class RocketMotionBase extends ParameteredRocket {
 
         this.setVectorModel();
 
-        this.initPhysics()
-            .setModule(module)
-            .addInternalVariables()
-            .initMethods()
-            .addInternalMethods();
+        if (module !== null) {
+            this.initPhysics()
+                .setModule(module)
+                .addInternalVariables()
+                .initMethods()
+                .addInternalMethods();
+        } else {
+            this.warn('No Module provided for RocketMotionBase');
+        }
+
 
         //this.loadSharedVariables();
     }
@@ -79,6 +84,14 @@ export default class RocketMotionBase extends ParameteredRocket {
     setVectorModel() {
         this.vectorModel = MotionVector.getModelType("1D");
         return this;
+    }
+
+    /**
+     *
+     * @returns {string}
+     */
+    getVectorModel() {
+        return this.vectorModel;
     }
 
     /**
@@ -101,6 +114,7 @@ export default class RocketMotionBase extends ParameteredRocket {
          * @var {RocketParameters} self._internals
          */
         this._internals
+            .addVariable('locals', {})    // a bag of local values you may need to store
             .addVariable('v',0)           // Vitesse Norm
             .addVariable('speedVector', MotionVector.new(this.vectorModel))
             .addVariable('coordsVector',MotionVector.new(this.vectorModel))  // Coordinates

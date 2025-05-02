@@ -4,6 +4,7 @@ import RocketMotionSharedVariable from "./RocketMotionSharedVariable.js";
 import Constraints from "../Constraint/Constraints.js";
 import RocketPhysics from "../Physics/RocketPhysics.js";
 import MotionVector from "../Vector/MotionVector.js";
+import DegreeUtils from "../Utils/DegreeUtils.js";
 
 export default class RocketMotionStageExtended extends RocketMotionBase {
     debugLog = false;
@@ -118,6 +119,14 @@ export default class RocketMotionStageExtended extends RocketMotionBase {
     }
 
     /**
+     *
+     * @returns {MotionVector}
+     */
+    calculateDirectionVector() {
+        return MotionVector.verticalVector;
+    }
+
+    /**
      * Calculates the Drag Force
      *  This is given by the following formula : Fdrag = 0.5 * rho * v^2 * Cd
      *      Where :
@@ -130,11 +139,8 @@ export default class RocketMotionStageExtended extends RocketMotionBase {
      * @returns {MotionVector}
      */
     calculateDragVector(speedVector) {
-        this.log('Calculate drag for speed', speedVector.clone(), speedVector.getNorm(), 'and A', this.A())
         let speedNorm = speedVector.getNorm();
-        //return 0.5 * this.Cd() * this.calculateRho() * this.A() * speedNorm * speedNorm * speed.verticalSign();
         let coefficient = -0.5 * this.Cd() * this.calculateRho() * this.A() * speedNorm;
-        this.log('Drag coefficient', coefficient)
         return MotionVector.multiply(speedVector, coefficient);
     }
 
@@ -145,14 +151,8 @@ export default class RocketMotionStageExtended extends RocketMotionBase {
      * @returns {MotionVector}
      */
     calculateThrustForceVector(thrustNorm) {
-        // let unitaryVector = dragVector.scale(-1/dragVector.getNorm());
-        // unitaryVector = unitaryVector.isNull() ? unitaryVector.unitaryVector() : unitaryVector;
-
-        //let unitaryVector = (dragVector.getNorm()===0) ? dragVector.unitaryVector() : dragVector.scale(-1/dragVector.getNorm());
-
-
         this.log('Unitary Vector', this.directionVector().clone())
-        return this.directionVector().clone().scale(thrustNorm);
+        return this.calculateDirectionVector().clone().scale(thrustNorm);
     }
 
     /**
@@ -161,10 +161,7 @@ export default class RocketMotionStageExtended extends RocketMotionBase {
      * @returns {MotionVector}
      */
     calculateAccelerationVector(dragVector) {
-        //return (this.F() - this.calculateGravitationForce() - dragVector) / this.m();
-        this.log('calculateAccelerationVector', dragVector.clone())
         let thrustForceVector = this.calculateThrustForceVector(this.F());
-        this.log('thrustForceVector', thrustForceVector.clone())
 
         thrustForceVector
                     .add(this.calculateGravitationForceVector())
